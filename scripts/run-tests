@@ -1,0 +1,13 @@
+#!/bin/bash -l
+
+BUNDLE_GEMFILE=cf.Gemfile bundle --no-cache
+
+echo $2
+if [[ -z "$2" ]]
+then
+  spec_files=cf_spec
+else
+  spec_files=$2
+fi
+
+BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=$1 rspec --pattern "{integration,unit}/*_spec.rb" $spec_files

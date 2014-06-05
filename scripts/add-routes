@@ -1,0 +1,7 @@
+#!/bin/bash -l
+
+cd ~/workspace/bosh-lite
+./scripts/add-route
+
+cd ~/workspace/bosh-lite-2nd-instance
+./scripts/add-route

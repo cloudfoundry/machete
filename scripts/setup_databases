@@ -1,0 +1,19 @@
+#!/bin/bash -l
+
+create_database() {
+    postgres_path_command="postgres_path=\`find /var/vcap/data/packages/postgres/*/ -name bin\`"
+    change_path_command="PATH=\$postgres_path:\$PATH"
+    create_user_command="psql -h 0.0.0.0 -U vcap -p 5524 -d postgres -c \"create user buildpacks with encrypted password 'buildpacks'\""
+    create_db_command="psql -h 0.0.0.0 -U vcap -p 5524 -d postgres -c \"create database buildpacks with owner buildpacks\""
+    bosh ssh --gateway_user vcap postgres_z1 0 --default_password p "$postgres_path_command;$change_path_command;$create_user_command;$create_db_command"
+}
+
+cd /Users/pivotal/workspace/bosh-lite
+bundle exec bosh target 192.168.50.4
+bundle exec bosh login admin admin
+create_database
+
+cd $HOME/workspace/bosh-lite-2nd-instance
+bosh target 192.168.100.4
+bosh login admin admin
+create_database
