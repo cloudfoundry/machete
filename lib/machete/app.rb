@@ -11,8 +11,9 @@ module Machete
     def initialize(app_path, opts={})
       @app_name = app_path.split("/").last
       @app_path = app_path
-      @cmd = opts.fetch(:cmd, '')
+      @cmd = opts.fetch(:cmd, nil)
       @with_pg = opts.fetch(:with_pg, false)
+      @database_name = opts.fetch(:database_name, "buildpacks")
       @manifest = opts.fetch(:manifest, nil)
       @vendor_gems_before_push = opts.fetch(:vendor_gems_before_push, false)
     end
@@ -40,7 +41,6 @@ module Machete
         if with_pg?
           run_cmd("#{command} --no-start")
           run_cmd("cf set-env #{app_name} DATABASE_URL #{database_url}")
-          run_cmd(command)
         end
 
         @output = run_cmd(command)
@@ -90,7 +90,7 @@ module Machete
     private
 
     def database_url
-      "postgres://buildpacks:buildpacks@#{postgres_ip}:5524/buildpacks"
+      "postgres://buildpacks:buildpacks@#{postgres_ip}:5524/#{@database_name}"
     end
 
     def postgres_ip
