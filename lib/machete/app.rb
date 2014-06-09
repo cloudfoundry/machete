@@ -102,7 +102,7 @@ module Machete
     end
 
     def ha_proxy_ip
-      @ha_proxy ||= `cf api`.scan(/api\.(\d+\.\d+\.\d+\.\d+)\.xip\.io/).flatten.first
+      @ha_proxy ||= run_cmd('cf api').scan(/api\.(\d+\.\d+\.\d+\.\d+)\.xip\.io/).flatten.first
     end
 
     def generate_manifest

@@ -13,7 +13,13 @@ describe Machete::App do
       @run_commands = []
       allow_any_instance_of(Machete::SystemHelper).to receive(:run_cmd) do |_, *ary|
         @run_commands.push ary.first
-        ""
+        case (ary.first)
+          when 'cf api'
+            'api.1.2.3.4.xip.io'
+          else
+            ""
+        end
+
       end
 
       allow_any_instance_of(Machete::App).to receive(:generate_manifest).and_return(nil)
@@ -31,7 +37,7 @@ describe Machete::App do
     end
 
     it "sets the DATABASE_URL environment variable with default DB" do
-      expect(@run_commands).to include("cf set-env app_name DATABASE_URL postgres://buildpacks:buildpacks@10.245.0.30:5524/buildpacks")
+      expect(@run_commands).to include("cf set-env app_name DATABASE_URL postgres://buildpacks:buildpacks@1.2.3.30:5524/buildpacks")
     end
 
     it "pushes the app once" do
@@ -42,7 +48,7 @@ describe Machete::App do
       let(:app) { Machete::App.new('path/app_name', with_pg: true, database_name: "wordpress") }
 
       it "sets the DATABASE_URL environment variable with default DB" do
-        expect(app).to have_received(:run_cmd).with("cf set-env app_name DATABASE_URL postgres://buildpacks:buildpacks@10.245.0.30:5524/wordpress")
+        expect(app).to have_received(:run_cmd).with("cf set-env app_name DATABASE_URL postgres://buildpacks:buildpacks@1.2.3.30:5524/wordpress")
       end
     end
 
@@ -52,8 +58,8 @@ describe Machete::App do
 
       before do
         allow_any_instance_of(Machete::SystemHelper).to receive(:run_on_host).
-                                          with("sudo cat /var/log/internet_access.log").
-                                          and_return(log_entry)
+                                                          with("sudo cat /var/log/internet_access.log").
+                                                          and_return(log_entry)
       end
 
       specify do
