@@ -1,4 +1,4 @@
-require 'spec_helper'
+require './spec/spec_helper'
 require 'machete/app'
 
 describe Machete::App do
@@ -11,7 +11,7 @@ describe Machete::App do
 
       # capture all run_cmd arguments for easier debugging
       @run_commands = []
-      allow_any_instance_of(Machete::App).to receive(:run_cmd) do |_, *ary|
+      allow_any_instance_of(Machete::SystemHelper).to receive(:run_cmd) do |_, *ary|
         @run_commands.push ary.first
         ""
       end
@@ -43,6 +43,22 @@ describe Machete::App do
 
       it "sets the DATABASE_URL environment variable with default DB" do
         expect(app).to have_received(:run_cmd).with("cf set-env app_name DATABASE_URL postgres://buildpacks:buildpacks@10.245.0.30:5524/wordpress")
+      end
+    end
+
+    describe 'access the cf internet log' do
+      let(:log_entry) { double(:log_entry) }
+      let(:app) { Machete::App.new('path/app_name') }
+
+      before do
+        allow_any_instance_of(Machete::SystemHelper).to receive(:run_on_host).
+                                          with("sudo cat /var/log/internet_access.log").
+                                          and_return(log_entry)
+      end
+
+      specify do
+        expect(app.cf_internet_log).to eql log_entry
+        expect(app).to have_received(:run_on_host).with("sudo cat /var/log/internet_access.log")
       end
     end
   end

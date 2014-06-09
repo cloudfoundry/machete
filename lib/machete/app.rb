@@ -54,6 +54,10 @@ module Machete
       run_cmd("cf files #{app_name} logs/staging_task.log")
     end
 
+    def cf_internet_log
+      run_on_host("sudo cat /var/log/internet_access.log")
+    end
+
     def homepage_html
       HTTParty.get("http://#{url}").body
     end

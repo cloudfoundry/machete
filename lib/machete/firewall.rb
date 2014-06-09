@@ -50,6 +50,13 @@ module Machete
         add_on_premises_chain
       end
 
+      def filter_internet_traffic_to_file(path)
+        run_on_host("echo :msg,contains,\\\"cf-to-internet-traffic: \\\" #{path} | sudo tee /etc/rsyslog.d/10-cf-internet.conf")
+        run_on_host("sudo restart rsyslog")
+      end
+
+      private
+
       def add_on_premises_chain
         on_premises_chain = FilterChain.create('on-premises-firewall')
         on_premises_chain.append(return_on_packets_to_dns)

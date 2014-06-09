@@ -12,8 +12,10 @@ fi
 
 if [ "$mode" == "online" ]; then
   api=api.10.244.0.34.xip.io
+  export VAGRANT_CWD="$HOME/workspace/bosh-lite"
 else
   api=api.10.245.0.34.xip.io
+  export VAGRANT_CWD="$HOME/workspace/bosh-lite-2nd-instance/"
 fi
 
 buildpack_location=/tmp/buildpacks

@@ -24,14 +24,19 @@ module Machete
     end
 
     def run_on_host(command)
-      with_vagrant_env { `vagrant ssh -c "#{command}" 2>&1` }
+      Machete.logger.info "On Host: $ #{command}"
+      result = with_vagrant_env { `vagrant ssh -c '#{command}' 2>&1` }
+      Machete.logger.info result
+      result
     end
 
     def with_vagrant_env
+      result = ''
       Bundler.with_clean_env do
         set_vagrant_working_directory
-        yield
+        result = yield
       end
+      result
     end
 
   end
