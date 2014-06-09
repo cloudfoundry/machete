@@ -24,17 +24,7 @@ module Machete
     end
 
     def run_on_host(command)
-      if in_gocd?
-        `ssh -i /var/vcap/jobs/gocd_agent/id_rsa_bosh_lite ubuntu@10.10.48.64 -c "#{command}" 2>&1`
-      else
-        with_vagrant_env { `vagrant ssh -c "#{command}" 2>&1` }
-      end
-    end
-
-    def in_gocd?
-      return @in_gocd unless @in_gocd.nil?
-
-      @in_gocd = File.exists?("/var/vcap/jobs/gocd_agent/id_rsa_bosh_lite")
+      with_vagrant_env { `vagrant ssh -c "#{command}" 2>&1` }
     end
 
     def with_vagrant_env
