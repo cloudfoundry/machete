@@ -3,6 +3,10 @@ require 'machete/app'
 
 describe Machete::App do
 
+  before do
+    allow_any_instance_of(Machete::SystemHelper).to receive(:run_on_host)
+  end
+
   context "when using a database" do
     let(:app) { Machete::App.new('path/app_name', with_pg: true) }
 
@@ -66,6 +70,33 @@ describe Machete::App do
         expect(app.cf_internet_log).to eql log_entry
         expect(app).to have_received(:run_on_host).with("sudo cat /var/log/internet_access.log")
       end
+    end
+  end
+
+  describe "pushing an app" do
+    let(:app) { Machete::App.new('path/app_name') }
+
+    before do
+      allow(Machete).to receive(:logger).and_return(double.as_null_object)
+      allow(app).to receive(:run_on_host)
+      allow(app).to receive(:run_cmd).and_return("")
+      allow(Dir).to receive(:chdir).and_yield
+
+      app.push
+    end
+
+    it "clears the internet access log before pushing the app" do
+      expect(app).to have_received(:run_on_host).
+                       ordered.
+                       with("sudo rm /var/log/internet_access.log")
+
+      expect(app).to have_received(:run_on_host).
+                       ordered.
+                       with("sudo restart rsyslog")
+
+      expect(app).to have_received(:run_cmd).
+                        with("cf delete -f app_name").
+                       ordered
     end
   end
 end

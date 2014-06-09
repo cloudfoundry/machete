@@ -24,6 +24,8 @@ module Machete
 
     def push()
       Dir.chdir(directory_for_app) do
+        clear_internet_access_log
+
         generate_manifest
 
         if File.exists?("package.sh")
@@ -103,6 +105,11 @@ module Machete
 
     def ha_proxy_ip
       @ha_proxy ||= run_cmd('cf api').scan(/api\.(\d+\.\d+\.\d+\.\d+)\.xip\.io/).flatten.first
+    end
+
+    def clear_internet_access_log
+      run_on_host("sudo rm /var/log/internet_access.log")
+      run_on_host("sudo restart rsyslog")
     end
 
     def generate_manifest
