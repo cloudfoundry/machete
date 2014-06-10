@@ -74,12 +74,12 @@ module Machete
     end
 
     def staged?
-      raw_spaces = run_cmd('cf curl /v2/spaces')
+      raw_spaces = run_cmd('cf curl /v2/spaces', true)
       spaces = JSON.parse(raw_spaces)
       test_space = spaces['resources'].detect { |resource| resource['entity']['name'] == 'integration' }
       apps_url = test_space['entity']['apps_url']
 
-      raw_apps = run_cmd("cf curl #{apps_url}")
+      raw_apps = run_cmd("cf curl #{apps_url}", true)
       apps = JSON.parse(raw_apps)
       app = apps['resources'].detect { |resource| resource['entity']['name'] == app_name }
       app['entity']['package_state'] == 'STAGED'

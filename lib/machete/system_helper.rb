@@ -1,10 +1,10 @@
 module Machete
   module SystemHelper
 
-    def run_cmd(cmd)
-      Machete.logger.info "$ #{cmd}"
+    def run_cmd(cmd, silent=false)
+      Machete.logger.info "$ #{cmd}" unless silent
       result = `#{cmd}`
-      Machete.logger.info result
+      Machete.logger.info result unless silent
       result
     end
 
