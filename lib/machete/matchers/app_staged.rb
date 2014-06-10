@@ -5,7 +5,7 @@ RSpec::Matchers.define :be_staged do | |
     app.staged?
   end
 
-  failure_message_for_should do |app|
+  failure_message do |app|
     "App is not staged. Logs are:\n" +
       app.logs
   end
