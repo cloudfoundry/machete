@@ -86,17 +86,49 @@ describe Machete::App do
     end
 
     it "clears the internet access log before pushing the app" do
-      expect(app).to have_received(:run_on_host).
-                       ordered.
-                       with("sudo rm /var/log/internet_access.log")
+      expect(app).
+        to have_received(:run_on_host).
+             ordered.
+             with("sudo rm /var/log/internet_access.log")
 
-      expect(app).to have_received(:run_on_host).
-                       ordered.
-                       with("sudo restart rsyslog")
+      expect(app).
+        to have_received(:run_on_host).
+             ordered.
+             with("sudo restart rsyslog")
 
-      expect(app).to have_received(:run_cmd).
-                        with("cf delete -f app_name").
-                       ordered
+      expect(app).
+        to have_received(:run_cmd).
+             with("cf delete -f app_name").
+             ordered
+    end
+  end
+
+  describe 'number_of_instances' do
+    let(:app) { Machete::App.new('path/app_name') }
+    let(:app_resource_url) { '/v2/apps/app_url' }
+
+    before do
+      allow(app).
+        to receive(:run_cmd).
+             with('cf curl /v2/apps?q=\'name:app_name\'').
+             and_return('{
+                  "total_results": 1,
+                  "resources": [
+                      {
+                          "metadata": {
+                              "url": "' + app_resource_url + '"
+                          }
+                      }
+                  ]
+              }')
+      allow(app).
+        to receive(:run_cmd).
+             with('cf curl ' + app_resource_url + '/summary').
+             and_return('{"running_instances":3}')
+    end
+
+    it 'returns the number_of_instances' do
+      expect(app.number_of_running_instances).to eql 3
     end
   end
 end

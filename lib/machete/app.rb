@@ -73,16 +73,10 @@ module Machete
       $?.exitstatus == 0
     end
 
-    def staged?
-      raw_spaces = run_cmd('cf curl /v2/spaces', true)
-      spaces = JSON.parse(raw_spaces)
-      test_space = spaces['resources'].detect { |resource| resource['entity']['name'] == 'integration' }
-      apps_url = test_space['entity']['apps_url']
-
-      raw_apps = run_cmd("cf curl #{apps_url}", true)
-      apps = JSON.parse(raw_apps)
-      app = apps['resources'].detect { |resource| resource['entity']['name'] == app_name }
-      app['entity']['package_state'] == 'STAGED'
+    def number_of_running_instances
+      app_summary_url = app_resource['metadata']['url'] + '/summary'
+      app = json("cf curl #{app_summary_url}")
+      app['running_instances']
     end
 
     def logs
@@ -118,6 +112,16 @@ module Machete
       File.open('manifest.yml', 'w') do |manifest_file|
         manifest_file.write @manifest.to_yaml
       end
+    end
+
+    def app_resource
+      apps_response = json("cf curl /v2/apps?q='name:#{app_name}'")
+      return if apps_response['total_results'] != 1
+      apps_response['resources'].first
+    end
+
+    def json cmd
+      JSON.parse run_cmd(cmd)
     end
   end
 end
