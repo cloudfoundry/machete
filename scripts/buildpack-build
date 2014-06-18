@@ -3,11 +3,17 @@
 set -e
 
 mode=$1
+rspec_options=$2
 
 if [ $# -eq 0 ] || ([ "$mode" != "online" ] && [ "$mode" != "offline" ]); then
   echo "Usage:"
-  echo "  ./buildpack-build [online|offline]"
+  echo "  ./buildpack-build online|offline [rspec options]"
   exit 1
+fi
+
+if [[ -z "$rspec_options" ]]
+then
+  rspec_options=cf_spec
 fi
 
 if [ "$mode" == "online" ]; then
@@ -20,39 +26,27 @@ fi
 
 buildpack_location=/tmp/buildpacks
 language=$(echo $(basename `git config --get remote.origin.url`) | rev | cut -d- -f1 | rev | cut -d. -f1)
-echo
-echo "******* CI ***************************************************"
-echo "******* Packaging $mode buildpack for $language"
+echo -e "\n******* Packaging $mode buildpack for $language"
 
-echo
-echo "******* CI ***************************************************"
-echo "******* Build $mode package"
+echo -e "\n******* Build $mode package"
 rm -f ${language}_buildpack.zip
 ./bin/package $mode
 
-echo
-echo "******* CI ***************************************************"
-echo "******* Create buildpack on CF"
+echo -e "\n******* Create buildpack on CF"
 cf api $api --skip-ssl-validation
 cf login -u admin -p admin -o pivotal -s integration
 cf delete-buildpack ${language}-test-buildpack -f
 cf create-buildpack ${language}-test-buildpack ${language}_buildpack.zip 1 --enable
 
-echo
-echo "******* CI ***************************************************"
-echo "******* Configure RVM"
+echo -e "\n******* Configure RVM"
 export PATH=/Users/pivotal/.rvm/bin:$PATH
 rvm use default
 
-echo
-echo "******* CI ***************************************************"
-echo "******* Run specs"
+echo -e "\n******* Run specs"
 BUNDLE_GEMFILE=cf.Gemfile bundle --no-cache
-BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=$mode rspec --pattern "{integration,unit}/*_spec.rb" cf_spec
+BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=$mode rspec --pattern "{integration,unit}/*_spec.rb" $rspec_options
 
-echo
-echo "******* CI ***************************************************"
-echo "******* Release buildpack"
+echo -e "\n******* Release buildpack"
 mkdir -p ${buildpack_location}/${language}
 if [ "$mode" == "online" ]; then
   mv ${language}_buildpack.zip ${buildpack_location}/${language}/${language}-buildpack-b${BUILD_NUMBER}.zip
