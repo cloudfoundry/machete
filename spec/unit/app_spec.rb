@@ -73,33 +73,112 @@ describe Machete::App do
     end
   end
 
-  describe "pushing an app" do
-    let(:app) { Machete::App.new('path/app_name') }
-
+  describe '#push' do
     before do
-      allow(Machete).to receive(:logger).and_return(double.as_null_object)
-      allow(app).to receive(:run_on_host)
-      allow(app).to receive(:run_cmd).and_return("")
       allow(Dir).to receive(:chdir).and_yield
-
-      app.push
+      allow(app).to receive(:run_cmd).and_return("")
+      allow(Machete).to receive(:logger).and_return(double.as_null_object)
     end
 
-    it "clears the internet access log before pushing the app" do
-      expect(app).
-        to have_received(:run_on_host).
-             ordered.
-             with("sudo rm /var/log/internet_access.log")
+    context 'clearing internet access log' do
+      let(:app) { Machete::App.new('path/app_name') }
 
-      expect(app).
-        to have_received(:run_on_host).
-             ordered.
-             with("sudo restart rsyslog")
+      before do
+        allow(app).to receive(:run_on_host)
+      end
 
-      expect(app).
-        to have_received(:run_cmd).
-             with("cf delete -f app_name").
-             ordered
+      specify do
+        app.push
+
+        expect(app).
+          to have_received(:run_on_host).
+               ordered.
+               with('sudo rm /var/log/internet_access.log')
+
+        expect(app).
+          to have_received(:run_on_host).
+               ordered.
+               with('sudo restart rsyslog')
+
+        expect(app).
+          to have_received(:run_cmd).
+               with('cf delete -f app_name').
+               ordered
+      end
+    end
+
+    context 'options' do
+      let(:app) { Machete::App.new('path/app_name', options) }
+
+      context 'setting environment variables' do
+        let(:options) do
+          {
+            env: {
+              MY_ENV_VAR: 'true'
+            }
+          }
+        end
+
+        specify do
+          app.push
+
+          expect(app).
+            to have_received(:run_cmd).
+                 with('cf delete -f app_name').
+                 ordered
+
+          expect(app).
+            to have_received(:run_cmd).
+                 with('cf push app_name --no-start').
+                 ordered
+
+          expect(app).
+            to have_received(:run_cmd).
+                 with('cf set-env app_name MY_ENV_VAR true').
+                 ordered
+
+          expect(app).
+            to have_received(:run_cmd).
+                 with('cf push app_name').
+                 ordered
+        end
+      end
+
+      context 'enabling postgres database' do
+        let(:options) do
+          {
+            with_pg: true
+          }
+        end
+
+        before do
+          allow(app).to receive(:run_cmd).with('cf api').and_return('api.1.1.1.1.xip.io')
+        end
+
+        specify do
+          app.push
+
+          expect(app).
+            to have_received(:run_cmd).
+                 with('cf delete -f app_name').
+                 ordered
+
+          expect(app).
+            to have_received(:run_cmd).
+                 with('cf push app_name --no-start').
+                 ordered
+
+          expect(app).
+            to have_received(:run_cmd).
+                 with('cf set-env app_name DATABASE_URL postgres://buildpacks:buildpacks@1.1.1.30:5524/buildpacks').
+                 ordered
+
+          expect(app).
+            to have_received(:run_cmd).
+                 with('cf push app_name').
+                 ordered
+        end
+      end
     end
   end
 
