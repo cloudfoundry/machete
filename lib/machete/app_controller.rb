@@ -4,7 +4,7 @@ require 'json'
 require 'wait_until'
 
 module Machete
-  class App
+  class AppController
     include SystemHelper
 
     attr_reader :output,

@@ -1,5 +1,5 @@
 require 'machete/logger'
-require 'machete/app'
+require 'machete/app_controller'
 require 'machete/buildpack_uploader'
 require 'machete/buildpack_mode'
 require 'machete/firewall'
@@ -7,7 +7,7 @@ require 'machete/firewall'
 module Machete
   class << self
     def deploy_app(app_path, options={})
-      app = Machete::App.new(app_path, options)
+      app = Machete::AppController.new(app_path, options)
       app.push
       yield app if block_given?
       app

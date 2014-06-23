@@ -1,9 +1,9 @@
 require './spec/spec_helper'
-require 'machete/app'
+require 'machete/app_controller'
 
 describe Machete::SystemHelper do
 
-  let(:system_helper) { Machete::App.new('path/app_name') }
+  let(:system_helper) { Machete::AppController.new('path/app_name') }
 
   describe 'run_cmd' do
 

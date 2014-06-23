@@ -7,7 +7,7 @@ describe Machete do
     let(:app) { double.as_null_object }
 
     before do
-      allow(Machete::App).
+      allow(Machete::AppController).
           to receive(:new).
                  and_return app
     end

@@ -1,7 +1,7 @@
 require './spec/spec_helper'
-require 'machete/app'
+require 'machete/app_controller'
 
-describe Machete::App do
+describe Machete::AppController do
 
   before do
     allow_any_instance_of(Machete::SystemHelper).to receive(:run_on_host)
@@ -9,7 +9,7 @@ describe Machete::App do
 
   describe '#cf_internet_log' do
     let(:log_entry) { double(:log_entry) }
-    let(:app) { Machete::App.new('path/app_name') }
+    let(:app) { Machete::AppController.new('path/app_name') }
 
     before do
       allow_any_instance_of(Machete::SystemHelper).to receive(:run_on_host).
@@ -32,7 +32,7 @@ describe Machete::App do
     end
 
     context 'clearing internet access log' do
-      let(:app) { Machete::App.new('path/app_name') }
+      let(:app) { Machete::AppController.new('path/app_name') }
 
       before do
         allow(app).to receive(:run_on_host)
@@ -59,7 +59,7 @@ describe Machete::App do
     end
 
     context 'options' do
-      let(:app) { Machete::App.new('path/app_name', options) }
+      let(:app) { Machete::AppController.new('path/app_name', options) }
       let(:options) do
         {}
       end
@@ -182,7 +182,7 @@ describe Machete::App do
   end
 
   describe '#number_of_running_instances' do
-    let(:app) { Machete::App.new('path/app_name') }
+    let(:app) { Machete::AppController.new('path/app_name') }
     let(:app_resource_url) { '/v2/apps/app_url' }
 
     before do
