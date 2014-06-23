@@ -15,6 +15,10 @@ module Machete
       command += " --no-start" unless options[:start]
       run_cmd command
     end
+
+    def delete
+      run_cmd("cf delete -f #{app_name}")
+    end
   end
 
 
