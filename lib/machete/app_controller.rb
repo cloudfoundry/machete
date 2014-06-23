@@ -10,7 +10,6 @@ module Machete
     attr_reader :output,
                 :app_name,
                 :app_path,
-                :manifest,
                 :database_name,
                 :vendor_gems_before_push,
                 :cmd,
@@ -25,7 +24,6 @@ module Machete
       @cmd = opts.fetch(:cmd, nil)
       @with_pg = opts.fetch(:with_pg, false)
       @database_name = opts.fetch(:database_name, "buildpacks")
-      @manifest = opts.fetch(:manifest, nil)
       @vendor_gems_before_push = opts.fetch(:vendor_gems_before_push, false)
       @env = opts.fetch(:env, {})
 
@@ -38,7 +36,6 @@ module Machete
 
       Dir.chdir(fixture.directory) do
         clear_internet_access_log
-        generate_manifest
         fixture.vendor
         app.delete
         app.push(start: env.empty?)
@@ -48,8 +45,6 @@ module Machete
         Wait.until_true!('instance started', timeout_in_seconds: 30) { number_of_running_instances > 0 }
       end
     end
-
-
 
     def cf_internet_log
       run_on_host('sudo cat /var/log/internet_access.log')
@@ -102,14 +97,6 @@ module Machete
     def clear_internet_access_log
       run_on_host('sudo rm /var/log/internet_access.log')
       run_on_host('sudo restart rsyslog')
-    end
-
-    def generate_manifest
-      return unless manifest
-
-      File.open('manifest.yml', 'w') do |manifest_file|
-        manifest_file.write @manifest.to_yaml
-      end
     end
 
     def app_resource
