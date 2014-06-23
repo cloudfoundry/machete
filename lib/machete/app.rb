@@ -1,6 +1,7 @@
 require 'httparty'
 require 'machete/system_helper'
 require 'json'
+require 'wait_until'
 
 module Machete
   class App
@@ -38,6 +39,8 @@ module Machete
         push_app(start: env.empty?)
         setup_environment_variables
         @output = push_app
+
+        Wait.until_true!('instance started') { number_of_running_instances > 0 }
       end
     end
 
@@ -136,7 +139,7 @@ module Machete
     end
 
     def json cmd
-      JSON.parse run_cmd(cmd)
+      JSON.parse run_cmd(cmd, true)
     end
   end
 end
