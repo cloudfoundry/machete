@@ -1,6 +1,7 @@
 require 'machete/logger'
 require 'machete/app_controller'
 require 'machete/app'
+require 'machete/fixture'
 require 'machete/buildpack_uploader'
 require 'machete/buildpack_mode'
 require 'machete/firewall'

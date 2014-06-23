@@ -25,18 +25,32 @@ describe Machete::AppController do
 
   describe '#initialize' do
     let(:app) { double }
+    let(:fixture) { double }
 
     before do
       allow(Machete::App).to receive(:new).and_return(app)
+      allow(Machete::Fixture).to receive(:new).and_return(fixture)
       app_controller
     end
 
-    specify do
-      expect(app_controller.app).to eql app
+    context 'intialize the app' do
+      specify do
+        expect(app_controller.app).to eql app
+      end
+
+      specify do
+        expect(Machete::App).to have_received(:new).with('app_name')
+      end
     end
 
-    specify do
-      expect(Machete::App).to have_received(:new).with('app_name')
+    context 'intialize the fixture' do
+      specify do
+        expect(app_controller.fixture).to eql fixture
+      end
+
+      specify do
+        expect(Machete::Fixture).to have_received(:new).with('path/app_name')
+      end
     end
   end
 
@@ -90,6 +104,28 @@ describe Machete::AppController do
                with('sudo restart rsyslog')
 
         expect(app_controller.app).to have_received(:delete).ordered
+      end
+    end
+
+    context 'vendoring' do
+      before do
+        allow(app_controller.fixture).to receive(:vendor)
+        app_controller.push
+      end
+
+      specify do
+        expect(app_controller.fixture).to have_received(:vendor)
+      end
+    end
+
+    context 'changing to fixture directory' do
+      before do
+        allow(app_controller.fixture).to receive(:directory).and_return('a_directory')
+        app_controller.push
+      end
+
+      specify do
+        expect(Dir).to have_received(:chdir).with('a_directory')
       end
     end
 

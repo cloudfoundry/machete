@@ -16,7 +16,8 @@ module Machete
                 :cmd,
                 :with_pg,
                 :env,
-                :app
+                :app,
+                :fixture
 
     def initialize(app_path, opts={})
       @app_name = app_path.split("/").last
@@ -29,15 +30,16 @@ module Machete
       @env = opts.fetch(:env, {})
 
       @app = Machete::App.new(app_name)
+      @fixture = Machete::Fixture.new(app_path)
     end
 
     def push()
       env['DATABASE_URL'] = database_url if with_pg
 
-      Dir.chdir(directory_for_app) do
+      Dir.chdir(fixture.directory) do
         clear_internet_access_log
         generate_manifest
-        vendor_dependencies
+        fixture.vendor
         app.delete
         app.push(start: env.empty?)
         setup_environment_variables
@@ -76,19 +78,6 @@ module Machete
     end
 
     private
-
-    def directory_for_app
-      "cf_spec/fixtures/#{app_path}"
-    end
-
-    def vendor_dependencies
-      if File.exists?('package.sh')
-        Machete.logger.action('Vendoring dependencies before push')
-        Bundler.with_clean_env do
-          run_cmd('./package.sh')
-        end
-      end
-    end
 
     def setup_environment_variables
       env.each do |variable, value|
