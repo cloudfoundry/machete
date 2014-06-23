@@ -50,6 +50,16 @@ describe Machete::AppController do
     end
   end
 
+  describe '#logs' do
+    before(:each) do
+      allow(app_controller.app).to receive(:logs).and_return('some logging')
+    end
+
+    specify do
+      expect(app_controller.logs).to eql 'some logging'
+    end
+  end
+
   describe '#push' do
     before do
       allow(Dir).to receive(:chdir).and_yield

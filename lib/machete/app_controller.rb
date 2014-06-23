@@ -55,10 +55,6 @@ module Machete
       run_on_host('sudo cat /var/log/internet_access.log')
     end
 
-    def homepage_html
-      app.homepage_body
-    end
-
     def has_file? filename
       run_cmd("cf files #{app_name} #{filename}")
       $?.exitstatus == 0
@@ -70,8 +66,13 @@ module Machete
       app['running_instances']
     end
 
+    # TODO: Add rspec matchers so there is no need to delegate here
+    def homepage_html
+      app.homepage_body
+    end
+
     def logs
-      run_cmd("cf logs #{app_name} --recent")
+      app.logs
     end
 
     private

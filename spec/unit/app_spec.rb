@@ -52,11 +52,20 @@ describe Machete::App do
     before do
       allow(app).to receive(:run_cmd).with('cf app kyle_has_an_awesome_app | grep url').and_return('urls: www.kylesurl.com')
       allow(HTTParty).to receive(:get).with('http://www.kylesurl.com').and_return website
-
     end
 
     specify do
       expect(app.homepage_body).to eql 'kyles homepage body'
+    end
+  end
+
+  describe '#logs' do
+    before do
+      allow(app).to receive(:run_cmd).with('cf logs kyle_has_an_awesome_app --recent').and_return('some logging')
+    end
+
+    specify do
+      expect(app.logs).to eql 'some logging'
     end
   end
 end

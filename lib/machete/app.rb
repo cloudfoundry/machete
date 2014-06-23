@@ -25,6 +25,10 @@ module Machete
       HTTParty.get("http://#{url}").body
     end
 
+    def logs
+      run_cmd("cf logs #{app_name} --recent")
+    end
+
     private
 
     def url
