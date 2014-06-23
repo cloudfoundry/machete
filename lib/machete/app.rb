@@ -29,6 +29,15 @@ module Machete
       run_cmd("cf logs #{app_name} --recent")
     end
 
+    def file filename
+      run_cmd("cf files #{app_name} #{filename}")
+    end
+
+    def has_file? filename
+      file(filename)
+      $?.exitstatus == 0
+    end
+
     private
 
     def url

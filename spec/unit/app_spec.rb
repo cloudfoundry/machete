@@ -68,4 +68,54 @@ describe Machete::App do
       expect(app.logs).to eql 'some logging'
     end
   end
+
+  describe '#file' do
+    before do
+      allow(app).to receive(:run_cmd).with('cf files kyle_has_an_awesome_app log/a_log_file.log').and_return('output from file')
+    end
+
+    specify do
+      expect(app.file('log/a_log_file.log')).to eql 'output from file'
+    end
+  end
+
+  describe '#has_file' do
+    before do
+      allow(app).to receive(:run_cmd).with('cf files kyle_has_an_awesome_app log/a_log_file.log')
+    end
+
+    context 'the file exists' do
+      let(:app_has_file) { app.has_file?('log/a_log_file.log') }
+
+      before do
+        allow($?).to receive(:exitstatus).and_return(0)
+      end
+
+      specify do
+        expect(app_has_file).to be_truthy
+      end
+
+      specify do
+        app_has_file
+        expect(app).to have_received(:run_cmd).with('cf files kyle_has_an_awesome_app log/a_log_file.log')
+      end
+    end
+
+    context 'the file does not exist' do
+      let(:app_has_file) { app.has_file?('log/a_log_file.log') }
+
+      before do
+        allow($?).to receive(:exitstatus).and_return(1)
+      end
+
+      specify do
+        expect(app_has_file).to be_falsey
+      end
+
+      specify do
+        app_has_file
+        expect(app).to have_received(:run_cmd).with('cf files kyle_has_an_awesome_app log/a_log_file.log')
+      end
+    end
+  end
 end

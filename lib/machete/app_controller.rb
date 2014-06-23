@@ -49,17 +49,10 @@ module Machete
       end
     end
 
-    def staging_log
-      run_cmd("cf files #{app_name} logs/staging_task.log")
-    end
+
 
     def cf_internet_log
       run_on_host('sudo cat /var/log/internet_access.log')
-    end
-
-    def has_file? filename
-      run_cmd("cf files #{app_name} #{filename}")
-      $?.exitstatus == 0
     end
 
     def number_of_running_instances
@@ -76,6 +69,15 @@ module Machete
     def logs
       app.logs
     end
+
+    def staging_log
+      app.file 'logs/staging_task.log'
+    end
+
+    def has_file? filename
+      app.has_file? filename
+    end
+    ###################################
 
     private
 

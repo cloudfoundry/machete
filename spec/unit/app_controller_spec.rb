@@ -74,6 +74,28 @@ describe Machete::AppController do
     end
   end
 
+  describe '#has_file?' do
+    let(:has_file) { double }
+
+    before(:each) do
+      allow(app_controller.app).to receive(:has_file?).with('a_file').and_return(has_file)
+    end
+
+    specify do
+      expect(app_controller.has_file?('a_file')).to eql has_file
+    end
+  end
+
+  describe '#staging_log' do
+    before(:each) do
+      allow(app_controller.app).to receive(:file).and_return('a string')
+    end
+
+    specify do
+      expect(app_controller.staging_log).to eql 'a string'
+    end
+  end
+
   describe '#push' do
     before do
       allow(Dir).to receive(:chdir).and_yield
