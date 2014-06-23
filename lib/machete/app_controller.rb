@@ -15,7 +15,8 @@ module Machete
                 :vendor_gems_before_push,
                 :cmd,
                 :with_pg,
-                :env
+                :env,
+                :app
 
     def initialize(app_path, opts={})
       @app_name = app_path.split("/").last
@@ -26,6 +27,8 @@ module Machete
       @manifest = opts.fetch(:manifest, nil)
       @vendor_gems_before_push = opts.fetch(:vendor_gems_before_push, false)
       @env = opts.fetch(:env, {})
+
+      @app = Machete::App.new(app_name)
     end
 
     def push()
@@ -35,10 +38,10 @@ module Machete
         clear_internet_access_log
         generate_manifest
         vendor_dependencies
-        delete_app
-        push_app(start: env.empty?)
+        app.delete
+        app.push(start: env.empty?)
         setup_environment_variables
-        @output = push_app
+        @output = app.push
 
         Wait.until_true!('instance started', timeout_in_seconds: 30) { number_of_running_instances > 0 }
       end
@@ -88,17 +91,6 @@ module Machete
           run_cmd('./package.sh')
         end
       end
-    end
-
-    def push_app(options = {start: true})
-      command = "cf push #{app_name}"
-      command += " -c '#{cmd}'" if cmd
-      command += " --no-start" unless options[:start]
-      run_cmd command
-    end
-
-    def delete_app
-      run_cmd("cf delete -f #{app_name}")
     end
 
     def setup_environment_variables

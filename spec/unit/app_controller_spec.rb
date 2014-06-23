@@ -1,5 +1,5 @@
 require './spec/spec_helper'
-require 'machete/app_controller'
+require 'machete'
 
 describe Machete::AppController do
 
@@ -9,7 +9,7 @@ describe Machete::AppController do
 
   describe '#cf_internet_log' do
     let(:log_entry) { double(:log_entry) }
-    let(:app) { Machete::AppController.new('path/app_name') }
+    let(:app_controller) { Machete::AppController.new('path/app_name') }
 
     before do
       allow_any_instance_of(Machete::SystemHelper).to receive(:run_on_host).
@@ -18,48 +18,66 @@ describe Machete::AppController do
     end
 
     specify do
-      expect(app.cf_internet_log).to eql log_entry
-      expect(app).to have_received(:run_on_host).with('sudo cat /var/log/internet_access.log')
+      expect(app_controller.cf_internet_log).to eql log_entry
+      expect(app_controller).to have_received(:run_on_host).with('sudo cat /var/log/internet_access.log')
+    end
+  end
+
+  describe '#initialize' do
+    subject(:app_controller) { Machete::AppController.new('path/app_name') }
+    let(:app) { double }
+
+    before do
+      allow(Machete::App).to receive(:new).and_return(app)
+      app_controller
+    end
+
+    specify do
+      expect(app_controller.app).to eql app
+    end
+
+    specify do
+      expect(Machete::App).to have_received(:new).with('app_name')
     end
   end
 
   describe '#push' do
     before do
       allow(Dir).to receive(:chdir).and_yield
-      allow(app).to receive(:run_cmd).and_return("")
+      allow(app_controller).to receive(:run_cmd).and_return("")
       allow(Machete).to receive(:logger).and_return(double.as_null_object)
       allow(Wait).to receive(:until_true!)
+
+      allow(app_controller.app).to receive(:delete)
+      allow(app_controller.app).to receive(:push)
     end
 
     context 'clearing internet access log' do
-      let(:app) { Machete::AppController.new('path/app_name') }
+      let(:app_controller) { Machete::AppController.new('path/app_name') }
 
       before do
-        allow(app).to receive(:run_on_host)
+        allow(app_controller).to receive(:run_on_host)
       end
 
       specify do
-        app.push
+        app_controller.push
 
-        expect(app).
+        expect(app_controller).
           to have_received(:run_on_host).
                ordered.
                with('sudo rm /var/log/internet_access.log')
 
-        expect(app).
+        expect(app_controller).
           to have_received(:run_on_host).
                ordered.
                with('sudo restart rsyslog')
 
-        expect(app).
-          to have_received(:run_cmd).
-               with('cf delete -f app_name').
-               ordered
+        expect(app_controller.app).to have_received(:delete).ordered
       end
     end
 
     context 'options' do
-      let(:app) { Machete::AppController.new('path/app_name', options) }
+      let(:app_controller) { Machete::AppController.new('path/app_name', options) }
       let(:options) do
         {}
       end
@@ -74,27 +92,17 @@ describe Machete::AppController do
         end
 
         specify do
-          app.push
+          app_controller.push
 
-          expect(app).
-            to have_received(:run_cmd).
-                 with('cf delete -f app_name').
-                 ordered
+          expect(app_controller.app).to have_received(:delete).ordered
+          expect(app_controller.app).to have_received(:push).with(start: false).ordered
 
-          expect(app).
-            to have_received(:run_cmd).
-                 with('cf push app_name --no-start').
-                 ordered
-
-          expect(app).
+          expect(app_controller).
             to have_received(:run_cmd).
                  with('cf set-env app_name MY_ENV_VAR true').
                  ordered
 
-          expect(app).
-            to have_received(:run_cmd).
-                 with('cf push app_name').
-                 ordered
+          expect(app_controller.app).to have_received(:push).with(no_args).ordered
         end
       end
 
@@ -106,32 +114,22 @@ describe Machete::AppController do
         end
 
         before do
-          allow(app).to receive(:run_cmd).with('cf api').and_return('api.1.1.1.1.xip.io')
+          allow(app_controller).to receive(:run_cmd).with('cf api').and_return('api.1.1.1.1.xip.io')
         end
 
         context 'with default database name' do
           specify do
-            app.push
+            app_controller.push
 
-            expect(app).
-              to have_received(:run_cmd).
-                   with('cf delete -f app_name').
-                   ordered
+            expect(app_controller.app).to have_received(:delete).ordered
+            expect(app_controller.app).to have_received(:push).with(start: false).ordered
 
-            expect(app).
-              to have_received(:run_cmd).
-                   with('cf push app_name --no-start').
-                   ordered
-
-            expect(app).
+            expect(app_controller).
               to have_received(:run_cmd).
                    with('cf set-env app_name DATABASE_URL postgres://buildpacks:buildpacks@1.1.1.30:5524/buildpacks').
                    ordered
 
-            expect(app).
-              to have_received(:run_cmd).
-                   with('cf push app_name').
-                   ordered
+            expect(app_controller.app).to have_received(:push).with(no_args).ordered
           end
         end
 
@@ -144,15 +142,15 @@ describe Machete::AppController do
           end
 
           specify do
-            app.push
-            expect(app).to have_received(:run_cmd).with('cf set-env app_name DATABASE_URL postgres://buildpacks:buildpacks@1.1.1.30:5524/wordpress')
+            app_controller.push
+            expect(app_controller).to have_received(:run_cmd).with('cf set-env app_name DATABASE_URL postgres://buildpacks:buildpacks@1.1.1.30:5524/wordpress')
           end
         end
       end
 
       context 'waiting for the instance to start' do
         before do
-          allow(app).
+          allow(app_controller).
             to receive(:run_cmd).
                  with('cf curl /v2/apps?q=\'name:app_name\'', true).
                  and_return('{
@@ -165,7 +163,7 @@ describe Machete::AppController do
                       }
                   ]
               }')
-          allow(app).
+          allow(app_controller).
             to receive(:run_cmd).
                  with('cf curl /v2/apps/app_url/summary', true).
                  and_return('{"running_instances":1}')
@@ -174,7 +172,7 @@ describe Machete::AppController do
         end
 
         specify do
-          app.push
+          app_controller.push
           expect(Wait).to have_received(:until_true!).with('instance started', timeout_in_seconds: 30)
         end
       end
@@ -182,11 +180,11 @@ describe Machete::AppController do
   end
 
   describe '#number_of_running_instances' do
-    let(:app) { Machete::AppController.new('path/app_name') }
+    let(:app_controller) { Machete::AppController.new('path/app_name') }
     let(:app_resource_url) { '/v2/apps/app_url' }
 
     before do
-      allow(app).
+      allow(app_controller).
         to receive(:run_cmd).
              with('cf curl /v2/apps?q=\'name:app_name\'', true).
              and_return('{
@@ -199,14 +197,14 @@ describe Machete::AppController do
                       }
                   ]
               }')
-      allow(app).
+      allow(app_controller).
         to receive(:run_cmd).
              with('cf curl ' + app_resource_url + '/summary', true).
              and_return('{"running_instances":3}')
     end
 
     it 'returns the number_of_instances' do
-      expect(app.number_of_running_instances).to eql 3
+      expect(app_controller.number_of_running_instances).to eql 3
     end
   end
 end
