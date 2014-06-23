@@ -175,7 +175,7 @@ describe Machete::App do
 
         specify do
           app.push
-          expect(Wait).to have_received(:until_true!).with('instance started')
+          expect(Wait).to have_received(:until_true!).with('instance started', timeout_in_seconds: 30)
         end
       end
     end

@@ -40,7 +40,7 @@ module Machete
         setup_environment_variables
         @output = push_app
 
-        Wait.until_true!('instance started') { number_of_running_instances > 0 }
+        Wait.until_true!('instance started', timeout_in_seconds: 30) { number_of_running_instances > 0 }
       end
     end
 
