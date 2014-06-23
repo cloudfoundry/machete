@@ -1,4 +1,5 @@
 require 'machete/system_helper'
+require 'httparty'
 
 module Machete
   class App
@@ -19,7 +20,15 @@ module Machete
     def delete
       run_cmd("cf delete -f #{app_name}")
     end
+
+    def homepage_body
+      HTTParty.get("http://#{url}").body
+    end
+
+    private
+
+    def url
+      run_cmd("cf app #{app_name} | grep url").split(' ').last
+    end
   end
-
-
 end

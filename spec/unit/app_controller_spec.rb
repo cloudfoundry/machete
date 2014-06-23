@@ -2,6 +2,7 @@ require './spec/spec_helper'
 require 'machete'
 
 describe Machete::AppController do
+  subject(:app_controller) { Machete::AppController.new('path/app_name') }
 
   before do
     allow_any_instance_of(Machete::SystemHelper).to receive(:run_on_host)
@@ -9,7 +10,6 @@ describe Machete::AppController do
 
   describe '#cf_internet_log' do
     let(:log_entry) { double(:log_entry) }
-    let(:app_controller) { Machete::AppController.new('path/app_name') }
 
     before do
       allow_any_instance_of(Machete::SystemHelper).to receive(:run_on_host).
@@ -24,7 +24,6 @@ describe Machete::AppController do
   end
 
   describe '#initialize' do
-    subject(:app_controller) { Machete::AppController.new('path/app_name') }
     let(:app) { double }
 
     before do
@@ -41,6 +40,16 @@ describe Machete::AppController do
     end
   end
 
+  describe '#homepage_html' do
+    before(:each) do
+      allow(app_controller.app).to receive(:homepage_body).and_return('the app body')
+    end
+
+    specify do
+      expect(app_controller.homepage_html).to eql 'the app body'
+    end
+  end
+
   describe '#push' do
     before do
       allow(Dir).to receive(:chdir).and_yield
@@ -53,8 +62,6 @@ describe Machete::AppController do
     end
 
     context 'clearing internet access log' do
-      let(:app_controller) { Machete::AppController.new('path/app_name') }
-
       before do
         allow(app_controller).to receive(:run_on_host)
       end
@@ -180,7 +187,6 @@ describe Machete::AppController do
   end
 
   describe '#number_of_running_instances' do
-    let(:app_controller) { Machete::AppController.new('path/app_name') }
     let(:app_resource_url) { '/v2/apps/app_url' }
 
     before do

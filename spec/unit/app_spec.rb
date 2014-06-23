@@ -45,4 +45,18 @@ describe Machete::App do
       expect(app).to have_received(:run_cmd).with('cf delete -f kyle_has_an_awesome_app')
     end
   end
+
+  describe '#homepage_body' do
+    let(:website) { double(body: 'kyles homepage body') }
+
+    before do
+      allow(app).to receive(:run_cmd).with('cf app kyle_has_an_awesome_app | grep url').and_return('urls: www.kylesurl.com')
+      allow(HTTParty).to receive(:get).with('http://www.kylesurl.com').and_return website
+
+    end
+
+    specify do
+      expect(app.homepage_body).to eql 'kyles homepage body'
+    end
+  end
 end

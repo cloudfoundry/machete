@@ -56,7 +56,7 @@ module Machete
     end
 
     def homepage_html
-      HTTParty.get("http://#{url}").body
+      app.homepage_body
     end
 
     def has_file? filename
@@ -75,10 +75,6 @@ module Machete
     end
 
     private
-
-    def url
-      run_cmd("cf app #{app_name} | grep url").split(' ').last
-    end
 
     def directory_for_app
       "cf_spec/fixtures/#{app_path}"
