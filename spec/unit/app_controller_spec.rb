@@ -105,6 +105,7 @@ describe Machete::AppController do
 
       allow(app_controller.app).to receive(:delete)
       allow(app_controller.app).to receive(:push)
+      allow(app_controller.app).to receive(:set_env)
     end
 
     context 'clearing internet access log' do
@@ -171,12 +172,7 @@ describe Machete::AppController do
 
           expect(app_controller.app).to have_received(:delete).ordered
           expect(app_controller.app).to have_received(:push).with(start: false).ordered
-
-          expect(app_controller).
-            to have_received(:run_cmd).
-                 with('cf set-env app_name MY_ENV_VAR true').
-                 ordered
-
+          expect(app_controller.app).to have_received(:set_env).with('MY_ENV_VAR', 'true').ordered
           expect(app_controller.app).to have_received(:push).with(no_args).ordered
         end
       end
@@ -198,12 +194,8 @@ describe Machete::AppController do
 
             expect(app_controller.app).to have_received(:delete).ordered
             expect(app_controller.app).to have_received(:push).with(start: false).ordered
-
-            expect(app_controller).
-              to have_received(:run_cmd).
-                   with('cf set-env app_name DATABASE_URL postgres://buildpacks:buildpacks@1.1.1.30:5524/buildpacks').
-                   ordered
-
+            expect(app_controller.app).to have_received(:set_env).
+                                            with('DATABASE_URL', 'postgres://buildpacks:buildpacks@1.1.1.30:5524/buildpacks').ordered
             expect(app_controller.app).to have_received(:push).with(no_args).ordered
           end
         end
@@ -218,7 +210,8 @@ describe Machete::AppController do
 
           specify do
             app_controller.push
-            expect(app_controller).to have_received(:run_cmd).with('cf set-env app_name DATABASE_URL postgres://buildpacks:buildpacks@1.1.1.30:5524/wordpress')
+            expect(app_controller.app).to have_received(:set_env).
+                                            with('DATABASE_URL', 'postgres://buildpacks:buildpacks@1.1.1.30:5524/wordpress')
           end
         end
       end

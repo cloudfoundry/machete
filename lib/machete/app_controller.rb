@@ -78,7 +78,7 @@ module Machete
 
     def setup_environment_variables
       env.each do |variable, value|
-        run_cmd("cf set-env #{app_name} #{variable} #{value}")
+        app.set_env(variable.to_s, value)
       end
     end
 

@@ -38,6 +38,10 @@ module Machete
       $?.exitstatus == 0
     end
 
+    def set_env key, value
+      run_cmd("cf set-env #{app_name} #{key} #{value}")
+    end
+
     private
 
     def url

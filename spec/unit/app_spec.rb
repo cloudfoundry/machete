@@ -80,10 +80,6 @@ describe Machete::App do
   end
 
   describe '#has_file' do
-    before do
-      allow(app).to receive(:run_cmd).with('cf files kyle_has_an_awesome_app log/a_log_file.log')
-    end
-
     context 'the file exists' do
       let(:app_has_file) { app.has_file?('log/a_log_file.log') }
 
@@ -116,6 +112,16 @@ describe Machete::App do
         app_has_file
         expect(app).to have_received(:run_cmd).with('cf files kyle_has_an_awesome_app log/a_log_file.log')
       end
+    end
+  end
+
+  describe '#set_env' do
+    before do
+      app.set_env('env_var', 'env_val')
+    end
+
+    specify do
+      expect(app).to have_received(:run_cmd).with('cf set-env kyle_has_an_awesome_app env_var env_val')
     end
   end
 end
