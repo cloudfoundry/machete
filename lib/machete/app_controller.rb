@@ -1,7 +1,6 @@
 require 'httparty'
 require 'machete/system_helper'
 require 'json'
-require 'wait_until'
 
 module Machete
   class AppController
@@ -31,7 +30,7 @@ module Machete
       @fixture = Machete::Fixture.new(app_path)
     end
 
-    def push()
+    def push
       env['DATABASE_URL'] = database_url if with_pg
 
       Dir.chdir(fixture.directory) do
@@ -41,8 +40,6 @@ module Machete
         app.push(start: env.empty?)
         setup_environment_variables
         @output = app.push
-
-        Wait.until_true!('instance started', timeout_in_seconds: 30) { number_of_running_instances > 0 }
       end
     end
 
