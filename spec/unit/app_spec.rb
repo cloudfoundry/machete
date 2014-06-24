@@ -1,5 +1,4 @@
-require './spec/spec_helper'
-require 'machete/app'
+require 'spec_helper'
 
 describe Machete::App do
   subject(:app) { Machete::App.new('kyle_has_an_awesome_app') }

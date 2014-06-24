@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'machete'
 
 describe Machete do
 

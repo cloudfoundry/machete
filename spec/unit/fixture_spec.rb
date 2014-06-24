@@ -1,5 +1,4 @@
-require './spec/spec_helper'
-require 'machete'
+require 'spec_helper'
 
 describe Machete::Fixture do
   subject(:fixture) { Machete::Fixture.new('path/to/kyle_has_an_awesome_app') }

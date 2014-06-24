@@ -1,5 +1,4 @@
-require './spec/spec_helper'
-require 'machete/firewall'
+require 'spec_helper'
 
 describe Machete::Firewall do
   subject(:firewall) { Machete::Firewall }

@@ -1,5 +1,4 @@
-require './spec/spec_helper'
-require 'machete/app_controller'
+require 'spec_helper'
 
 describe Machete::SystemHelper do
 

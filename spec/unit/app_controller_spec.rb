@@ -1,5 +1,4 @@
-require './spec/spec_helper'
-require 'machete'
+require 'spec_helper'
 
 describe Machete::AppController do
   subject(:app_controller) { Machete::AppController.new('path/app_name') }
@@ -101,7 +100,6 @@ describe Machete::AppController do
       allow(Dir).to receive(:chdir).and_yield
       allow(app_controller).to receive(:run_cmd).and_return("")
       allow(Machete).to receive(:logger).and_return(double.as_null_object)
-      allow(Wait).to receive(:until_true!)
 
       allow(app_controller.app).to receive(:delete)
       allow(app_controller.app).to receive(:push)
@@ -213,35 +211,6 @@ describe Machete::AppController do
             expect(app_controller.app).to have_received(:set_env).
                                             with('DATABASE_URL', 'postgres://buildpacks:buildpacks@1.1.1.30:5524/wordpress')
           end
-        end
-      end
-
-      context 'waiting for the instance to start' do
-        before do
-          allow(app_controller).
-            to receive(:run_cmd).
-                 with('cf curl /v2/apps?q=\'name:app_name\'', true).
-                 and_return('{
-                  "total_results": 1,
-                  "resources": [
-                      {
-                          "metadata": {
-                              "url": "/v2/apps/app_url"
-                          }
-                      }
-                  ]
-              }')
-          allow(app_controller).
-            to receive(:run_cmd).
-                 with('cf curl /v2/apps/app_url/summary', true).
-                 and_return('{"running_instances":1}')
-
-          allow(Wait).to receive(:until_true!).and_yield
-        end
-
-        specify do
-          app_controller.push
-          expect(Wait).to have_received(:until_true!).with('instance started', timeout_in_seconds: 30)
         end
       end
     end
