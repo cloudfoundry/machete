@@ -3,7 +3,9 @@ require 'rspec/matchers'
 RSpec::Matchers.define :be_running do |timeout = 30|
   match do |app|
     start_time = Time.now
-    while Time.now < start_time + timeout do
+    max_end_time = start_time + timeout
+
+    while Time.now < max_end_time do
       return true if app.number_of_running_instances > 0
     end
 

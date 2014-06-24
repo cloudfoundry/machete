@@ -24,4 +24,3 @@ module Machete
     end
   end
 end
-
