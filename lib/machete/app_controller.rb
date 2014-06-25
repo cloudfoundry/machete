@@ -3,29 +3,16 @@ require 'machete/system_helper'
 
 module Machete
   class AppController
-    attr_reader :output,
-                :app_name,
-                :app_path,
-                :database_name,
-                :vendor_gems_before_push,
-                :cmd,
-                :with_pg,
-                :env,
-                :app,
-                :fixture
+
 
     def initialize(app, opts={})
       @app = app
-      @app_name = app.name
-      @app_path = app.path
+      @fixture = Fixture.new(app.path)
 
-      @cmd = opts.fetch(:cmd, nil)
       @with_pg = opts.fetch(:with_pg, false)
       @database_name = opts.fetch(:database_name, "buildpacks")
-      @vendor_gems_before_push = opts.fetch(:vendor_gems_before_push, false)
       @env = opts.fetch(:env, {})
 
-      @fixture = Machete::Fixture.new(app_path)
     end
 
     def push
@@ -37,21 +24,17 @@ module Machete
         app.delete
         app.push(start: env.empty?)
         setup_environment_variables
-        @output = app.push
+        app.push
       end
     end
 
-    # TODO: Add rspec matchers so there is no need to delegate here
-    def staging_log
-      app.file 'logs/staging_task.log'
-    end
-
-    def has_file? filename
-      app.has_file? filename
-    end
-    ###################################
-
     private
+
+    attr_reader :database_name,
+                :with_pg,
+                :env,
+                :app,
+                :fixture
 
     def clear_internet_access_log
       Host::Log.new(app.host).clear
