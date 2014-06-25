@@ -5,14 +5,17 @@ require 'machete/fixture'
 require 'machete/buildpack_uploader'
 require 'machete/buildpack_mode'
 require 'machete/firewall'
+require 'machete/cf'
+require 'machete/host'
 
 module Machete
   class << self
-    def deploy_app(app_path, options={})
-      app_controller = Machete::AppController.new(app_path, options)
+    def deploy_app(path, options={})
+      host = Host.new
+      app = App.new path, host
+      app_controller = Machete::AppController.new(app, options)
       app_controller.push
-      yield app_controller if block_given?
-      app_controller
+      app
     end
 
     def logger

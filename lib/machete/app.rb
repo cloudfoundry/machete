@@ -3,34 +3,30 @@ require 'httparty'
 
 module Machete
   class App
-    include SystemHelper
+    attr_reader :name, :path, :host
 
-    attr_reader :app_name
-
-    def initialize app_name
-      @app_name = app_name
+    def initialize path, host
+      @path = path
+      @name = path.split('/').last
+      @host = host
     end
 
     def push(options = {start: true})
-      command = "cf push #{app_name}"
+      command = "cf push #{name}"
       command += " --no-start" unless options[:start]
-      run_cmd command
+      SystemHelper.run_cmd command
     end
 
     def delete
-      run_cmd("cf delete -f #{app_name}")
+      SystemHelper.run_cmd("cf delete -f #{name}")
     end
 
     def homepage_body
       HTTParty.get("http://#{url}").body
     end
 
-    def logs
-      run_cmd("cf logs #{app_name} --recent")
-    end
-
     def file filename
-      run_cmd("cf files #{app_name} #{filename}")
+      SystemHelper.run_cmd("cf files #{name} #{filename}")
     end
 
     def has_file? filename
@@ -39,13 +35,13 @@ module Machete
     end
 
     def set_env key, value
-      run_cmd("cf set-env #{app_name} #{key} #{value}")
+      SystemHelper.run_cmd("cf set-env #{name} #{key} #{value}")
     end
 
     private
 
     def url
-      run_cmd("cf app #{app_name} | grep url").split(' ').last
+      SystemHelper.run_cmd("cf app #{name} | grep url").split(' ').last
     end
   end
 end
