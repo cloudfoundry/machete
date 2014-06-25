@@ -11,7 +11,7 @@ module Machete
       end
 
       def contents
-        Machete.logger.info "On Host: $ #{recent_logs}"
+        Machete.logger.info "$ #{recent_logs}"
         result = SystemHelper.run_cmd(recent_logs)
         Machete.logger.info result
         result

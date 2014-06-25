@@ -14,7 +14,7 @@ module Machete
     end
 
     def vendor
-      if File.exists?('package.sh')
+      if File.exist?('package.sh')
         Machete.logger.action('Vendoring dependencies before push')
         Bundler.with_clean_env do
           SystemHelper.run_cmd('./package.sh')

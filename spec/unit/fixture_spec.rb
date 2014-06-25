@@ -19,7 +19,7 @@ module Machete
 
       context 'when there is no script' do
         before do
-          allow(File).to receive(:exists?).with('package.sh').and_return(false)
+          allow(File).to receive(:exist?).with('package.sh').and_return(false)
           fixture.vendor
         end
 
@@ -38,7 +38,7 @@ module Machete
 
       context 'when there is a script' do
         before do
-          allow(File).to receive(:exists?).with('package.sh').and_return(true)
+          allow(File).to receive(:exist?).with('package.sh').and_return(true)
           fixture.vendor
         end
 

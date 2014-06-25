@@ -9,6 +9,7 @@ module Machete
 
       describe '#contents' do
         before do
+          allow(Machete.logger).to receive(:info)
           allow(SystemHelper).to receive(:run_cmd).with("cf logs #{app_name} --recent").and_return('some logging')
         end
 

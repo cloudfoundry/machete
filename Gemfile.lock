@@ -3,7 +3,6 @@ PATH
   specs:
     machete (0.0.1)
       httparty
-      rake
       rspec
 
 GEM
@@ -15,19 +14,18 @@ GEM
       multi_xml (>= 0.5.2)
     json (1.8.1)
     multi_xml (0.5.5)
-    rake (10.3.1)
     rspec (3.0.0)
       rspec-core (~> 3.0.0)
       rspec-expectations (~> 3.0.0)
       rspec-mocks (~> 3.0.0)
-    rspec-core (3.0.2)
+    rspec-core (3.0.0)
       rspec-support (~> 3.0.0)
-    rspec-expectations (3.0.2)
+    rspec-expectations (3.0.0)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.0.0)
-    rspec-mocks (3.0.2)
+    rspec-mocks (3.0.1)
       rspec-support (~> 3.0.0)
-    rspec-support (3.0.2)
+    rspec-support (3.0.0)
 
 PLATFORMS
   ruby
@@ -35,4 +33,3 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.6)
   machete!
-  rake
