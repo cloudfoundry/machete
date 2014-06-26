@@ -15,7 +15,8 @@ RSpec::Matchers.define :be_running do |timeout = 30|
   end
 
   failure_message do |app|
+    app_log = Machete::CF::AppLog.new(app)
     "App is not running. Logs are:\n" +
-      app.logs
+      app_log.contents
   end
 end
