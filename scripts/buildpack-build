@@ -21,8 +21,10 @@ if [ "$mode" == "online" ]; then
   export VAGRANT_CWD="$HOME/workspace/bosh-lite"
 else
   api=api.10.245.0.34.xip.io
-  export VAGRANT_CWD="$HOME/workspace/bosh-lite-2nd-instance/"
+  export VAGRANT_CWD="$HOME/workspace/bosh-lite-2nd-instance"
 fi
+
+$VAGRANT_CWD/scripts/add-route
 
 buildpack_location=/tmp/buildpacks
 language=$(echo $(basename `git config --get remote.origin.url`) | rev | cut -d- -f1 | rev | cut -d. -f1)
