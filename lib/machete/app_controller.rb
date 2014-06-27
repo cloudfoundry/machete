@@ -12,7 +12,6 @@ module Machete
       @with_pg = opts.fetch(:with_pg, false)
       @database_name = opts.fetch(:database_name, "buildpacks")
       @env = opts.fetch(:env, {})
-
     end
 
     def push
@@ -22,7 +21,7 @@ module Machete
         clear_internet_access_log
         fixture.vendor
         app.delete
-        app.push(start: env.empty?)
+        app.push(start: false) unless env.empty?
         setup_environment_variables
         app.push
       end

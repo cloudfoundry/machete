@@ -85,6 +85,15 @@ module Machete
           end
         end
 
+        context 'with no environment varaibles set' do
+          specify do
+            app_controller.push
+
+            expect(app).to have_received(:push).once
+            expect(app).to have_received(:push).with(no_args)
+          end
+        end
+
         context 'enabling postgres database' do
           let(:options) do
             {
