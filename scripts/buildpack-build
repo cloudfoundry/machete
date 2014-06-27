@@ -29,7 +29,7 @@ language=$(echo $(basename `git config --get remote.origin.url`) | rev | cut -d-
 echo -e "\n******* Packaging $mode buildpack for $language"
 
 echo -e "\n******* Build $mode package"
-rm -f ${language}_buildpack.zip
+rm -f ${language}_buildpack*.zip
 ./bin/package $mode
 
 echo -e "\n******* Create buildpack on CF"
