@@ -16,8 +16,11 @@ module Machete
     def vendor
       if File.exist?('package.sh')
         Machete.logger.action('Vendoring dependencies before push')
-        Bundler.with_clean_env do
+        result = Bundler.with_clean_env do
           SystemHelper.run_cmd('./package.sh')
+        end
+        if SystemHelper.exit_status > 0
+          raise "Failed to vendor dependencies:\n#{result}"
         end
       end
     end

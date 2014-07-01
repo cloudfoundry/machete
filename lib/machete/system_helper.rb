@@ -6,5 +6,9 @@ module Machete
       Machete.logger.info result unless silent
       result
     end
+
+    def self.exit_status
+      $?.exitstatus
+    end
   end
 end

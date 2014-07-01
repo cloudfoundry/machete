@@ -5,12 +5,22 @@ module Machete
     describe 'run_cmd' do
       before  { allow(Machete).to receive(:logger).and_return(double.as_null_object) }
 
-      context 'returned output' do
-
+      describe 'returned output' do
         subject { SystemHelper.run_cmd('echo hello') }
 
         it { should eql "hello\n" }
+      end
 
+      describe 'exit status' do
+        subject { SystemHelper }
+
+        specify do
+          subject.run_cmd('exit 1')
+          expect(subject.exit_status).to eql 1
+
+          subject.run_cmd('exit 0')
+          expect(subject.exit_status).to eql 0
+        end
       end
 
       context 'running silently' do
