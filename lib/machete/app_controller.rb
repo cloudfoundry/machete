@@ -10,7 +10,7 @@ module Machete
       @fixture = Fixture.new(app.path)
 
       @with_pg = opts.fetch(:with_pg, false)
-      @database_name = opts.fetch(:database_name, "buildpacks")
+      @database_name = opts.fetch(:database_name, 'buildpacks')
       @env = opts.fetch(:env, {})
     end
 

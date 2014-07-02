@@ -41,19 +41,6 @@ module Machete
       end
     end
 
-    describe '#homepage_body' do
-      let(:website) { double(body: 'kyles homepage body') }
-
-      before do
-        allow(SystemHelper).to receive(:run_cmd).with('cf app example_app | grep url').and_return('urls: www.kylesurl.com')
-        allow(HTTParty).to receive(:get).with('http://www.kylesurl.com').and_return website
-      end
-
-      specify do
-        expect(app.homepage_body).to eql 'kyles homepage body'
-      end
-    end
-
     describe '#set_env' do
       before do
         app.set_env('env_var', 'env_val')
