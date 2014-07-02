@@ -11,12 +11,9 @@ require 'machete/host'
 module Machete
   class << self
     def deploy_app(path, options={})
-      host = Host.new
-
-      app = App.new(path, host, start_command: options.delete(:start_command))
-
-      app_controller = Machete::AppController.new(app, options)
-      app_controller.push
+      start_command = options.delete(:start_command)
+      app = App.new(path, host, start_command: start_command)
+      app_controller.deploy(app, options)
       app
     end
 
@@ -26,6 +23,16 @@ module Machete
 
     def logger=(new_logger)
       @logger = new_logger
+    end
+
+    private
+
+    def app_controller
+      Machete::AppController.new
+    end
+
+    def host
+      Host.new
     end
   end
 end

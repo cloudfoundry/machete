@@ -9,7 +9,7 @@ module Machete
 
     let(:path) { 'path/app_name' }
 
-    subject(:app_controller) { AppController.new(app) }
+    subject(:app_controller) { AppController.new }
 
     before do
       allow_any_instance_of(SystemHelper).to receive(:run_on_host)
@@ -19,20 +19,38 @@ module Machete
       let(:host_log) { double(:host_log, clear: true) }
 
       before do
-        allow(Dir).to receive(:chdir).and_yield
-        allow(Machete).to receive(:logger).and_return(logger)
+        allow(Dir).
+          to receive(:chdir).
+               and_yield
 
-        allow(Fixture).to receive(:new).and_return(fixture)
+        allow(Machete).
+          to receive(:logger).
+               and_return(logger)
 
-        allow(Host::Log).to receive(:new).with(host).and_return host_log
-        allow(app).to receive(:delete)
-        allow(app).to receive(:push)
-        allow(app).to receive(:set_env)
+        allow(Fixture).
+          to receive(:new).
+              with(path).
+               and_return(fixture)
+
+        allow(Host::Log).
+          to receive(:new).
+               with(host).
+               and_return host_log
+
+        allow(app)
+        .to receive(:delete)
+
+        allow(app).
+          to receive(:push)
+
+        allow(app).
+          to receive(:set_env)
       end
 
       context 'clearing internet access log' do
         specify do
-          app_controller.push
+          app_controller.deploy(app)
+
           expect(host_log).to have_received(:clear).ordered
           expect(app).to have_received(:delete).ordered
         end
@@ -41,7 +59,7 @@ module Machete
       context 'vendoring' do
         before do
           allow(fixture).to receive(:vendor)
-          app_controller.push
+          app_controller.deploy(app)
         end
 
         specify do
@@ -52,7 +70,7 @@ module Machete
       context 'changing to fixture directory' do
         before do
           allow(fixture).to receive(:directory).and_return('a_directory')
-          app_controller.push
+          app_controller.deploy(app)
         end
 
         specify do
@@ -61,7 +79,7 @@ module Machete
       end
 
       context 'options' do
-        let(:app_controller) { AppController.new(app, options) }
+        let(:app_controller) { AppController.new }
         let(:options) do
           {}
         end
@@ -76,7 +94,7 @@ module Machete
           end
 
           specify do
-            app_controller.push
+            app_controller.deploy(app, options)
 
             expect(app).to have_received(:delete).ordered
             expect(app).to have_received(:push).with(start: false).ordered
@@ -87,7 +105,7 @@ module Machete
 
         context 'with no environment varaibles set' do
           specify do
-            app_controller.push
+            app_controller.deploy(app)
 
             expect(app).to have_received(:push).once
             expect(app).to have_received(:push).with(no_args)
@@ -107,7 +125,7 @@ module Machete
 
           context 'with default database name' do
             specify do
-              app_controller.push
+              app_controller.deploy(app, options)
 
               expect(app).to have_received(:delete).ordered
               expect(app).to have_received(:push).with(start: false).ordered
@@ -126,7 +144,7 @@ module Machete
             end
 
             specify do
-              app_controller.push
+              app_controller.deploy(app, options)
               expect(app).to have_received(:set_env).
                                with('DATABASE_URL', 'postgres://buildpacks:buildpacks@1.1.1.30:5524/wordpress')
             end

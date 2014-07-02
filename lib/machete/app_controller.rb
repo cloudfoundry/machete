@@ -4,26 +4,22 @@ require 'machete/system_helper'
 module Machete
   class AppController
 
-    def initialize(app, opts={})
-      @app = app
-      @fixture = Fixture.new(app.path)
+    def deploy(app, options = {})
+      env = options.fetch(:env, {})
+      with_pg = options.fetch(:with_pg, false)
+      database_name = options.fetch(:database_name, 'buildpacks')
+      env['DATABASE_URL'] = database_url(database_name) if with_pg
 
-      @with_pg = opts.fetch(:with_pg, false)
-      @database_name = opts.fetch(:database_name, 'buildpacks')
-      @env = opts.fetch(:env, {})
-    end
-
-    def push
-      env['DATABASE_URL'] = database_url if with_pg
+      fixture = Fixture.new(app.path)
 
       Dir.chdir(fixture.directory) do
-        clear_internet_access_log
+        clear_internet_access_log(app)
         fixture.vendor
         app.delete
 
         if env.any?
           app.push(start: false)
-          setup_environment_variables
+          setup_environment_variables(env, app)
         end
 
         app.push
@@ -32,23 +28,17 @@ module Machete
 
     private
 
-    attr_reader :database_name,
-                :with_pg,
-                :env,
-                :app,
-                :fixture
-
-    def clear_internet_access_log
+    def clear_internet_access_log(app)
       Host::Log.new(app.host).clear
     end
 
-    def setup_environment_variables
+    def setup_environment_variables(env, app)
       env.each do |variable, value|
         app.set_env(variable.to_s, value)
       end
     end
 
-    def database_url
+    def database_url(database_name)
       "postgres://buildpacks:buildpacks@#{postgres_ip}:5524/#{database_name}"
     end
 
