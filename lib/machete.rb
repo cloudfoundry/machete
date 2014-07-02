@@ -12,7 +12,9 @@ module Machete
   class << self
     def deploy_app(path, options={})
       host = Host.new
-      app = App.new path, host
+
+      app = App.new(path, host, start_command: options.delete(:start_command))
+
       app_controller = Machete::AppController.new(app, options)
       app_controller.push
       app

@@ -4,7 +4,6 @@ require 'machete/system_helper'
 module Machete
   class AppController
 
-
     def initialize(app, opts={})
       @app = app
       @fixture = Fixture.new(app.path)
@@ -21,8 +20,12 @@ module Machete
         clear_internet_access_log
         fixture.vendor
         app.delete
-        app.push(start: false) unless env.empty?
-        setup_environment_variables
+
+        if env.any?
+          app.push(start: false)
+          setup_environment_variables
+        end
+
         app.push
       end
     end

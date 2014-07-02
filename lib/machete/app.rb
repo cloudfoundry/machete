@@ -3,17 +3,19 @@ require 'httparty'
 
 module Machete
   class App
-    attr_reader :name, :path, :host
+    attr_reader :name, :path, :host, :start_command
 
-    def initialize path, host
+    def initialize path, host, options = {}
       @path = path
       @name = path.split('/').last
       @host = host
+      @start_command = options[:start_command]
     end
 
     def push(options = {start: true})
       command = "cf push #{name}"
       command += ' --no-start' unless options[:start]
+      command += " -c '#{start_command}'" if start_command
       SystemHelper.run_cmd command
     end
 

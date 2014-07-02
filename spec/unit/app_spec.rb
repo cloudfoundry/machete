@@ -29,6 +29,18 @@ module Machete
           expect(SystemHelper).to have_received(:run_cmd).with('cf push example_app --no-start')
         end
       end
+
+      context 'with a start command' do
+        subject(:app) { App.new('path/to/example_app', host, start_command: 'start_command') }
+
+        before do
+          app.push
+        end
+
+        specify do
+          expect(SystemHelper).to have_received(:run_cmd).with('cf push example_app -c \'start_command\'')
+        end
+      end
     end
 
     describe '#delete' do

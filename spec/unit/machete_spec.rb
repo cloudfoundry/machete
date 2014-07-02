@@ -3,9 +3,7 @@ require 'spec_helper'
 describe Machete do
 
   describe 'deploy_app' do
-    subject(:app) { Machete.deploy_app('path/to/app_name') }
-
-    let(:path){'path/to/app_name'}
+    let(:path) { 'path/to/app_name' }
     let(:app_controller) { double(:app_controller) }
     let(:host) { double(:host) }
 
@@ -16,21 +14,34 @@ describe Machete do
 
       allow(Machete::Host).
         to receive(:new).
-        and_return(host)
+             and_return(host)
 
       allow(app_controller).
-        to receive(:push)
+        to receive(:push).
+             with(no_args)
     end
 
-    it 'returns the app' do
-      expect(app.name).to eql 'app_name'
-      expect(app.host).to eql host
-      expect(app.path).to eql path
+    context 'no additional options' do
+      specify do
+        app = Machete.deploy_app('path/to/app_name')
+        expect(app.name).to eql 'app_name'
+        expect(app.host).to eql host
+        expect(app.path).to eql path
+
+        expect(app_controller).to have_received(:push)
+
+      end
     end
 
-    it 'pushes the app' do
-      app
-      expect(app_controller).to have_received(:push)
+    context 'with additional options' do
+      context 'with start command' do
+        let(:start_command) { double(:start_command) }
+
+        specify do
+          app = Machete.deploy_app('path/to/app_name', start_command: start_command)
+          expect(app.start_command).to eql start_command
+        end
+      end
     end
   end
 end
