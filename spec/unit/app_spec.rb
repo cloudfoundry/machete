@@ -54,16 +54,6 @@ module Machete
       end
     end
 
-    describe '#file' do
-      before do
-        allow(SystemHelper).to receive(:run_cmd).with('cf files example_app log/a_log_file.log').and_return('output from file')
-      end
-
-      specify do
-        expect(app.file('log/a_log_file.log')).to eql 'output from file'
-      end
-    end
-
     describe '#set_env' do
       before do
         app.set_env('env_var', 'env_val')

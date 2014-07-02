@@ -25,15 +25,6 @@ module Machete
       HTTParty.get("http://#{url}").body
     end
 
-    def file filename
-      SystemHelper.run_cmd("cf files #{name} #{filename}")
-    end
-
-    def has_file? filename
-      file(filename)
-      $?.exitstatus == 0
-    end
-
     def set_env key, value
       SystemHelper.run_cmd("cf set-env #{name} #{key} #{value}")
     end
