@@ -1,19 +1,19 @@
 require 'machete/logger'
-require 'machete/app_controller'
+require 'machete/deploy_app'
 require 'machete/app'
-require 'machete/fixture'
 require 'machete/buildpack_uploader'
 require 'machete/buildpack_mode'
 require 'machete/firewall'
 require 'machete/cf'
 require 'machete/host'
+require 'machete/vendor_dependencies'
+require 'machete/database_url_builder'
 
 module Machete
   class << self
     def deploy_app(path, options={})
-      start_command = options.delete(:start_command)
-      app = App.new(path, host, start_command: start_command)
-      app_controller.deploy(app, options)
+      app = App.new(path, host, options)
+      deployer.execute(app)
       app
     end
 
@@ -27,8 +27,8 @@ module Machete
 
     private
 
-    def app_controller
-      Machete::AppController.new
+    def deployer
+      Machete::DeployApp.new
     end
 
     def host
