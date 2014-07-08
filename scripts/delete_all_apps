@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cf apps | grep 1G | awk '{ print $1 }' | xargs -IBP cf delete BP -f
