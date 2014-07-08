@@ -10,11 +10,15 @@ module Machete
       private
 
       def push_command(app, start)
-        if start
-          base_command(app)
-        else
-          base_command(app) + ' --no-start'
+        unless start
+          return base_command(app) + ' --no-start'
         end
+
+        if app.start_command
+          return base_command(app) + " -c '#{app.start_command}'"
+        end
+
+        base_command(app)
       end
 
       def base_command(app)

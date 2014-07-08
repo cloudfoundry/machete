@@ -16,7 +16,7 @@ module Machete
       before do
         allow(SystemHelper).
           to receive(:run_cmd).
-               with("PGPASSWORD=#{password} psql -h #{host} -U #{username} -p #{port} -d postgres -c \"DROP DATABASE #{name}\"")
+               with("PGPASSWORD=#{password} psql -U #{username} -h #{host} -p #{port} -d postgres -c \"DROP DATABASE #{name}\"")
       end
 
       specify do
@@ -31,7 +31,7 @@ module Machete
       before do
         allow(SystemHelper).
           to receive(:run_cmd).
-               with("PGPASSWORD=#{password} psql -h #{host} -U #{username} -p #{port} -d postgres -c \"CREATE DATABASE #{name} WITH OWNER #{owner}\"")
+               with("PGPASSWORD=#{password} psql -U #{username} -h #{host} -p #{port} -d postgres -c \"CREATE DATABASE #{name} WITH OWNER #{owner}\"")
       end
 
       specify do
