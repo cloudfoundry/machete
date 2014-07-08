@@ -9,9 +9,9 @@ module Machete
       delete_app.execute(app)
       vendor_dependencies.execute(app)
 
-      if app.environment_variables?
+      if app.needs_setup?
         push_app.execute(app, start: false)
-        set_app_environment_variables.execute(app)
+        setup_app.execute(app)
       end
 
       push_app.execute(app)
@@ -27,8 +27,8 @@ module Machete
       CF::PushApp.new
     end
 
-    def set_app_environment_variables
-      CF::SetAppEnv.new
+    def setup_app
+      SetupApp.new
     end
 
     def clear_internet_access_log(app)

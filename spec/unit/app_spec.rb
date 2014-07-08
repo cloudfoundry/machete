@@ -4,17 +4,8 @@ module Machete
   describe App do
     let(:host) { double(:host) }
     let(:options) { Hash.new }
-    let(:database_url_builder) { double(:database_url_builder) }
-    let(:database_url) { double(:database_url) }
 
     subject(:app) { App.new('path/to/example_app', host, options) }
-
-    before do
-      allow(DatabaseUrlBuilder).
-        to receive(:new).
-             with(no_args).
-             and_return(database_url_builder)
-    end
 
     describe '#name' do
       specify do
@@ -22,57 +13,12 @@ module Machete
       end
     end
 
-    describe '#env' do
-      context 'with_pg: true' do
-        context 'default database name' do
-          let(:options) do
-            {
-              with_pg: true
-            }
-          end
-
-          before do
-            allow(database_url_builder).
-              to receive(:execute).
-                  with(database_name: nil).
-                   and_return(database_url)
-          end
-
-          specify do
-            expect(app.env['DATABASE_URL']).
-              to eql database_url
-          end
-        end
-
-        context 'specified database name' do
-          let(:options) do
-            {
-              with_pg: true,
-              database_name: 'my_database'
-            }
-          end
-
-          before do
-            allow(database_url_builder).
-              to receive(:execute).
-                   with(database_name: 'my_database').
-                   and_return(database_url)
-          end
-
-          specify do
-            expect(app.env['DATABASE_URL']).
-              to eql database_url
-          end
-        end
-      end
-    end
-
-    describe '#environment_variables?' do
+    describe '#needs_setup?' do
       context 'has no environment variables' do
         let(:options) { Hash.new }
 
         specify do
-          expect(app.environment_variables?).to be false
+          expect(app.needs_setup?).to be false
         end
       end
 
@@ -86,7 +32,7 @@ module Machete
         end
 
         specify do
-          expect(app.environment_variables?).to be true
+          expect(app.needs_setup?).to be true
         end
       end
 
@@ -97,15 +43,8 @@ module Machete
           }
         end
 
-        before do
-          allow(database_url_builder).
-            to receive(:execute).
-                 with(database_name: nil).
-                 and_return(database_url)
-        end
-
         specify do
-          expect(app.environment_variables?).to be true
+          expect(app.needs_setup?).to be true
         end
       end
     end

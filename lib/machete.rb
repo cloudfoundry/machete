@@ -7,7 +7,8 @@ require 'machete/firewall'
 require 'machete/cf'
 require 'machete/host'
 require 'machete/vendor_dependencies'
-require 'machete/database_url_builder'
+require 'machete/setup_app'
+require 'machete/database'
 
 module Machete
   class << self

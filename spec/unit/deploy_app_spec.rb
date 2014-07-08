@@ -2,13 +2,13 @@ require 'spec_helper'
 
 module Machete
   describe DeployApp do
-    let(:app_has_environment_variables) { false }
+    let(:app_needs_setup?) { false }
     let(:app) do
       double(:app,
              path: path,
              host: host,
              name: 'app_name',
-             environment_variables?: app_has_environment_variables
+             needs_setup?: app_needs_setup?
       )
     end
 
@@ -17,8 +17,7 @@ module Machete
     let(:logger) { double(:logger) }
     let(:delete_app) { double(:delete_app) }
     let(:push_app) { double(:push_app) }
-    let(:set_app_env) { double(:set_app_env) }
-
+    let(:setup_app) { double(:setup_app) }
     let(:path) { 'path/app_name' }
 
     subject(:deploy_app) { DeployApp.new }
@@ -56,11 +55,11 @@ module Machete
           to receive(:execute).
                with(app)
 
-        allow(CF::SetAppEnv).
+        allow(SetupApp).
           to receive(:new).
-               and_return(set_app_env)
+               and_return(setup_app)
 
-        allow(set_app_env).
+        allow(setup_app).
           to receive(:execute).
                with(app)
       end
@@ -89,8 +88,8 @@ module Machete
         end
       end
 
-      context 'app has environment_variables' do
-        let(:app_has_environment_variables) { true }
+      context 'app needs setup' do
+        let(:app_needs_setup?) { true }
 
         before do
           allow(push_app).
@@ -103,7 +102,7 @@ module Machete
 
           expect(delete_app).to have_received(:execute).with(app).ordered
           expect(push_app).to have_received(:execute).with(app, start: false).ordered
-          expect(set_app_env).to have_received(:execute).with(app).ordered
+          expect(setup_app).to have_received(:execute).with(app).ordered
 
           expect(push_app).to have_received(:execute).with(app).ordered
         end
@@ -116,7 +115,6 @@ module Machete
           expect(push_app).to have_received(:execute).with(app)
         end
       end
-
     end
   end
 end
