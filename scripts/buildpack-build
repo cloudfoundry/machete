@@ -26,28 +26,30 @@ fi
 
 $VAGRANT_CWD/scripts/add-route
 
-buildpack_location=/tmp/buildpacks
 language=$(echo $(basename `git config --get remote.origin.url`) | rev | cut -d- -f1 | rev | cut -d. -f1)
+
 echo -e "\n******* Packaging $mode buildpack for $language"
 
-echo -e "\n******* Build $mode package"
+echo -e "\n******* Fetching CF CLI details"
+which cf
+cf --version
+
+echo -e "\n******* Building $mode package"
 rm -f ${language}_buildpack*.zip
 ./bin/package $mode
 
-echo -e "\n******* Create buildpack on CF"
+echo -e "\n******* Creating buildpack on CF"
 cf api $api --skip-ssl-validation
 cf login -u admin -p admin -o pivotal -s integration
 cf delete-buildpack ${language}-test-buildpack -f
 cf create-buildpack ${language}-test-buildpack ${language}_buildpack*.zip 1 --enable
 
-echo -e "\n******* Configure RVM"
+echo -e "\n******* Configuring RVM"
 export PATH=/Users/pivotal/.rvm/bin:$PATH
 rvm use default
 
-echo -e "\n******* Run specs"
+echo -e "\n******* Running specs"
 BUNDLE_GEMFILE=cf.Gemfile bundle --no-cache
 BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=$mode rspec --format documentation --pattern "{integration,unit}/*_spec.rb" $rspec_options
 
-echo -e "\n******* Release buildpack"
-mkdir -p ${buildpack_location}/${language}
-mv ${language}_buildpack*.zip ${buildpack_location}/${language}
+mv ${language}_buildpack*.zip
