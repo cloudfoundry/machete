@@ -51,5 +51,3 @@ rvm use default
 echo -e "\n******* Running specs"
 BUNDLE_GEMFILE=cf.Gemfile bundle --no-cache
 BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=$mode rspec --format documentation --pattern "{integration,unit}/*_spec.rb" $rspec_options
-
-mv ${language}_buildpack*.zip
