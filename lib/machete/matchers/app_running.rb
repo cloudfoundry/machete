@@ -2,13 +2,15 @@ require 'rspec/matchers'
 
 RSpec::Matchers.define :be_running do |timeout = 30|
   match do |app|
-    app_info = Machete::CF::AppInfo.new(app)
+    app_status = Machete::AppStatus.new
 
     start_time = Time.now
     max_end_time = start_time + timeout
 
     while Time.now <= max_end_time do
-      return true if app_info.instance_count > 0
+      status = app_status.execute(app)
+      return false if status == Machete::AppStatus::STAGING_FAILED
+      return true if status == Machete::AppStatus::RUNNING
     end
 
     return false

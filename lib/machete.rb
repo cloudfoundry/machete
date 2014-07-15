@@ -9,6 +9,7 @@ require 'machete/host'
 require 'machete/vendor_dependencies'
 require 'machete/setup_app'
 require 'machete/database'
+require 'machete/app_status'
 
 module Machete
   class << self

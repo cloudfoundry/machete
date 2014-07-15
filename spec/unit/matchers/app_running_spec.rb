@@ -2,27 +2,24 @@ require 'spec_helper'
 require 'machete/matchers'
 
 describe '#be_running' do
-  let(:app_info) { double(:app_info) }
   let(:app) { Machete::App.new('app_name', nil) }
+  let(:app_status) { double(:app_status) }
 
   before do
-    allow(Machete::CF::AppInfo).
+    allow(Machete::AppStatus).
       to receive(:new).
-           with(app).
-           and_return(app_info)
-
-    allow(app_info).
-      to receive(:instance_count).
-           and_return(instance_count)
+           and_return(app_status)
   end
 
   context 'app is running' do
-    let(:instance_count) { 1 }
-
     before do
-      allow(app_info).
-        to receive(:instance_count).
-             and_return 0, 0, 0, instance_count
+      allow(app_status).
+        to receive(:execute).
+             with(app).
+             and_return(
+             Machete::AppStatus::UNKNOWN,
+             Machete::AppStatus::RUNNING
+           )
     end
 
     specify do
@@ -30,17 +27,19 @@ describe '#be_running' do
     end
   end
 
-  context 'app is not running' do
-    let(:instance_count) { 0 }
-
+  context 'app has failed' do
     before do
-      allow(app_info).
-        to receive(:instance_count).
-             and_return instance_count
+      allow(app_status).
+        to receive(:execute).
+             with(app).
+             and_return(
+             Machete::AppStatus::UNKNOWN,
+             Machete::AppStatus::STAGING_FAILED,
+           )
     end
 
-    specify 'with a timeout provided' do
-      expect(app).not_to be_running(0.1)
+    specify do
+      expect(app).not_to be_running
     end
   end
 end
