@@ -2,6 +2,10 @@
 
 set -e
 
+trap 'echo "error in buildpack-build ${BASH_SOURCE} ${LINENO}"' ERR
+
+BUILDPACK_FILE_PATTERN="*_buildpack*.zip"
+
 mode=$1
 rspec_options=$2
 
@@ -26,23 +30,26 @@ fi
 
 $VAGRANT_CWD/scripts/add-route
 
-language=$(echo $(basename `git config --get remote.origin.url`) | rev | cut -d- -f1 | rev | cut -d. -f1)
-
-echo -e "\n******* Packaging $mode buildpack for $language"
+echo -e "\n******* Packaging $mode buildpack"
 
 echo -e "\n******* Fetching CF CLI details"
 which cf
 cf --version
 
 echo -e "\n******* Building $mode package"
-rm -f ${language}_buildpack*.zip
+rm -f ${BUILDPACK_FILE_PATTERN}
 time ./bin/package $mode
 
+echo -e "\n******* Detecting language"
+language=$(ls ${BUILDPACK_FILE_PATTERN} | cut -d_ -f1)
+echo -e "Language detected: ${language}"
+
 echo -e "\n******* Creating buildpack on CF"
+
 cf api $api --skip-ssl-validation
 cf login -u admin -p admin -o pivotal -s integration
 cf delete-buildpack ${language}-test-buildpack -f
-cf create-buildpack ${language}-test-buildpack ${language}_buildpack*.zip 1 --enable
+cf create-buildpack ${language}-test-buildpack ${BUILDPACK_FILE_PATTERN} 1 --enable
 
 echo -e "\n******* Configuring RVM"
 export PATH=/Users/pivotal/.rvm/bin:$PATH
