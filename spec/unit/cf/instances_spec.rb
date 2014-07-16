@@ -42,7 +42,7 @@ module Machete
 
         specify do
           instances = instances_command.execute
-          expect(instances).to be_nil
+          expect(instances).to eql []
           expect(instances_command.error).to eql 'CF-ErrorCode'
         end
       end

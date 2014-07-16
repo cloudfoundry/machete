@@ -8,7 +8,7 @@ module Machete
       end
 
       def execute
-        return nil if error_occurred?
+        return [] if error_occurred?
 
         instances
       end
