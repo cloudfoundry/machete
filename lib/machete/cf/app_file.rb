@@ -12,7 +12,7 @@ module Machete
 
       def has_file?(filename)
         file(filename)
-        $?.exitstatus == 0
+        $?.success?
       end
 
       private
