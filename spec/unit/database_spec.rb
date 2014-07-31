@@ -16,7 +16,7 @@ module Machete
       before do
         allow(SystemHelper).
           to receive(:run_cmd).
-               with("PGPASSWORD=#{password} psql -U #{username} -h #{host} -p #{port} -d postgres -c \"DROP DATABASE #{name}\"")
+               with("PGPASSWORD=#{password} psql -U #{username} -h #{host} -p #{port} -d postgres -c \"DROP DATABASE IF EXISTS #{name}\"")
       end
 
       specify do

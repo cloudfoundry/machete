@@ -23,7 +23,7 @@ module Machete
                 :server
 
     def drop_database_command
-      "DROP DATABASE #{database_name}"
+      "DROP DATABASE IF EXISTS #{database_name}"
     end
 
     def create_database_command
