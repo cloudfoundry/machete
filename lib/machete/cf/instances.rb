@@ -19,7 +19,9 @@ module Machete
 
       private
 
-      attr_reader :app
+      def app
+        @app
+      end
 
       def cf_response
         @cf_response ||= JSON.parse instances_command

@@ -19,8 +19,13 @@ module Machete
 
     private
 
-    attr_reader :database_name,
-                :server
+    def database_name
+      @database_name
+    end
+
+    def server
+      @server
+    end
 
     def drop_database_command
       "DROP DATABASE IF EXISTS #{database_name}"
