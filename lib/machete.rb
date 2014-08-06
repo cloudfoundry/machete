@@ -10,6 +10,7 @@ require 'machete/vendor_dependencies'
 require 'machete/setup_app'
 require 'machete/database'
 require 'machete/app_status'
+require 'machete/browser'
 
 module Machete
   class << self
