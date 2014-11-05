@@ -1,5 +1,6 @@
 #!/bin/bash --login
 
+./scripts/online_api
 ./scripts/offline_api
 ./scripts/setup_databases
 
