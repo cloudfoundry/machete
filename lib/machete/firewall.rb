@@ -46,16 +46,21 @@ module Machete
       def add_on_premises_chain
         on_premises_chain = FilterChain.create('on-premises-firewall')
         on_premises_chain.append(return_on_packets_to_dns)
+        on_premises_chain.append(return_on_packets_to_google_dns)
         on_premises_chain.append(return_on_packets_from_mac)
         on_premises_chain.append(log_all_packets)
         on_premises_chain.append(rejects_all_packets)
 
-        warden_forward_chain = FilterChain.new('warden-forward')
+        warden_forward_chain = FilterChain.new('w--forward')
         warden_forward_chain.insert(2,firewall_packets_not_destined_for_cf_machines)
       end
 
       def return_on_packets_to_dns
         "-d #{dns_addr} -j RETURN"
+      end
+
+      def return_on_packets_to_google_dns
+        "-d #{google_dns_addr} -j RETURN"
       end
 
       def return_on_packets_from_mac
@@ -75,11 +80,15 @@ module Machete
       end
 
       def cf_subnet
-        '10.245.0.0/19'
+        '10.244.1.0/24'
       end
 
       def mac_subnet
         '192.168.100.0/24'
+      end
+
+      def google_dns_addr
+        '8.8.8.8/32'
       end
 
       def dns_addr
