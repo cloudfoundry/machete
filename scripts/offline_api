@@ -1,7 +1,0 @@
-#!/bin/bash -l
-
-cf api api.10.244.1.34.xip.io --skip-ssl-validation
-cf login -u admin -p admin -o pivotal -s integration
-cf create-org pivotal
-cf create-space integration -o pivotal
-cf target -o pivotal -s integration
