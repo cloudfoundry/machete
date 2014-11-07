@@ -20,6 +20,12 @@ module Machete
       app
     end
 
+    # Pushes an existing app again
+    def push(app)
+      deployer.execute(app, push_only: true)
+    end
+
+
     def logger
       @logger ||= Machete::Logger.new(STDOUT)
     end

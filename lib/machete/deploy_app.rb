@@ -4,20 +4,20 @@ require 'machete/cf/delete_app'
 
 module Machete
   class DeployApp
-    def execute(app)
-      clear_internet_access_log(app)
-      delete_app.execute(app)
-      vendor_dependencies.execute(app)
-
-      if app.needs_setup?
-        push_app.execute(app, start: false)
-        setup_app.execute(app)
-      end
+    def execute(app, push_only: false)
+      prepare_push(app) unless push_only
 
       push_app.execute(app)
     end
 
     private
+
+    def prepare_push(app)
+      clear_internet_access_log(app)
+      delete_app.execute(app)
+      vendor_dependencies.execute(app)
+      setup_app(app)
+    end
 
     def delete_app
       CF::DeleteApp.new
@@ -27,8 +27,10 @@ module Machete
       CF::PushApp.new
     end
 
-    def setup_app
-      SetupApp.new
+    def setup_app(app)
+      return unless app.needs_setup?
+      push_app.execute(app, start: false)
+      SetupApp.new.execute(app)
     end
 
     def clear_internet_access_log(app)

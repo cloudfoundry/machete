@@ -1,19 +1,21 @@
 require 'spec_helper'
 
 describe Machete do
+  let(:app) { double(:app) }
+  let(:deploy_app) { double(:deploy_app) }
+
+  before do
+    allow(Machete::DeployApp).
+      to receive(:new).
+           with(no_args).
+           and_return deploy_app
+  end
 
   describe '.deploy_app' do
-    let(:app) { double(:app) }
     let(:path) { 'path/to/app_name' }
-    let(:deploy_app) { double(:deploy_app) }
     let(:host) { double(:host) }
 
     before do
-      allow(Machete::DeployApp).
-        to receive(:new).
-             with(no_args).
-             and_return deploy_app
-
       allow(Machete::Host).
         to receive(:new).
              and_return(host)
@@ -53,6 +55,19 @@ describe Machete do
         expect(result).to eql app
         expect(deploy_app).to have_received(:execute)
       end
+    end
+  end
+
+  describe '.push' do
+    before do
+      allow(deploy_app).
+        to receive(:execute).
+             with(app, push_only: true)
+    end
+
+    specify do
+      Machete.push(app)
+      expect(deploy_app).to have_received(:execute).with(app, push_only: true)
     end
   end
 end
