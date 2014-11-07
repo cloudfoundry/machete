@@ -7,7 +7,7 @@ __parse_arguments() {
 }
 
 __check_usage() {
-  if [ ${number_of_arguments} -ne 1 ] || ([ $mode != "online" ] && [ $mode != "offline" ]); then
+  if [ ${number_of_arguments} -ne 1 ] || ([ "$mode" != "online" ] && [ "$mode" != "offline" ]); then
     echo "Usage:"
     echo "  $0 online|offline"
     exit 1
@@ -15,7 +15,7 @@ __check_usage() {
 }
 
 __target_api() {
-  if [ $mode = "online" ]; then
+  if [ "$mode" = "online" ]; then
       cf api api.10.244.0.34.xip.io --skip-ssl-validation
   else
       cf api api.10.244.1.34.xip.io --skip-ssl-validation
@@ -37,7 +37,7 @@ __reset_postgres_security_groups() {
 }
 
 __ensure_firewall_for_offline() {
-  if [ $mode = "offline" ]; then
+  if [ "$mode" = "offline" ]; then
     bundle
     VAGRANT_CWD=$HOME/workspace/bosh-lite-2nd-instance bundle exec ./scripts/enable_bosh_enterprise_firewall.rb
   fi
@@ -52,7 +52,7 @@ __create_database_users() {
 }
 
 __target_bosh() {
-  if [ $mode = "online" ]; then
+  if [ "$mode" = "online" ]; then
     cd $HOME/workspace/bosh-lite
     bosh target 192.168.50.4
   else
