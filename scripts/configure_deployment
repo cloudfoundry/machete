@@ -14,6 +14,12 @@ __check_usage() {
   fi
 }
 
+__ensure_space() {
+  cf create-org pivotal
+  cf create-space integration -o pivotal
+  cf target -o pivotal -s integration
+}
+
 __target_api() {
   if [ "$mode" = "online" ]; then
       cf api api.10.244.0.34.xip.io --skip-ssl-validation
@@ -32,19 +38,30 @@ __target_api() {
   fi
 }
 
-__ensure_space() {
-  cf create-org pivotal
-  cf create-space integration -o pivotal
-  cf target -o pivotal -s integration
+__target_bosh() {
+  set +e
+  if [ "$mode" = "online" ]; then
+    bosh target 192.168.50.4
+    bosh login admin admin
+    bosh deployment ../bosh-lite/manifests/cf-manifest.yml
+  else
+    bosh target 192.168.100.4
+    bosh login admin admin
+    bosh deployment ../bosh-lite-2nd-instance/manifests/cf-manifest.yml
+  fi
+  set -e
 }
 
 __reset_postgres_security_groups() {
+  __target_api
   cf delete-security-group postgres-access -f
   cf create-security-group postgres-access "./scripts/assets/${mode}_postgres_security_group.json"
   cf bind-security-group postgres-access pivotal integration
 }
 
 __ensure_firewall_for_offline() {
+  __target_bosh
+
   if [ "$mode" = "offline" ]; then
     bundle
     VAGRANT_CWD=$HOME/workspace/bosh-lite-2nd-instance bundle exec ./scripts/enable_bosh_enterprise_firewall.rb
@@ -52,6 +69,8 @@ __ensure_firewall_for_offline() {
 }
 
 __create_database_users() {
+  __target_bosh
+
   postgres_path_command="postgres_path=\`find /var/vcap/data/packages/postgres/*/ -name bin\`"
   change_path_command="PATH=\$postgres_path:\$PATH"
   create_machete_user_command="psql -h 0.0.0.0 -U vcap -p 5524 -d postgres -c \"create user machete with encrypted password 'machete' SUPERUSER\""
@@ -59,26 +78,10 @@ __create_database_users() {
   bosh ssh --gateway_user vcap postgres_z1 0 --default_password p "$postgres_path_command;$change_path_command;$create_machete_user_command;$create_buildpacks_user_command"
 }
 
-__target_bosh() {
-  set +e
-  if [ "$mode" = "online" ]; then
-    cd $HOME/workspace/bosh-lite
-    bosh target 192.168.50.4
-  else
-    cd $HOME/workspace/bosh-lite-2nd-instance
-    bosh target 192.168.100.4
-  fi
-  set -e
-  bosh login admin admin
-}
 
 __parse_arguments $@
 __check_usage
-__target_api
-__ensure_space
+
 __reset_postgres_security_groups
-
 __ensure_firewall_for_offline
-
-__target_bosh
 __create_database_users
