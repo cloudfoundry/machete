@@ -3,4 +3,3 @@ set -eo pipefail
 
 ./scripts/configure_deployment online
 ./scripts/configure_deployment offline
-./scripts/setup_databases
