@@ -21,7 +21,15 @@ __target_api() {
       cf api api.10.244.1.34.xip.io --skip-ssl-validation
   fi
 
+  set +e
   cf login -u admin -p admin -o pivotal -s integration
+
+  login_result=$?
+  set -e
+
+  if [ $login_result -ne 0 ]; then
+    __ensure_space
+  fi
 }
 
 __ensure_space() {
@@ -52,6 +60,7 @@ __create_database_users() {
 }
 
 __target_bosh() {
+  set +e
   if [ "$mode" = "online" ]; then
     cd $HOME/workspace/bosh-lite
     bosh target 192.168.50.4
@@ -59,7 +68,7 @@ __target_bosh() {
     cd $HOME/workspace/bosh-lite-2nd-instance
     bosh target 192.168.100.4
   fi
-
+  set -e
   bosh login admin admin
 }
 
