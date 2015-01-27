@@ -2,7 +2,19 @@ module Machete
   module CF
     class AppGuidFinder
       def execute(app)
-        extract_first_guid search(app.name)
+        num_retries = 0
+
+        begin
+          extract_first_guid search(app.name)
+        rescue
+          num_retries += 1
+          if num_retries < 3
+            sleep(1)
+            retry
+          else
+            raise
+          end
+        end
       end
 
       private
