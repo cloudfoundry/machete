@@ -1,19 +1,12 @@
+require 'rrrretry'
+
 module Machete
   module CF
     class AppGuidFinder
       def execute(app)
-        num_retries = 0
-
-        begin
+        3.times.retry do
+          sleep(1)
           extract_first_guid search(app.name)
-        rescue
-          num_retries += 1
-          if num_retries < 3
-            sleep(1)
-            retry
-          else
-            raise
-          end
         end
       end
 

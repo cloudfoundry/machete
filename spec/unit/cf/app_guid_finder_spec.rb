@@ -36,8 +36,8 @@ module Machete
         subject(:app_guid_finder) { AppGuidFinder.new }
 
         it "sleeps after each retry" do
-          expect(SystemHelper).to receive(:run_cmd).exactly(3).times.and_return('{}')
-          expect(app_guid_finder).to receive(:sleep).with(1).exactly(2).times
+          allow(SystemHelper).to receive(:run_cmd).and_return('{}')
+          expect(app_guid_finder).to receive(:sleep).with(1).exactly(3).times
           app_guid_finder.execute(app) rescue nil
         end
 
