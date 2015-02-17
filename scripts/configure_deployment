@@ -59,13 +59,10 @@ __reset_postgres_security_groups() {
   cf bind-security-group postgres-access pivotal integration
 }
 
-__ensure_firewall_for_offline() {
+__ensure_internet_traffic_logging() {
   __target_bosh
 
-  if [ "$mode" = "offline" ]; then
-    bundle
-    VAGRANT_CWD=$HOME/workspace/bosh-lite-2nd-instance bundle exec ./scripts/enable_bosh_enterprise_firewall.rb
-  fi
+  VAGRANT_CWD=$HOME/workspace/bosh-lite bundle exec ./scripts/enable_bosh_enterprise_firewall.rb
 }
 
 __create_database_users() {
@@ -83,5 +80,5 @@ __parse_arguments $@
 __check_usage
 
 __reset_postgres_security_groups
-__ensure_firewall_for_offline
+__ensure_internet_traffic_logging
 __create_database_users

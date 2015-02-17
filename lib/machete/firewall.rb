@@ -49,7 +49,7 @@ module Machete
         on_premises_chain.append(return_on_packets_to_google_dns)
         on_premises_chain.append(return_on_packets_from_mac)
         on_premises_chain.append(log_all_packets)
-        on_premises_chain.append(rejects_all_packets)
+        on_premises_chain.append(accepts_all_packets)
 
         warden_forward_chain = FilterChain.new('w--forward')
         warden_forward_chain.insert(2,firewall_packets_not_destined_for_cf_machines)
@@ -71,8 +71,8 @@ module Machete
         '-m limit --limit 5/min -j LOG --log-prefix "cf-to-internet-traffic: " --log-level 0'
       end
 
-      def rejects_all_packets
-        '-j REJECT'
+      def accepts_all_packets
+        '-j ACCEPT'
       end
 
       def firewall_packets_not_destined_for_cf_machines
@@ -80,11 +80,11 @@ module Machete
       end
 
       def cf_subnet
-        '10.244.1.0/24'
+        '10.244.0.0/24'
       end
 
       def mac_subnet
-        '192.168.100.0/24'
+        '192.168.50.0/24'
       end
 
       def google_dns_addr
