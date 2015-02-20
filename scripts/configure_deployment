@@ -15,12 +15,16 @@ __check_usage() {
 }
 
 __ensure_space() {
+  echo "-----> Setting up org and space"
+  
   cf create-org pivotal
   cf create-space integration -o pivotal
   cf target -o pivotal -s integration
 }
 
 __target_api() {
+  echo "-----> Targetting CF API"
+  
   if [ "$mode" = "online" || "$mode" = "offline" ]; then
       cf api api.10.244.0.34.xip.io --skip-ssl-validation
   else
@@ -39,6 +43,8 @@ __target_api() {
 }
 
 __target_bosh() {
+  echo "-----> Targetting bosh"
+
   set +e
   if [ "$mode" = "online" ]; then
     bosh target 192.168.50.4
@@ -54,6 +60,9 @@ __target_bosh() {
 
 __reset_postgres_security_groups() {
   __target_api
+
+  echo "-----> Setting up security groups for PostgreSQL access"
+
   cf delete-security-group postgres-access -f
   cf create-security-group postgres-access "./scripts/assets/${mode}_postgres_security_group.json"
   cf bind-security-group postgres-access pivotal integration
@@ -62,11 +71,15 @@ __reset_postgres_security_groups() {
 __ensure_internet_traffic_logging() {
   __target_bosh
 
+  echo "-----> Setting up internet egress logging"
+
   VAGRANT_CWD=$HOME/workspace/bosh-lite bundle exec ./scripts/enable_bosh_enterprise_firewall.rb
 }
 
 __create_database_users() {
   __target_bosh
+
+  echo "-----> Creating database users"
 
   postgres_path_command="postgres_path=\`find /var/vcap/data/packages/postgres/*/ -name bin\`"
   change_path_command="PATH=\$postgres_path:\$PATH"
