@@ -4,5 +4,3 @@ ruby '2.1.1'
 
 # Specify your gem's dependencies in machete.gemspec
 gemspec
-
-gem 'rrrretry'
