@@ -16,7 +16,7 @@ __check_usage() {
 
 __ensure_space() {
   echo "-----> Setting up org and space"
-  
+
   cf create-org pivotal
   cf create-space integration -o pivotal
   cf target -o pivotal -s integration
@@ -24,11 +24,11 @@ __ensure_space() {
 
 __target_api() {
   echo "-----> Targetting CF API"
-  
+
   if [ "$mode" = "lucid" ]; then
-      cf api api.10.244.0.34.xip.io --skip-ssl-validation
+    cf api api.10.244.0.34.xip.io --skip-ssl-validation
   else
-      cf api api.10.244.1.34.xip.io --skip-ssl-validation
+    cf api api.10.244.1.34.xip.io --skip-ssl-validation
   fi
 
   set +e
@@ -73,7 +73,13 @@ __ensure_internet_traffic_logging() {
 
   echo "-----> Setting up internet egress logging"
 
-  VAGRANT_CWD=$HOME/workspace/bosh-lite bundle exec ./scripts/enable_bosh_enterprise_firewall.rb
+  if [ "$mode" = "trusty" ]; then
+    bundle
+    VAGRANT_CWD=$HOME/workspace/bosh-lite-trusty bundle exec ./scripts/enable_bosh_enterprise_firewall.rb
+  else
+    bundle
+    VAGRANT_CWD=$HOME/workspace/bosh-lite bundle exec ./scripts/enable_bosh_enterprise_firewall.rb
+  fi
 }
 
 __create_database_users() {

@@ -80,11 +80,19 @@ module Machete
       end
 
       def cf_subnet
-        '10.244.0.0/24'
+        if ENV['VAGRANT_CWD'].include? 'trusty'
+          '10.244.1.0/24'
+        else
+          '10.244.0.0/24'
+        end
       end
 
       def mac_subnet
-        '192.168.50.0/24'
+        if ENV['VAGRANT_CWD'].include? 'trusty'
+          '192.168.200.0/24'
+        else
+          '192.168.50.0/24'
+        end
       end
 
       def google_dns_addr
