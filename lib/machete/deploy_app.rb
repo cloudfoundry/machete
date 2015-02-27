@@ -34,7 +34,7 @@ module Machete
     end
 
     def clear_internet_access_log(app)
-      Host::Log.new(app.host).clear
+      app.host.create_log_manager.clear
     end
 
     def vendor_dependencies

@@ -36,7 +36,7 @@ module Machete
       end
 
       def filter_internet_traffic_to_file(path)
-        host = Machete::Host::Vagrant.new
+        host = Machete::Host.create
         host.run("echo :msg,contains,\\\"cf-to-internet-traffic: \\\" #{path} | sudo tee /etc/rsyslog.d/10-cf-internet.conf")
         host.run("sudo restart rsyslog")
       end

@@ -23,7 +23,8 @@ module Machete
     subject(:deploy_app) { DeployApp.new }
 
     describe '#execute' do
-      let(:host_log) { double(:host_log, clear: true) }
+      let(:log_manager) { double(:log_manager, clear: true) }
+
 
       context 'full deploy of app' do
         before do
@@ -35,10 +36,9 @@ module Machete
             to receive(:execute).
                  with(app)
 
-          allow(Host::Log).
-            to receive(:new).
-                 with(host).
-                 and_return host_log
+          allow(host).
+            to receive(:create_log_manager).
+                 and_return(log_manager)
 
           allow(CF::DeleteApp).
             to receive(:new).
@@ -68,7 +68,7 @@ module Machete
         context 'clearing internet access log' do
           specify do
             deploy_app.execute(app)
-            expect(host_log).to have_received(:clear).ordered
+            expect(log_manager).to have_received(:clear).ordered
             expect(push_app).to have_received(:execute).ordered
           end
         end

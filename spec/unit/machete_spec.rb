@@ -31,6 +31,7 @@ describe Machete do
           to receive(:new).
                with(path, host, {}).
                and_return(app)
+        allow(Machete).to receive(:host).and_return(host)
       end
 
       specify do
@@ -48,6 +49,7 @@ describe Machete do
           to receive(:new).
                with(path, host, options).
                and_return(app)
+        allow(Machete).to receive(:host).and_return(host)
       end
 
       specify do
