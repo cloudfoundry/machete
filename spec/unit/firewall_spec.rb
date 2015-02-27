@@ -9,7 +9,7 @@ module Machete
 
       before do
         allow(Machete).to receive(:logger).and_return(double.as_null_object)
-        allow(Host).to receive(:new).and_return(host)
+        allow(Host::Vagrant).to receive(:new).and_return(host)
       end
 
       specify do

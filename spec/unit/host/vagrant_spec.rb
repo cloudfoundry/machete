@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 module Machete
-  describe Host do
+  describe Host::Vagrant do
 
-    subject(:host) { Host.new }
+    subject(:host) { Host::Vagrant.new }
 
     context 'when VAGRANT_CWD is set' do
       before do
@@ -32,7 +32,7 @@ module Machete
       specify do
         expect do
           host.run('command')
-        end.to raise_error(VagrantCWDMissingError)
+        end.to raise_error(Host::VagrantCWDMissingError)
       end
     end
   end

@@ -41,7 +41,7 @@ module Machete
     end
 
     def host
-      Host.new
+      Host::Vagrant.new
     end
   end
 end

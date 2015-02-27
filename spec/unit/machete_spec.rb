@@ -16,7 +16,7 @@ describe Machete do
     let(:host) { double(:host) }
 
     before do
-      allow(Machete::Host).
+      allow(Machete::Host::Vagrant).
         to receive(:new).
              and_return(host)
 

@@ -1,5 +1,5 @@
 module Machete
-  class Host
+  module Host
     class Log
       attr_reader :host
 
