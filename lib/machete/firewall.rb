@@ -7,19 +7,23 @@ module Machete
     end
 
     def append(rule)
-      host = Machete::Host::Vagrant.new
       host.run("sudo iptables -t filter -A #{name} #{rule}")
     end
 
     def insert(position, rule)
-      host = Machete::Host::Vagrant.new
       host.run("sudo iptables -t filter -I #{name} #{position} #{rule}")
     end
 
     def self.create(name)
-      host = Machete::Host::Vagrant.new
+      host = Machete::Host.create
       host.run("sudo iptables -t filter -N #{name}")
       self.new(name)
+    end
+
+    private
+
+    def host
+      Machete::Host.create
     end
   end
 
@@ -36,7 +40,6 @@ module Machete
       end
 
       def filter_internet_traffic_to_file(path)
-        host = Machete::Host.create
         host.run("echo :msg,contains,\\\"cf-to-internet-traffic: \\\" #{path} | sudo tee /etc/rsyslog.d/10-cf-internet.conf")
         host.run("sudo restart rsyslog")
       end
@@ -100,12 +103,10 @@ module Machete
       end
 
       def dns_addr
-        host = Machete::Host::Vagrant.new
         @dns_addr ||= host.run("sudo ip -f inet addr | grep eth0 | grep inet").split(" ")[1].gsub(/\d+\/\d+$/, "0/24")
       end
 
       def save_iptables
-        host = Machete::Host::Vagrant.new
         host.run("test -f #{iptables_file}")
         if $?.exitstatus == 0
           Machete.logger.info "Found existing #{iptables_file}"
@@ -118,13 +119,16 @@ module Machete
       end
 
       def restore_iptables
-        host = Machete::Host::Vagrant.new
         Machete.logger.action "Restoring iptables from #{iptables_file}"
         host.run("sudo iptables-restore #{iptables_file}")
       end
 
       def iptables_file
         '/tmp/machete_iptables.ipt'
+      end
+
+      def host
+        Machete::Host.create
       end
     end
   end
