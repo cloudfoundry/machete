@@ -9,22 +9,8 @@ module Machete
       START_FENCEPOST = '---COMMAND START---'
       STOP_FENCEPOST = '---COMMAND STOP---'
 
-      def initialize()
-        super
-        @commands = []
-      end
-
       def create_log_manager
         Log.new(self)
-      end
-
-      def queue_command(command)
-        @commands << command
-      end
-
-      def run_queue
-        run(@commands.join('; '))
-        @commands = []
       end
 
       def run command
