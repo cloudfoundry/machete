@@ -2,9 +2,9 @@ module Machete
   class SetupApp
     def execute(app)
       if app.with_pg
-        database_server = server
-        reset_database(app, database_server)
-        insert_database_url!(app, database_server)
+        database_manager = database_manager(app)
+        reset_database(app, database_manager)
+        insert_database_url!(app, database_manager)
       end
 
       set_environment_variables(app)
@@ -12,20 +12,19 @@ module Machete
 
     private
 
-    def reset_database(app, database_server)
+    def reset_database(app, database_manager)
       database = Database.new(
         database_name: database_name(app),
-        server: database_server
+        database_manager: database_manager
       )
 
-      database.clear
       database.create
     end
 
-    def insert_database_url!(app, database_server)
+    def insert_database_url!(app, database_manager)
       app.env['DATABASE_URL'] = url_builder.execute(
         database_name: database_name(app),
-        server: database_server
+        database_manager: database_manager
       )
     end
 
@@ -37,8 +36,8 @@ module Machete
       app.name
     end
 
-    def server
-      Database::Server.new
+    def database_manager(app)
+      @database_manager ||= app.host.create_db_manager
     end
 
     def url_builder

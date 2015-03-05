@@ -1,6 +1,6 @@
 require 'bundler'
 require 'machete/host/vagrant/log'
-
+require 'machete/host/vagrant/db'
 
 module Machete
   module Host
@@ -17,13 +17,17 @@ module Machete
 
         result = ''
         Bundler.with_clean_env do
-          result = `vagrant ssh -c '#{command}' 2>&1`
+          result = SystemHelper.run_cmd "vagrant ssh -c '#{command}' 2>&1"
         end
         result
       end
 
       def create_log_manager
         Log.new(self)
+      end
+
+      def create_db_manager
+        DB.new(self)
       end
 
       private

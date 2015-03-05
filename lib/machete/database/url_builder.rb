@@ -1,8 +1,8 @@
 module Machete
   class Database
     class UrlBuilder
-      def execute(database_name:, server:)
-        "#{server.type}://#{username}:#{password}@#{server.host}:#{server.port}/#{database_name}"
+      def execute(database_name:, database_manager:)
+        "#{database_manager.type}://#{username}:#{password}@#{database_manager.hostname}:#{database_manager.port}/#{database_name}"
       end
 
       private

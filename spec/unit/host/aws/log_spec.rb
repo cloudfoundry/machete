@@ -7,7 +7,9 @@ module Machete::Host
 
     describe '#contents' do
       before do
-        allow(host).to receive(:run).with('echo p | sudo -S cat /var/log/messages').and_return('some logging')
+        allow(host).to receive(:run)
+          .with('echo p | sudo -S cat /var/log/messages', :runner_z1)
+          .and_return('some logging', :runner_z1)
       end
 
       specify do
@@ -18,7 +20,7 @@ module Machete::Host
     describe '#logged_internet_traffic?' do
       before do
         allow(host).to receive(:run)
-                         .with('echo p | sudo -S cat /var/log/messages')
+                         .with('echo p | sudo -S cat /var/log/messages', :runner_z1)
                          .and_return(result)
       end
 
@@ -49,7 +51,7 @@ module Machete::Host
         expect(host).to have_received(:run).with([
                                                    "echo p | sudo -S rm /var/log/messages",
                                                    "echo p | sudo -S restart rsyslog"
-                                                 ])
+                                                 ], :runner_z1)
       end
     end
   end

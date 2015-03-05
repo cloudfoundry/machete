@@ -11,11 +11,11 @@ module Machete
         end
 
         def contents
-          host.run cat_access_log_command
+          host.run cat_access_log_command, :runner_z1
         end
 
         def clear
-          host.run [remove_access_log_command, restart_syslog_command]
+          host.run [remove_access_log_command, restart_syslog_command], :runner_z1
         end
 
         def logged_internet_traffic?

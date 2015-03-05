@@ -3,7 +3,8 @@ require 'spec_helper'
 module Machete
   describe SetupApp do
     let(:database) { double(:database) }
-    let(:app) { double(:app, name: app_name, with_pg: with_pg, env: env) }
+    let(:host) { double(:host) }
+    let(:app) { double(:app, host: host, name: app_name, with_pg: with_pg, env: env) }
     let(:app_name) { double(:app_name) }
     let(:env) { double(:env) }
     let(:database_url) { double(:database_url) }
@@ -37,17 +38,17 @@ module Machete
 
     context 'app requires database' do
       let(:with_pg) { true }
-      let(:database_server) { double(:database_server) }
+      let(:database_manager) { double(:database_manager) }
       let(:url_builder) { double(:url_builder) }
 
       before do
-        allow(Database::Server).
-          to receive(:new).
-               and_return(database_server)
+        allow(app.host).
+          to receive(:create_db_manager).
+               and_return(database_manager)
 
         allow(Database).
           to receive(:new).
-               with(database_name: app_name, server: database_server).
+               with(database_name: app_name, database_manager: database_manager).
                and_return(database)
 
         allow(database).
@@ -64,7 +65,7 @@ module Machete
 
         allow(url_builder).
           to receive(:execute).
-               with(database_name: app_name, server: database_server).
+               with(database_name: app_name, database_manager: database_manager).
                and_return(database_url)
 
         allow(env).
@@ -74,9 +75,6 @@ module Machete
 
       specify do
         setup_app.execute(app)
-
-        expect(database).
-          to have_received(:clear)
 
         expect(database).
           to have_received(:create)

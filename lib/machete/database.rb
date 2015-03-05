@@ -1,20 +1,18 @@
-require 'machete/database/server'
 require 'machete/database/url_builder'
 require 'machete/database/settings'
 
 module Machete
   class Database
-    def initialize(database_name:, server:)
+    def initialize(database_name:, database_manager:)
       @database_name = database_name
-      @server = server
-    end
-
-    def clear
-      SystemHelper.run_cmd psql(drop_database_command)
+      @database_manager = database_manager
     end
 
     def create
-      SystemHelper.run_cmd psql(create_database_command)
+      @database_manager.run [
+        psql(drop_database_command),
+        psql(create_database_command)
+      ].join("; ")
     end
 
     private
@@ -23,16 +21,12 @@ module Machete
       @database_name
     end
 
-    def server
-      @server
-    end
-
     def drop_database_command
-      "DROP DATABASE IF EXISTS #{database_name}"
+      "DROP DATABASE IF EXISTS #{database_name};"
     end
 
     def create_database_command
-      "CREATE DATABASE #{database_name} WITH OWNER #{Settings.user_name}"
+      "CREATE DATABASE #{database_name} WITH OWNER #{Settings.user_name};"
     end
 
     def psql(sql)
@@ -45,15 +39,15 @@ module Machete
     end
 
     def host
-      server.host
+      @database_manager.hostname
     end
 
     def port
-      server.port
+      @database_manager.port
     end
 
     def connecting_database
-      'postgres'
+      @database_manager.type
     end
   end
 end
