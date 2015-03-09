@@ -3,8 +3,9 @@ require 'spec_helper'
 module Machete
   module CF
     describe PushApp do
-      let(:app) { double(:app, name: 'app_name', src_directory: 'path/to/src', start_command: start_command) }
+      let(:app) { double(:app, name: 'app_name', src_directory: 'path/to/src', start_command: start_command, stack: stack) }
       let(:start_command) { nil }
+      let(:stack) { nil }
 
       subject(:push_app) { PushApp.new }
 
@@ -44,6 +45,19 @@ module Machete
 
         before do
           allow(SystemHelper).to receive(:run_cmd).with('cf push app_name -c \'start_command\'')
+        end
+
+        specify do
+          push_app.execute(app)
+          expect(SystemHelper).to have_received(:run_cmd)
+        end
+      end
+
+      context 'app has a stack' do
+        let(:stack) { 'stack' }
+
+        before do
+          allow(SystemHelper).to receive(:run_cmd).with('cf push app_name -s stack')
         end
 
         specify do

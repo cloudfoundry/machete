@@ -7,7 +7,8 @@ module Machete
                 :host,
                 :start_command,
                 :env,
-                :with_pg
+                :with_pg,
+                :stack
 
     def initialize path, host, options = {}
       @path = path
@@ -17,6 +18,7 @@ module Machete
       @start_command = options[:start_command]
       @with_pg = options[:with_pg]
       @env = options.fetch(:env, {})
+      @stack = ENV['CF_STACK']
     end
 
     def src_directory
