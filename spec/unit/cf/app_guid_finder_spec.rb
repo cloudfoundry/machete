@@ -59,6 +59,7 @@ module Machete
           end
 
           it "returns an error" do
+            allow(SystemHelper).to receive(:run_cmd).and_return('{}')
             allow(app_guid_finder).to receive(:sleep)
             expect {
               app_guid_finder.execute(app)
