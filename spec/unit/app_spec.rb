@@ -70,6 +70,30 @@ module Machete
           expect(app.stack).to eql 'cflinuxfs2'
         end
       end
+
+      context 'when the stack is passed as an argument' do
+        let(:options) { { stack: 'my_stack' } }
+
+        it 'returns the value' do
+          expect(app.stack).to eql 'my_stack'
+        end
+      end
+    end
+
+    describe '#buildpack' do
+      context 'when the buildpack is passed as an argument' do
+        let(:options) { {buildpack: 'my_buildpack'} }
+
+        it 'return the value' do
+          expect(app.buildpack).to eq 'my_buildpack'
+        end
+      end
+
+      context 'when the buildpack is not passed as an argument' do
+        it 'returns nil' do
+          expect(app.buildpack).to eq nil
+        end
+      end
     end
   end
 end

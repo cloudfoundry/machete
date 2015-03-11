@@ -3,9 +3,16 @@ require 'spec_helper'
 module Machete
   module CF
     describe PushApp do
-      let(:app) { double(:app, name: 'app_name', src_directory: 'path/to/src', start_command: start_command, stack: stack) }
+      let(:app) do
+        double(:app, name: 'app_name',
+               src_directory: 'path/to/src', 
+               start_command: start_command, 
+               stack: stack, 
+               buildpack: buildpack)
+      end
       let(:start_command) { nil }
       let(:stack) { nil }
+      let(:buildpack) { nil }
 
       subject(:push_app) { PushApp.new }
 
@@ -62,6 +69,19 @@ module Machete
 
         specify do
           expect(SystemHelper).to receive(:run_cmd).with('cf push app_name -s stack')
+          push_app.execute(app)
+        end
+      end
+
+      context 'app has a buildpack' do
+        let(:buildpack) { 'my_buildpack' }
+
+        before do
+          allow(SystemHelper).to receive(:run_cmd)
+        end
+
+        specify do
+          expect(SystemHelper).to receive(:run_cmd).with('cf push app_name -b my_buildpack')
           push_app.execute(app)
         end
       end

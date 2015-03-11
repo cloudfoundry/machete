@@ -24,6 +24,10 @@ module Machete
           base_command += " -c '#{app.start_command}'"
         end
 
+        if app.buildpack
+          base_command += " -b #{app.buildpack}"
+        end
+
         return base_command
       end
 

@@ -2,13 +2,14 @@ module Machete
   class App
     FIXTURES_DIR = 'cf_spec/fixtures'
 
-    attr_reader :name,
-                :path,
-                :host,
-                :start_command,
+    attr_reader :buildpack,
                 :env,
-                :with_pg,
-                :stack
+                :host,
+                :name,
+                :path,
+                :stack,
+                :start_command,
+                :with_pg
 
     def initialize path, host, options = {}
       @path = path
@@ -18,7 +19,8 @@ module Machete
       @start_command = options[:start_command]
       @with_pg = options[:with_pg]
       @env = options.fetch(:env, {})
-      @stack = ENV['CF_STACK']
+      @stack = options[:stack] || ENV['CF_STACK']
+      @buildpack = options[:buildpack]
     end
 
     def src_directory
