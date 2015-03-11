@@ -17,12 +17,14 @@ module Machete
         end
 
         unless start
-          return base_command + ' --no-start'
+          base_command += ' --no-start'
         end
 
         if app.start_command
-          return base_command + " -c '#{app.start_command}'"
+          base_command += " -c '#{app.start_command}'"
         end
+
+        return base_command
       end
 
       def base_command(app)
