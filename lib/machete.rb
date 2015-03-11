@@ -1,7 +1,6 @@
 require 'machete/logger'
 require 'machete/deploy_app'
 require 'machete/app'
-require 'machete/buildpack_uploader'
 require 'machete/buildpack_mode'
 require 'machete/firewall'
 require 'machete/cf'
