@@ -63,10 +63,7 @@ module Machete
           expect(app.stack).to eql 'lucid64'
         end
       end
-    end
 
-    describe '#stack' do
-      let(:app) { App.new('path/to/example_app', host, options) }
       context 'when CF_STACK is cflinuxfs2' do
         specify do
           allow(ENV).to receive(:[]).with('CF_STACK').and_return('cflinuxfs2')
