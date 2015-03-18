@@ -117,11 +117,11 @@ __ensure_internet_traffic_logging() {
 
   if [ "$deployment" == "lucid" ]; then
     __indent " with lucid BOSH Lite environment"
-    export VAGRANT_CWD=$HOME/workspace/bosh-lite-trusty
+    export VAGRANT_CWD=$HOME/workspace/bosh-lite 
     bundle exec ./scripts/enable_bosh_lite_enterprise_firewall.rb
   elif [ "$deployment" == "trusty" ]; then
-    __indent " with lucid BOSH Lite environment"
-    export VAGRANT_CWD=$HOME/workspace/bosh-lite 
+    __indent " with trusty BOSH Lite environment"
+    export VAGRANT_CWD=$HOME/workspace/bosh-lite-trusty
     bundle exec ./scripts/enable_bosh_lite_enterprise_firewall.rb
   else
     __indent " with AWS deployment"
