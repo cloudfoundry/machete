@@ -1,5 +1,7 @@
 require 'rspec'
 require 'machete'
+require 'machete/matchers'
+require 'timecop'
 
 RSpec.configure do |config|
   config.order = :random

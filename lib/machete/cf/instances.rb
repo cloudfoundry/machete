@@ -14,6 +14,7 @@ module Machete
       end
 
       def error
+        return 'NoAppGUID' if app_guid.nil?
         cf_response['error_code']
       end
 
@@ -28,7 +29,7 @@ module Machete
       end
 
       def error_occurred?
-        cf_response.has_key?('error_code')
+        app_guid.nil? || cf_response.has_key?('error_code')
       end
 
       def instances

@@ -20,6 +20,7 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 2.0'
 
   spec.add_development_dependency 'bundler', '~> 1.6'
+  spec.add_development_dependency 'timecop'
 
   spec.add_runtime_dependency 'rspec'
   spec.add_runtime_dependency 'rrrretry'

@@ -4,16 +4,13 @@ module Machete
   module CF
     class AppGuidFinder
       def execute(app)
-        3.times.retry do
-          sleep(1)
-          extract_first_guid search(app.name)
-        end
+        extract_first_guid search(app.name)
       end
 
       private
 
       def extract_first_guid(response)
-        response['resources'].first['metadata']['guid']
+        response['resources'].first['metadata']['guid'] rescue nil
       end
 
       def search(app_name)

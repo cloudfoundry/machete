@@ -11,6 +11,7 @@ RSpec::Matchers.define :be_running do |timeout = 30|
       status = app_status.execute(app)
       return false if status == Machete::AppStatus::STAGING_FAILED
       return true if status == Machete::AppStatus::RUNNING
+      Kernel.sleep(1)
     end
 
     return false
