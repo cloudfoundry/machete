@@ -1,5 +1,3 @@
-require 'rrrretry'
-
 module Machete
   module CF
     class AppGuidFinder

@@ -3,8 +3,6 @@ PATH
   specs:
     machete (0.0.3)
       httparty
-      rrrretry
-      rspec
 
 GEM
   remote: https://rubygems.org/
@@ -15,7 +13,6 @@ GEM
       multi_xml (>= 0.5.2)
     json (1.8.2)
     multi_xml (0.5.5)
-    rrrretry (1.0.0)
     rspec (3.2.0)
       rspec-core (~> 3.2.0)
       rspec-expectations (~> 3.2.0)
@@ -37,4 +34,5 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.6)
   machete!
+  rspec
   timecop
