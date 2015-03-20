@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    machete (0.0.2)
+    machete (0.0.3)
       httparty
       rrrretry
       rspec
