@@ -4,48 +4,43 @@ module Machete
   describe Browser do
 
     subject(:browser) { Browser.new(app) }
-    let(:app) { double(:app) }
+    let(:app) { double(:app, name: 'app') }
     let(:response) { double(:response, headers: headers) }
     let(:headers) { {} }
 
-    before do
-      allow(HTTParty).to receive(:get).
-                           and_return(response)
+    describe '#visit_path' do
+      it 'makes an HTTP request to the URI' do
+        expect(CF::CLI).to receive(:url_for_app).with(app).and_return('some.url')
+        expect(HTTParty).to receive(:get).with('http://some.url/flub')
 
-      allow(response).to receive(:body).
-                           and_return('<html><body>Hello, Test!</body></html>')
-
-      allow(CF::CLI).to receive(:url_for_app).
-                          with(app).
-                          and_return("some.url")
-    end
-
-    describe 'visiting the app url and path' do
-      specify do
         browser.visit_path('/flub')
-        expect(HTTParty).to have_received(:get).
-                              with("http://some.url/flub")
       end
     end
 
-    describe 'examining the body of the browser' do
-      specify do
-        browser.visit_path('/test')
-        expect(browser.body).to eql '<html><body>Hello, Test!</body></html>'
-      end
-    end
-
-    describe 'finding string in set-cookie headers' do
+    describe '#body' do
       before do
-        allow(HTTParty).to receive(:get).
-                              and_return(response)
+        allow(CF::CLI).to receive(:url_for_app)
+        allow(HTTParty).to receive(:get).and_return(response)
+      end
+
+      it 'returns the body of the request' do
+        expect(response).to receive(:body).and_return('Hello, World')
+        browser.visit_path('/test')
+        expect(browser.body).to eql 'Hello, World'
+      end
+    end
+
+    describe 'contains_cookie?' do
+      before do
+        allow(CF::CLI).to receive(:url_for_app)
+        allow(HTTParty).to receive(:get).and_return(response)
 
         browser.visit_path('unimportant')
       end
 
       context "a cookie string is not set" do
-        specify "should not find any cookie string" do
-          expect(browser.has_cookie_containing?("my-cookie-string")).to eql false
+        it "does not find any cookie string" do
+          expect(browser.contains_cookie?("my-cookie-string")).to eql false
         end
       end
 
@@ -55,11 +50,11 @@ module Machete
         end
 
         specify "and 'my-cookie-string' is in the set-cookie header" do
-          expect(browser.has_cookie_containing?("my-cookie-string")).to eql true
+          expect(browser.contains_cookie?("my-cookie-string")).to eql true
         end
 
         specify "and 'not-my-cookie-string' is not in the set-cookie header" do
-          expect(browser.has_cookie_containing?("not-my-cookie-string")).to eql false
+          expect(browser.contains_cookie?("not-my-cookie-string")).to eql false
         end
       end
     end

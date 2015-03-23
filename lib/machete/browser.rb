@@ -15,7 +15,7 @@ module Machete
       @response.body
     end
 
-    def has_cookie_containing?(search_string)
+    def contains_cookie?(search_string)
       return false unless set_cookie_headers
 
       set_cookie_headers.include?(search_string)
