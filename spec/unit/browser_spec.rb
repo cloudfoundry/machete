@@ -15,6 +15,27 @@ module Machete
 
         browser.visit_path('/flub')
       end
+
+      context 'with SocketError' do
+        before do
+          allow(CF::CLI).to receive(:url_for_app)
+          allow(browser).to receive(:sleep)
+        end
+
+        it 'retries the request three times' do
+          expect(HTTParty).to receive(:get).exactly(3).times.and_raise(SocketError)
+          expect {
+            browser.visit_path('/flub')
+          }.to raise_error(SocketError)
+        end
+
+        it 'returns on a successful request' do
+          expect(HTTParty).to receive(:get).twice.and_raise(SocketError)
+          expect(HTTParty).to receive(:get).once
+
+          browser.visit_path('/flub')
+        end
+      end
     end
 
     describe '#body' do

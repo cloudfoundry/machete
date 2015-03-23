@@ -7,8 +7,16 @@ module Machete
     end
 
     def visit_path(path)
-      base_url = CF::CLI.url_for_app(app)
-      @response = HTTParty.get("http://#{base_url}#{path}")
+      retries = 1
+      begin
+        base_url = CF::CLI.url_for_app(app)
+        @response = HTTParty.get("http://#{base_url}#{path}")
+      rescue SocketError
+        raise if retries == 3
+        retries += 1
+        sleep(0.5)
+        retry
+      end
     end
 
     def body
