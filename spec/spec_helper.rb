@@ -14,4 +14,8 @@ RSpec.configure do |config|
   config.mock_with :rspec do |mocks|
     mocks.syntax = :expect
   end
+
+  config.before do
+    allow(Kernel).to receive(:sleep)
+  end
 end
