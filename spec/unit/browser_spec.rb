@@ -5,25 +5,26 @@ module Machete
 
     subject(:browser) { Browser.new(app) }
     let(:app) { double(:app, name: 'app') }
-    let(:response) { double(:response, headers: headers) }
+    let(:response) { double(:response, headers: headers, code: 200) }
     let(:headers) { {} }
 
     describe '#visit_path' do
       it 'makes an HTTP request to the URI' do
         expect(CF::CLI).to receive(:url_for_app).with(app).and_return('some.url')
-        expect(HTTParty).to receive(:get).with('http://some.url/flub')
+        expect(HTTParty).to receive(:get).with('http://some.url/flub').and_return(response)
 
         browser.visit_path('/flub')
       end
 
-      context 'with SocketError' do
+      context 'when an exception occurs' do
         before do
           allow(CF::CLI).to receive(:url_for_app)
           allow(browser).to receive(:sleep)
         end
 
         it 'retries the request three times' do
-          expect(HTTParty).to receive(:get).exactly(3).times.and_raise(SocketError)
+          expect(HTTParty).to receive(:get).once.and_raise(HTTPStatusCodeError)
+          expect(HTTParty).to receive(:get).exactly(2).times.and_raise(SocketError)
           expect {
             browser.visit_path('/flub')
           }.to raise_error(SocketError)
@@ -31,9 +32,19 @@ module Machete
 
         it 'returns on a successful request' do
           expect(HTTParty).to receive(:get).twice.and_raise(SocketError)
-          expect(HTTParty).to receive(:get).once
+          expect(HTTParty).to receive(:get).once.and_return(response)
 
           browser.visit_path('/flub')
+        end
+
+        context 'when the HTTP response is not 200 OK' do
+          it 'raises an exception' do
+            expect(HTTParty).to receive(:get).exactly(3).times.and_return(double(:bad_response, code: 500))
+
+            expect {
+              browser.visit_path('/flub')
+            }.to raise_error(HTTPStatusCodeError)
+          end
         end
       end
     end
