@@ -1,5 +1,5 @@
 module Machete
-  HTTPStatusCodeError = Class.new(RuntimeError)
+  HTTPServerError = Class.new(RuntimeError)
 
   class Browser
     attr_reader :app
@@ -13,9 +13,10 @@ module Machete
       begin
         base_url = CF::CLI.url_for_app(app)
         @response = HTTParty.get("http://#{base_url}#{path}")
-        raise HTTPStatusCodeError unless @response.code == 200
-      rescue SocketError, HTTPStatusCodeError
-        raise if retries == 3
+
+        raise HTTPServerError.new("responded with error code #{@response.code}") if @response.code >= 500
+      rescue SocketError, HTTPServerError
+        raise if retries == 10
         retries += 1
         sleep(0.5)
         retry

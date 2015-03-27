@@ -22,9 +22,9 @@ module Machete
           allow(browser).to receive(:sleep)
         end
 
-        it 'retries the request three times' do
-          expect(HTTParty).to receive(:get).once.and_raise(HTTPStatusCodeError)
-          expect(HTTParty).to receive(:get).exactly(2).times.and_raise(SocketError)
+        it 'retries the request ten times' do
+          expect(HTTParty).to receive(:get).once.and_raise(HTTPServerError)
+          expect(HTTParty).to receive(:get).exactly(9).times.and_raise(SocketError)
           expect {
             browser.visit_path('/flub')
           }.to raise_error(SocketError)
@@ -37,13 +37,23 @@ module Machete
           browser.visit_path('/flub')
         end
 
-        context 'when the HTTP response is not 200 OK' do
+        context 'when the HTTP response is 50x status code' do
           it 'raises an exception' do
-            expect(HTTParty).to receive(:get).exactly(3).times.and_return(double(:bad_response, code: 500))
+            expect(HTTParty).to receive(:get).exactly(10).times.and_return(double(:bad_response, code: 500))
 
             expect {
               browser.visit_path('/flub')
-            }.to raise_error(HTTPStatusCodeError)
+            }.to raise_error(HTTPServerError)
+          end
+        end
+
+        context 'when the HTTP response is 40x status code' do
+          it 'does not raise an exception' do
+            expect(HTTParty).to receive(:get).once.and_return(double(:response, code: 400))
+
+            expect {
+              browser.visit_path('/flub')
+            }.to_not raise_error
           end
         end
       end
