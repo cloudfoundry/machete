@@ -15,7 +15,7 @@ module Machete
       @path = path
       @host = host
 
-      @name = path.split('/').last
+      @name = options[:name] || path.split('/').last
       @start_command = options[:start_command]
       @with_pg = options[:with_pg]
       @env = options.fetch(:env, {})

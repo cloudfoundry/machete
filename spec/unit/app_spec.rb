@@ -8,8 +8,16 @@ module Machete
     let(:app) { App.new('path/to/example_app', host, options) }
 
     describe '#name' do
-      specify do
+      it 'defaults to the last path' do
         expect(app.name).to eql 'example_app'
+      end
+
+      context 'when the name argument is passed' do
+        let(:options) { {name: 'my_new_app' } }
+
+        it 'sets the name' do
+          expect(app.name).to eql 'my_new_app'
+        end
       end
     end
 
