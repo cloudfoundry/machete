@@ -1,6 +1,6 @@
 require 'rspec/matchers'
 
-RSpec::Matchers.define :be_running do |timeout = 30|
+RSpec::Matchers.define :be_running do |timeout = 60|
   match do |app|
     app_status = Machete::AppStatus.new
 
