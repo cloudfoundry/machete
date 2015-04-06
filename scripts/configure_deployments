@@ -1,5 +1,0 @@
-#!/bin/bash --login
-set -eo pipefail
-
-./scripts/configure_deployment lucid
-./scripts/configure_deployment trusty

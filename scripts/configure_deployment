@@ -2,7 +2,6 @@
 set -eo pipefail
 
 __parse_arguments() {
-  number_of_arguments=$#
   deployment=${1:-''}
 }
 
@@ -12,9 +11,9 @@ __indent() {
 }
 
 __check_usage() {
-  if [ ${number_of_arguments} -ne 1 ]; then
+  if [ "$deployment" == "--help" ]; then
     echo "Usage:"
-    echo "  $0 lucid|trusty|deployment_name"
+    echo "  $0 [deployment_name]"
     exit 1
   fi
 }
@@ -39,13 +38,9 @@ __target_api() {
 
   set +e
 
-  if [ "$deployment" == "lucid" ]; then
-    __indent " with lucid BOSH Lite environment"
+  if [ "$deployment" == "" ]; then
+    __indent " with local BOSH Lite environment"
     cf api api.10.244.0.34.xip.io --skip-ssl-validation
-    cf login -u admin -p admin -o pivotal -s integration
-  elif [ "$deployment" == "trusty" ]; then
-    __indent " with trusty BOSH Lite environment"
-    cf api api.10.244.1.34.xip.io --skip-ssl-validation
     cf login -u admin -p admin -o pivotal -s integration
   else
     __indent " with AWS deployment"
@@ -66,16 +61,11 @@ __target_bosh() {
   __indent "Targetting bosh"
 
   set +e
-  if [ "$deployment" = "lucid" ]; then
-    __indent " with lucid BOSH Lite environment"
+  if [ "$deployment" = "" ]; then
+    __indent " with local BOSH Lite environment"
     bosh target 192.168.50.4
     bosh login admin admin
     bosh deployment ../bosh-lite/manifests/cf-manifest.yml
-  elif [ "$deployment" = "trusty" ]; then
-    __indent " with trusty BOSH Lite environment"
-    bosh target 192.168.200.4
-    bosh login admin admin
-    bosh deployment ../bosh-lite-trusty/manifests/cf-manifest.yml
   else
     __indent " with AWS deployment"
     __ensure_deployments
@@ -90,8 +80,8 @@ __reset_postgres_security_groups() {
   __indent "Setting up security groups for PostgreSQL access"
 
   cf delete-security-group postgres-access -f
-  if ( [ "$deployment" = "lucid" ] || [ "$deployment" = "trusty" ] ); then
-    cf create-security-group postgres-access "./scripts/assets/${deployment}_postgres_security_group.json"
+  if [ "$deployment" = "" ]; then
+    cf create-security-group postgres-access "./scripts/assets/postgres_security_group.json"
   else
     cf create-security-group postgres-access "./scripts/assets/aws_postgres_security_group.json"
   fi
@@ -115,13 +105,9 @@ __ensure_internet_traffic_logging() {
 
   bundle
 
-  if [ "$deployment" == "lucid" ]; then
-    __indent " with lucid BOSH Lite environment"
+  if [ "$deployment" == "" ]; then
+    __indent " with local BOSH Lite environment"
     export VAGRANT_CWD=$HOME/workspace/bosh-lite 
-    bundle exec ./scripts/enable_bosh_lite_enterprise_firewall.rb
-  elif [ "$deployment" == "trusty" ]; then
-    __indent " with trusty BOSH Lite environment"
-    export VAGRANT_CWD=$HOME/workspace/bosh-lite-trusty
     bundle exec ./scripts/enable_bosh_lite_enterprise_firewall.rb
   else
     __indent " with AWS deployment"
@@ -140,7 +126,7 @@ __create_database_users() {
   create_machete_user_command="psql -h 0.0.0.0 -U vcap -p 5524 -d postgres -c \"create user machete with encrypted password 'machete' SUPERUSER\""
   create_buildpacks_user_command="psql -h 0.0.0.0 -U vcap -p 5524 -d postgres -c \"create user buildpacks with encrypted password 'buildpacks'\""
 
-  if ( [ "$deployment" = "lucid" ] || [ "$deployment" = "trusty" ] ); then
+  if [ "$deployment" = "" ]; then
     bosh ssh --gateway_user vcap postgres_z1 0 --default_password p "$postgres_path_command;$change_path_command;$create_machete_user_command;$create_buildpacks_user_command"
   else
     bosh_target_host=$(ruby -ruri -e "print URI.parse(URI.extract('`bosh target`')[0]).host")
