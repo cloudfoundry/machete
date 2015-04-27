@@ -39,17 +39,5 @@ module Machete
     def content_type
       @response.content_type
     end
-
-    def contains_cookie?(search_string)
-      return false unless set_cookie_headers
-
-      set_cookie_headers.include?(search_string)
-    end
-
-    private
-
-    def set_cookie_headers
-      @response.headers['set-cookie']
-    end
   end
 end

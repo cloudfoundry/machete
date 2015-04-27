@@ -5,8 +5,7 @@ module Machete
 
     subject(:browser) { Browser.new(app) }
     let(:app) { double(:app, name: 'app') }
-    let(:response) { double(:response, headers: headers, content_type: content_type, code: 200) }
-    let(:headers) { {} }
+    let(:response) { double(:response, content_type: content_type, code: 200) }
     let(:content_type) { nil }
 
     describe '#visit_path' do
@@ -107,35 +106,6 @@ module Machete
           browser.visit_path('/')
 
           expect(browser.status).to eq 200
-        end
-      end
-    end
-
-    describe 'contains_cookie?' do
-      before do
-        allow(CF::CLI).to receive(:url_for_app)
-        allow(HTTParty).to receive(:get).and_return(response)
-
-        browser.visit_path('unimportant')
-      end
-
-      context "a cookie string is not set" do
-        it "does not find any cookie string" do
-          expect(browser.contains_cookie?("my-cookie-string")).to eql false
-        end
-      end
-
-      context "a cookie string is set" do
-        before do
-          headers["set-cookie"] = 'this has my-cookie-string in it someplace'
-        end
-
-        specify "and 'my-cookie-string' is in the set-cookie header" do
-          expect(browser.contains_cookie?("my-cookie-string")).to eql true
-        end
-
-        specify "and 'not-my-cookie-string' is not in the set-cookie header" do
-          expect(browser.contains_cookie?("not-my-cookie-string")).to eql false
         end
       end
     end
