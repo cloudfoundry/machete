@@ -5,8 +5,9 @@ module Machete
 
     subject(:browser) { Browser.new(app) }
     let(:app) { double(:app, name: 'app') }
-    let(:response) { double(:response, headers: headers, code: 200) }
+    let(:response) { double(:response, headers: headers, content_type: content_type, code: 200) }
     let(:headers) { {} }
+    let(:content_type) { nil }
 
     describe '#visit_path' do
       it 'makes an HTTP request to the URI' do
@@ -14,6 +15,15 @@ module Machete
         expect(HTTParty).to receive(:get).with('http://some.url/flub').and_return(response)
 
         browser.visit_path('/flub')
+      end
+
+      context 'with basic auth' do
+        it 'supports username and password in the path' do
+          expect(CF::CLI).to receive(:url_for_app).with(app).and_return('some.url')
+          expect(HTTParty).to receive(:get).with('http://bob:sideshow@some.url/flub').and_return(response)
+
+          browser.visit_path('/flub', username: 'bob', password: 'sideshow')
+        end
       end
 
       context 'when an exception occurs' do
@@ -69,6 +79,35 @@ module Machete
         expect(response).to receive(:body).and_return('Hello, World')
         browser.visit_path('/test')
         expect(browser.body).to eql 'Hello, World'
+      end
+    end
+
+    describe '#content_type' do
+      context 'when specified in the headers' do
+        let(:content_type) { 'text/plain' }
+
+        it 'returns Content-Type value' do
+          allow(CF::CLI).to receive(:url_for_app)
+          allow(HTTParty).to receive(:get).and_return(response)
+
+
+          browser.visit_path('/')
+
+          expect(browser.content_type).to eq 'text/plain'
+        end
+      end
+    end
+
+    describe '#status' do
+      context 'with a successful request' do
+        it 'returns 200' do
+          allow(CF::CLI).to receive(:url_for_app)
+          allow(HTTParty).to receive(:get).and_return(response)
+
+          browser.visit_path('/')
+
+          expect(browser.status).to eq 200
+        end
       end
     end
 
