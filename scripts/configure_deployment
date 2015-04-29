@@ -1,21 +1,9 @@
 #!/bin/bash -l
 set -eo pipefail
 
-__parse_arguments() {
-  deployment=${1:-''}
-}
-
 __indent() {
   local msg=$1
   echo "-----> $msg"
-}
-
-__check_usage() {
-  if [ "$deployment" == "--help" ]; then
-    echo "Usage:"
-    echo "  $0 [deployment_name]"
-    exit 1
-  fi
 }
 
 __ensure_space() {
@@ -26,9 +14,11 @@ __ensure_space() {
   cf target -o pivotal -s integration
 }
 
-__ensure_deployments() {
-  if [ ! -d ~/workspace/deployments-buildpacks ]; then
-    __indent " unable to find ~/workspace/deployments-buildpacks"
+__are_you_sure() {
+  echo -n $1
+  read -r -p " [y/N] " response
+  response=$(echo $response | tr '[:upper:]' '[:lower:]')
+  if [[ $response =~ ^(no|n)$ ]]; then
     exit 1
   fi
 }
@@ -36,51 +26,23 @@ __ensure_deployments() {
 __target_api() {
   __indent "Targetting CF API"
 
-  set +e
-
-  if [ "$deployment" == "" ]; then
-    __indent " with local BOSH Lite environment"
-    cf api api.10.244.0.34.xip.io --skip-ssl-validation
-    cf login -u admin -p admin -o pivotal -s integration
-  else
-    __indent " with AWS deployment"
-    __ensure_deployments
-    cf api api.$CF_DEPLOYMENT_NAME.cf-app.com --skip-ssl-validation
-    cf login -u admin -p $CF_CLI_PASSWORD -o pivotal -s integration
-  fi
-
-  login_result=$?
-  set -e
-
-  if [ $login_result -ne 0 ]; then
-    __ensure_space
-  fi
+  echo $(cf api)
+  __are_you_sure "Are you sure you want to use the above cf api?"
+  __ensure_space
 }
 
 __target_bosh() {
   __indent "Targetting bosh"
 
-  set +e
-  if [ "$deployment" = "" ]; then
-    __indent " with local BOSH Lite environment"
-    bosh target 192.168.50.4
-    bosh login admin admin
-    bosh deployment ../bosh-lite/manifests/cf-manifest.yml
-  else
-    __indent " with AWS deployment"
-    __ensure_deployments
-    . ~/workspace/deployments-buildpacks/bin/switch $deployment 
-  fi
-  set -e
+  echo $(bosh target)
+  __are_you_sure "Are you sure you want to use the above bosh target?"
 }
 
 __reset_postgres_security_groups() {
-  __target_api
-
   __indent "Setting up security groups for PostgreSQL access"
 
   cf delete-security-group postgres-access -f
-  if [ "$deployment" = "" ]; then
+  if [ "$VAGRANT_CWD" != "" ]; then
     cf create-security-group postgres-access "./scripts/assets/postgres_security_group.json"
   else
     cf create-security-group postgres-access "./scripts/assets/aws_postgres_security_group.json"
@@ -89,8 +51,6 @@ __reset_postgres_security_groups() {
 }
 
 __reset_public_security_groups() {
-  __target_api
-
   __indent "Setting up public security groups for egress logging"
 
   cf unbind-staging-security-group public_networks
@@ -99,25 +59,20 @@ __reset_public_security_groups() {
 }
 
 __ensure_internet_traffic_logging() {
-  __target_bosh
-
   __indent "Setting up internet egress logging"
 
   bundle
 
-  if [ "$deployment" == "" ]; then
-    __indent " with local BOSH Lite environment"
-    export VAGRANT_CWD=$HOME/workspace/bosh-lite 
+  if [ "$VAGRANT_CWD" != "" ]; then
+    __indent " with Vagrant deployment"
     bundle exec ./scripts/enable_bosh_lite_enterprise_firewall.rb
   else
     __indent " with AWS deployment"
-    __ensure_deployments
     __reset_public_security_groups
   fi
 }
 
 __create_database_users() {
-  __target_bosh
 
   __indent "Creating database users"
 
@@ -126,17 +81,18 @@ __create_database_users() {
   create_machete_user_command="psql -h 0.0.0.0 -U vcap -p 5524 -d postgres -c \"create user machete with encrypted password 'machete' SUPERUSER\""
   create_buildpacks_user_command="psql -h 0.0.0.0 -U vcap -p 5524 -d postgres -c \"create user buildpacks with encrypted password 'buildpacks'\""
 
-  if [ "$deployment" = "" ]; then
-    bosh ssh --gateway_user vcap postgres_z1 0 --default_password p "$postgres_path_command;$change_path_command;$create_machete_user_command;$create_buildpacks_user_command"
+  bosh_target_host=$(ruby -ruri -e "print URI.parse(URI.extract('`bosh target`')[0]).host")
+  if [[ "$bosh_target_host" =~ ^192\.168\.50 ]]; then
+    bosh ssh postgres_z1 0 --default_password p "$postgres_path_command;$change_path_command;$create_machete_user_command;$create_buildpacks_user_command"
   else
-    bosh_target_host=$(ruby -ruri -e "print URI.parse(URI.extract('`bosh target`')[0]).host")
-    bosh ssh --gateway_host $bosh_target_host --gateway_user vcap postgres_z1 0 --default_password p "$postgres_path_command;$change_path_command;$create_machete_user_command;$create_buildpacks_user_command"
+  gateway_user=${BOSH_GATEWAY_USER-'vcap'}
+    bosh ssh --gateway_host $bosh_target_host --gateway_user $gateway_user postgres_z1 0 --default_password p "$postgres_path_command;$change_path_command;$create_machete_user_command;$create_buildpacks_user_command"
   fi
 }
 
 
-__parse_arguments "$@"
-__check_usage
+__target_bosh
+__target_api
 
 __ensure_internet_traffic_logging
 __reset_postgres_security_groups
