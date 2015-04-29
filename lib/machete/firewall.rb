@@ -47,27 +47,16 @@ module Machete
       private
 
       def add_on_premises_chain
+        host_ip_address = URI.parse(URI.extract(CF::API.new.execute)[1]).host
         on_premises_chain = FilterChain.create('on-premises-firewall')
-        on_premises_chain.append(return_on_packets_to_dns)
-        on_premises_chain.append(return_on_packets_to_google_dns)
-        on_premises_chain.append(return_on_packets_from_mac)
+        on_premises_chain.append('-p udp --dport 53 -j RETURN')
+        on_premises_chain.append('! -s 10.244.0.26/32 -j RETURN')
+        on_premises_chain.append("-d #{host_ip_address} -j RETURN")
         on_premises_chain.append(log_all_packets)
         on_premises_chain.append(accepts_all_packets)
 
         warden_forward_chain = FilterChain.new('w--forward')
         warden_forward_chain.insert(2,firewall_packets_not_destined_for_cf_machines)
-      end
-
-      def return_on_packets_to_dns
-        "-d #{dns_addr} -j RETURN"
-      end
-
-      def return_on_packets_to_google_dns
-        "-d #{google_dns_addr} -j RETURN"
-      end
-
-      def return_on_packets_from_mac
-        "-d #{mac_subnet} -j RETURN"
       end
 
       def log_all_packets
@@ -83,27 +72,7 @@ module Machete
       end
 
       def cf_subnet
-        if ENV['VAGRANT_CWD'].include? 'trusty'
-          '10.244.1.0/24'
-        else
-          '10.244.0.0/24'
-        end
-      end
-
-      def mac_subnet
-        if ENV['VAGRANT_CWD'].include? 'trusty'
-          '192.168.200.0/24'
-        else
-          '192.168.50.0/24'
-        end
-      end
-
-      def google_dns_addr
-        '8.8.8.8/32'
-      end
-
-      def dns_addr
-        @dns_addr ||= host.run("sudo ip -f inet addr | grep eth0 | grep inet").split(" ")[1].gsub(/\d+\/\d+$/, "0/24")
+        '10.244.0.0/24'
       end
 
       def save_iptables
