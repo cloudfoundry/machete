@@ -9,7 +9,7 @@ module Machete
       before do
         allow(SystemHelper).
           to receive(:run_cmd).
-               with('cf delete -f app_name')
+               with('cf delete -rf app_name')
 
       end
 
