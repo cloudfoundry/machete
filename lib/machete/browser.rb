@@ -11,8 +11,6 @@ module Machete
     def visit_path(path, username: nil, password: nil)
       retries = 1
       begin
-        base_url = CF::CLI.url_for_app(app)
-
         if username.nil? && password.nil?
           @response = HTTParty.get("http://#{base_url}#{path}")
         else
@@ -26,6 +24,10 @@ module Machete
         sleep(0.5)
         retry
       end
+    end
+
+    def base_url
+      @base_url ||= CF::CLI.url_for_app(app)
     end
 
     def body
