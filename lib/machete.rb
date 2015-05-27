@@ -7,7 +7,6 @@ require 'machete/cf'
 require 'machete/host'
 require 'machete/vendor_dependencies'
 require 'machete/setup_app'
-require 'machete/database'
 require 'machete/app_status'
 require 'machete/browser'
 

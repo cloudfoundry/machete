@@ -43,18 +43,6 @@ module Machete
           expect(app.needs_setup?).to be true
         end
       end
-
-      context 'with_pg: true' do
-        let(:options) do
-          {
-            with_pg: true
-          }
-        end
-
-        specify do
-          expect(app.needs_setup?).to be true
-        end
-      end
     end
 
     describe '#src_directory' do

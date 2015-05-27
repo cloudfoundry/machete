@@ -38,18 +38,6 @@ __target_bosh() {
   __are_you_sure "Are you sure you want to use the above bosh target?"
 }
 
-__reset_postgres_security_groups() {
-  __indent "Setting up security groups for PostgreSQL access"
-
-  cf delete-security-group postgres-access -f
-  if [ "$VAGRANT_CWD" != "" ]; then
-    cf create-security-group postgres-access "./scripts/assets/postgres_security_group.json"
-  else
-    cf create-security-group postgres-access "./scripts/assets/aws_postgres_security_group.json"
-  fi
-  cf bind-security-group postgres-access pivotal integration
-}
-
 __reset_public_security_groups() {
   __indent "Setting up public security groups for egress logging"
 
@@ -72,29 +60,8 @@ __ensure_internet_traffic_logging() {
   fi
 }
 
-__create_database_users() {
-
-  __indent "Creating database users"
-
-  postgres_path_command="postgres_path=\`find /var/vcap/data/packages/postgres/*/ -name bin\`"
-  change_path_command="PATH=\$postgres_path:\$PATH"
-  create_machete_user_command="psql -h 0.0.0.0 -U vcap -p 5524 -d postgres -c \"create user machete with encrypted password 'machete' SUPERUSER\""
-  create_buildpacks_user_command="psql -h 0.0.0.0 -U vcap -p 5524 -d postgres -c \"create user buildpacks with encrypted password 'buildpacks'\""
-
-  bosh_target_host=$(ruby -ruri -e "print URI.parse(URI.extract('`bosh target`')[0]).host")
-  if [[ "$bosh_target_host" =~ ^192\.168\.50 ]]; then
-    bosh ssh postgres_z1 0 --default_password p "$postgres_path_command;$change_path_command;$create_machete_user_command;$create_buildpacks_user_command"
-  else
-  gateway_user=${BOSH_GATEWAY_USER-'vcap'}
-    bosh ssh --gateway_host $bosh_target_host --gateway_user $gateway_user postgres_z1 0 --default_password p "$postgres_path_command;$change_path_command;$create_machete_user_command;$create_buildpacks_user_command"
-  fi
-}
-
-
 __target_bosh
 __target_api
 
 __ensure_internet_traffic_logging
-__reset_postgres_security_groups
 __reset_public_security_groups
-__create_database_users

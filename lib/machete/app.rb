@@ -8,8 +8,7 @@ module Machete
                 :name,
                 :path,
                 :stack,
-                :start_command,
-                :with_pg
+                :start_command
 
     def initialize path, host, options = {}
       @path = path
@@ -17,7 +16,6 @@ module Machete
 
       @name = options[:name] || path.split('/').last
       @start_command = options[:start_command]
-      @with_pg = options[:with_pg]
       @env = options.fetch(:env, {})
       @stack = options[:stack] || ENV['CF_STACK']
       @buildpack = options[:buildpack]
@@ -28,7 +26,7 @@ module Machete
     end
 
     def needs_setup?
-      !! ( env.any? || with_pg )
+      !! ( env.any?  )
     end
   end
 end

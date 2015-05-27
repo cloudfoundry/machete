@@ -19,20 +19,6 @@ module Machete
       end
     end
 
-    describe '#create_db_manager' do
-      let(:db_manager) { double(:db_manager) }
-
-      before do
-        allow(Host::Aws::DB).to receive(:new).
-                                       with(host).
-                                       and_return(db_manager)
-      end
-
-      specify do
-        expect(host.create_db_manager).to eql(db_manager)
-      end
-    end
-
     describe '#run' do
       context 'interfaces with an interactive BOSH SSH' do
         let(:stdin) { double(:stdin) }

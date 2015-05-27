@@ -1,6 +1,5 @@
 require 'bundler'
 require 'machete/host/aws/log'
-require 'machete/host/aws/db'
 require 'pty'
 
 module Machete
@@ -12,10 +11,6 @@ module Machete
 
       def create_log_manager
         Log.new(self)
-      end
-
-      def create_db_manager
-        DB.new(self)
       end
 
       def run(command, vm_name)
