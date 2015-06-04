@@ -68,16 +68,26 @@ module Machete
       end
     end
 
-    describe '#body' do
+    describe 'HTTP response' do
       before do
         allow(CF::CLI).to receive(:url_for_app)
         allow(HTTParty).to receive(:get).and_return(response)
       end
 
-      it 'returns the body of the request' do
-        expect(response).to receive(:body).and_return('Hello, World')
-        browser.visit_path('/test')
-        expect(browser.body).to eql 'Hello, World'
+      describe '#body' do
+        it 'returns the body of the request' do
+          expect(response).to receive(:body).and_return('Hello, World')
+          browser.visit_path('/test')
+          expect(browser.body).to eql 'Hello, World'
+        end
+      end
+
+      describe '#headers' do
+        it 'returns the headers of the request' do
+          expect(response).to receive(:headers).and_return({ 'X-This-Is-A-Header' => 'true' })
+          browser.visit_path('/test')
+          expect(browser.headers).to eql({ 'X-This-Is-A-Header' => 'true' })
+        end
       end
     end
 

@@ -34,6 +34,10 @@ module Machete
       @response.body
     end
 
+    def headers
+      @response.headers
+    end
+
     def status
       @response.code
     end
