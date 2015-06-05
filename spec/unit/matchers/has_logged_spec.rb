@@ -28,6 +28,14 @@ describe '#has_logged' do
       expect(app).to have_logged /something/
       expect(app).to_not have_logged /something else/
     end
+
+    context 'special characters' do
+      let(:log_contents) { 'something was logged $HERE' }
+
+      it 'can match strings with special characters' do
+        expect(app).to have_logged '$HERE'
+      end
+    end
   end
 
   context 'app has not logged' do

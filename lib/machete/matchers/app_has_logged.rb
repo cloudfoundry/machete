@@ -3,7 +3,12 @@ require 'rspec/matchers'
 RSpec::Matchers.define :have_logged do |expected_entry|
   match do |app|
     app_log = Machete::CF::AppLog.new(app)
-    app_log.contents.match(expected_entry) != nil
+
+    if expected_entry.is_a? String
+      app_log.contents.include?(expected_entry)
+    elsif expected_entry.is_a? Regexp
+      app_log.contents.match(expected_entry) != nil
+    end
   end
 
   failure_message do |app|
