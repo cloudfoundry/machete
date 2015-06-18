@@ -14,9 +14,20 @@ module Machete
       host.run("sudo iptables -t filter -I #{name} #{position} #{rule}")
     end
 
+    def delete(rule)
+      host.run("sudo iptables -t filter -D #{name} #{rule}")
+    end
+
     def self.create(name)
       host = Machete::Host.create
       host.run("sudo iptables -t filter -N #{name}")
+      self.new(name)
+    end
+
+    def self.delete(name)
+      host = Machete::Host.create
+      host.run("sudo iptables -t filter -F #{name}")
+      host.run("sudo iptables -t filter -X #{name}")
       self.new(name)
     end
 
@@ -30,12 +41,10 @@ module Machete
   module Firewall
     class << self
       def disable_firewall
-        restore_iptables
+        remove_on_premises_chain
       end
 
       def enable_firewall
-        save_iptables || restore_iptables
-
         add_on_premises_chain
       end
 
@@ -45,6 +54,13 @@ module Machete
       end
 
       private
+
+      def remove_on_premises_chain
+        warden_forward_chain = FilterChain.new('w--forward')
+        warden_forward_chain.delete(firewall_packets_not_destined_for_cf_machines)
+
+        FilterChain.delete('on-premises-firewall')
+      end
 
       def add_on_premises_chain
         host_ip_address = URI.parse(URI.extract(CF::API.new.execute)[1]).host
@@ -73,27 +89,6 @@ module Machete
 
       def cf_subnet
         '10.244.0.0/24'
-      end
-
-      def save_iptables
-        host.run("test -f #{iptables_file}")
-        if $?.exitstatus == 0
-          Machete.logger.info "Found existing #{iptables_file}"
-          return false
-        else
-          Machete.logger.action "saving iptables to #{iptables_file}"
-          host.run("sudo iptables-save > #{iptables_file}")
-          return true
-        end
-      end
-
-      def restore_iptables
-        Machete.logger.action "Restoring iptables from #{iptables_file}"
-        host.run("sudo iptables-restore #{iptables_file}")
-      end
-
-      def iptables_file
-        '/tmp/machete_iptables.ipt'
       end
 
       def host
