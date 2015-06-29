@@ -7,33 +7,35 @@ Machete is the CF buildpack test framework.
 
 ## ci-tools
 
-Clone [ci-tools](https://github.com/cf-buildpacks/ci-tools) into `~/workspace`.
+Clone [ci-tools](https://github.com/cf-buildpacks/ci-tools) into the same directory your buildpack's directory is in.
 
-## Bosh-Lite
+## Cloud Foundry
 
-The tests expect two Cloud Foundry installations to be present - an online one at 10.244.0.34 and an offline one at 10.245.0.34.
+The tests require a running instance of Cloud Foundry. By default, it will try to find an instance at the local IP 10.244.0.34. You can specify an alternative Cloud Foundry instance with the `--host` argument.
 
-We use [bosh-lite](https://github.com/cloudfoundry/bosh-lite) for the online instance and [bosh-lite-2nd-instance](https://github.com/cf-buildpacks/bosh-lite-2nd-instance) for the offline instance.
-
-See [bosh-lite](https://github.com/cloudfoundry/bosh-lite) or [bosh-lite-2nd-instance](https://github.com/cf-buildpacks/bosh-lite-2nd-instance) for more instructions.
+We run our tests with a local bosh-lite deployment. See [the github repo](https://github.com/cloudfoundry/bosh-lite) for more instructions.
 
 
 # Usage
 
 1. Navigate to the buildpack that you want to test (e.g., [Ruby Buildpack](https://github.com/cloudfoundry/ruby-buildpack))
 1. Update submodules:
-```bash
-git submodule update --init
 ```
-1. Run buildpack-build with desired mode
+git  submodule update --init
+```
+1. From your buildpack's directory, run the `buildpack-builds` script.
 ```bash
-~/workspace/ci-tools/buildpack-build [ online | offline ]
+../ci-tools/buildpack-builds
 ```
 
-`buildpack-build` will create a buildpack in one of two modes and upload it to your local bosh-lite based Cloud Foundry installations:
+`buildpack-builds` will run your full test suite against both modes of buildpack: uncached and cached.
 
-* online : Dependencies can be fetched from the internet.
-* offline : Dependencies, such as ruby, are installed from a cache included in the buildpack.
+Buildpack Modes:
+
+* uncached: Buildpack dependencies will be fetched from the internet when staging an app.
+* cached : Buildpack dependencies will be downloaded and bundled with the buildpack before uploading it to Cloud Foundry.
+
+If you only want to run your tests with one mode, you can use the `../ci-tools/buildpack-build [ cached | uncached ]` script instead.
 
 
 # Logging
@@ -49,7 +51,7 @@ Errors in the Machete library log to STDOUT by default. You can change Machete's
 
 ### RVM Version
 
-You may encounter a silent early exit for scripts offline-build and online-build. This is an issue with RVM running
+You may encounter a silent early exit for scripts cached-build and uncached-build. This is an issue with RVM running
 inside a bash script with `set -e`.
 
 Ensure you have the latest stable version of RVM
