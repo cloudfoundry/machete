@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'json'
 
 module Machete
   module CF
@@ -7,34 +8,53 @@ module Machete
 
       subject(:app_file) { AppFile.new(app) }
 
-      before do
-        allow(SystemHelper).
-          to receive(:run_cmd).
-          with('cf files app_name filename')
-      end
-
       describe '#has_file?' do
-        context 'file exists on cf' do
+        context 'with a standard CF deployment' do
+
           before do
-            # stub $? and return 0
-            `(exit 0)`
+            allow(SystemHelper).to receive(:run_cmd).
+              with("cf has-diego-enabled #{app.name}").and_return('false')
+            allow(SystemHelper).
+              to receive(:run_cmd).
+              with('cf files app_name filename')
           end
 
-          specify do
-            expect(app_file.has_file?('filename')).to be_truthy
+          context 'when the file exists in the app' do
+            it 'returns true' do
+              expect(SystemHelper).to receive(:exit_status).and_return(0)
+              expect(app).to have_file('filename')
+            end
+          end
+
+          context 'when file does not exist in the app' do
+            it 'returns false' do
+              expect(SystemHelper).to receive(:exit_status).and_return(1)
+              expect(app).to_not have_file('filename')
+            end
+          end
+        end
+      end
+
+      context 'with a Diego CF deployment' do
+        before do
+          allow(SystemHelper).to receive(:run_cmd).
+            with("cf has-diego-enabled #{app.name}").and_return('true')
+          expect(SystemHelper).to receive(:run_cmd).
+            with("cf ssh #{app.name} ls filename")
+        end
+
+        context 'when the file exists in the app' do
+          it 'returns true' do
+            expect(SystemHelper).to receive(:exit_status).and_return(0)
+            expect(app).to have_file('filename')
           end
         end
 
-        context 'file does not exist on cf' do
-          before do
-            # stub $? and return non-zero
-            `(exit 1)`
+        context 'when file does not exist in the app' do
+          it 'returns false' do
+            expect(SystemHelper).to receive(:exit_status).and_return(1)
+            expect(app).to_not have_file('filename')
           end
-
-          specify do
-            expect(app_file.has_file?('filename')).to be_falsy
-          end
-
         end
       end
     end
