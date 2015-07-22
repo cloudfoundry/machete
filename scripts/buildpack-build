@@ -136,9 +136,6 @@ indent "Fetching CF CLI details"
 which cf
 cf --version
 
-indent "Bundling cf.Gemfile"
-BUNDLE_GEMFILE=cf.Gemfile bundle -j4 --no-cache
-
 if [ "$should_build" == "true" ]; then
   build_buildpack
   detect_language
