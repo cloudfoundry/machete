@@ -1,0 +1,162 @@
+#!/bin/bash
+set -eo pipefail
+trap 'echo "error in $0 ${BASH_SOURCE} ${LINENO}"' ERR
+
+stack=cflinuxfs2
+mode=cached
+should_build=true
+should_upload=true
+rspec_options=cf_spec
+host=""
+
+usage() {
+  echo "Usage: buildpack-build
+
+  Options:
+      [--stack=STACK]       # Specifies the stack that the test will run against.
+                            # Default: cflinuxfs2
+                            # Possible values: cflinuxfs2
+      [--host=HOST]         # Specifies the host to target for running tests.
+                            # Example: ci=8.example.com
+      [--cached]            # Specifies the test run of a buildpack with vendored dependencies
+                            # Default: true
+      [--uncached]          # Specifies the test run of a buildpack without vendored dependencies
+                            # Default: false
+      [--no-build]          # Specifies whether to build the targeted buildpack.
+                            # Default: false
+      [--no-upload]         # Specifies whether to upload local buildpack to cf. Overrides '--no-build' flag to true.
+                            # Default: false
+
+  Builds, uploads, and runs tests against a specified BUILDPACK.
+  Any other supplied arguments will be passed as rspec arguments!"
+  exit 1
+}
+
+indent() {
+  echo -e "\n******* $1"
+}
+
+detect_language() {
+  if [ "$language" == "" ]; then
+    indent "Detecting language"
+    language=$(ls ${buildpack_file_pattern} | cut -d_ -f1)
+    indent "Language detected: ${language}"
+  fi
+}
+
+validate_stack_option() {
+  if ([ "$stack" != "cflinuxfs2" ]); then
+    echo -e 'ERROR: Invalid argument passed in for --stack option. \n' \
+      'The valid --stack options are [ "cflinuxfs2" ]'
+    exit 1
+  fi
+}
+
+configure_stack() {
+  if [ "$host" == "" ]; then
+    host=10.244.0.34.xip.io
+    export VAGRANT_CWD="$HOME/workspace/bosh-lite"
+    $VAGRANT_CWD/bin/add-route
+  fi
+
+  indent "Using the stack '$stack' against the host '$host'"
+}
+
+configure_based_on_mode() {
+  if [ "$mode" == "cached" ]; then
+    buildpack_file_pattern="*_buildpack-cached-v*.zip"
+  else
+    buildpack_file_pattern="*_buildpack-v*.zip"
+  fi
+}
+
+build_buildpack() {
+  indent "Building $mode buildpack"
+  rm -f ${buildpack_file_pattern}
+  BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager "$mode"
+}
+
+upload_buildpack() {
+  indent "Uploading buildpack to CF"
+  cf delete-buildpack ${language}-test-buildpack -f
+  cf create-buildpack ${language}-test-buildpack ${buildpack_file_pattern} 1 --enable
+}
+
+while [ "$#" -gt 0 ]; do
+  case $1 in
+    -h|-\?|--help|help)
+        usage
+        exit
+        ;;
+    --stack)
+      if [ "$#" -gt 1 ]; then
+        stack=$2
+        validate_stack_option
+        shift 2
+        continue
+      else
+        echo 'ERROR: Must specify a non-empty "--stack STACK" argument.'
+        exit 1
+      fi
+      ;;
+    --stack=*)
+      stack=${1#*=}
+      validate_stack_option
+      ;;
+    --host=*)
+      host=${1#*=}
+      ;;
+    --cached)
+      mode=cached;;
+    --uncached)
+      mode=uncached;;
+    --no-build)
+      should_build=false;;
+    --no-upload)
+      should_build=false
+      should_upload=false;;
+    --)
+      shift
+      break
+      ;;
+    -?*)
+      echo "Unrecognized option ($1) submitted"
+      usage
+      ;;
+    *)
+      rspec_options=$1;;
+  esac
+  shift
+done
+
+configure_based_on_mode
+configure_stack
+
+indent "Fetching CF CLI details"
+which cf
+cf --version
+
+indent "Bundling cf.Gemfile"
+BUNDLE_GEMFILE=cf.Gemfile bundle -j4 --no-cache
+
+if [ "$should_build" == "true" ]; then
+  build_buildpack
+  detect_language
+fi
+
+indent "Connecting to CF"
+cf api api.$host --skip-ssl-validation
+cf_password=${CF_PASSWORD:-"admin"}
+cf login -u admin -p $cf_password -o pivotal -s integration
+
+if [ "$should_upload" == "true" ]; then
+  detect_language
+  upload_buildpack
+fi
+
+indent "Running specs"
+BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=$mode CF_STACK=$stack bundle exec rspec \
+  --require rspec/instafail \
+  --format RSpec::Instafail \
+  --color \
+  --pattern "{integration,unit,helpers}/*_spec.rb" $rspec_options
