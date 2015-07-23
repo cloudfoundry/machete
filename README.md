@@ -5,10 +5,6 @@ Machete is the CF buildpack test framework.
 
 # Prerequisites
 
-## ci-tools
-
-Clone [ci-tools](https://github.com/cf-buildpacks/ci-tools) into the same directory your buildpack's directory is in.
-
 ## Cloud Foundry
 
 The tests require a running instance of Cloud Foundry. By default, it will try to find an instance at the local IP 10.244.0.34. You can specify an alternative Cloud Foundry instance with the `--host` argument.
@@ -25,7 +21,7 @@ git  submodule update --init
 ```
 1. From your buildpack's directory, run the `buildpack-builds` script.
 ```bash
-../ci-tools/buildpack-builds
+bundle exec buildpack-builds
 ```
 
 `buildpack-builds` will run your full test suite against both modes of buildpack: uncached and cached.
