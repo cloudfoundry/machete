@@ -19,19 +19,17 @@ We run our tests with a local bosh-lite deployment. See [the github repo](https:
 ```
 git  submodule update --init
 ```
-1. From your buildpack's directory, run the `buildpack-builds` script.
+1. From your buildpack's directory, run the `buildpack-build` script.
 ```bash
-bundle exec buildpack-builds
+bundle exec buildpack-build
 ```
-
-`buildpack-builds` will run your full test suite against both modes of buildpack: uncached and cached.
 
 Buildpack Modes:
 
 * uncached: Buildpack dependencies will be fetched from the internet when staging an app.
 * cached : Buildpack dependencies will be downloaded and bundled with the buildpack before uploading it to Cloud Foundry.
 
-If you only want to run your tests with one mode, you can use the `../ci-tools/buildpack-build [ cached | uncached ]` script instead.
+If you only want to run your tests with one mode, you can use the `bundle exec buildpack-build [ cached | uncached ]` script instead.
 
 
 # Logging
