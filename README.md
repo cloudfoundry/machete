@@ -16,7 +16,7 @@ Use these commands to create them:
 
 ```
 cf create-org pivotal
-cf create-space integration
+cf create-space integration -o pivotal
 ```
 
 # Usage
