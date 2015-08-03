@@ -11,6 +11,13 @@ The tests require a running instance of Cloud Foundry. By default, it will try t
 
 We run our tests with a local bosh-lite deployment. See [the github repo](https://github.com/cloudfoundry/bosh-lite) for more instructions.
 
+These tests assume an org named `pivotal` and a space named `integration` exist.
+Use these commands to create them: 
+
+```
+cf create-org pivotal
+cf create-space integration -o pivotal
+```
 
 # Usage
 
