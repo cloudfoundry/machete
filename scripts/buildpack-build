@@ -73,7 +73,7 @@ configure_based_on_mode() {
 build_buildpack() {
   indent "Building $mode buildpack"
   rm -f ${buildpack_file_pattern}
-  BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager "$mode"
+  BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --"$mode"
 }
 
 upload_buildpack() {
