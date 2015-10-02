@@ -54,7 +54,7 @@ validate_stack_option() {
 
 configure_stack() {
   if [ "$host" == "" ]; then
-    host=10.244.0.34.xip.io
+    host=bosh-lite.com
     export VAGRANT_CWD="$HOME/workspace/bosh-lite"
     $VAGRANT_CWD/bin/add-route
   fi
