@@ -12,7 +12,7 @@ module Machete
 
       def has_file?(filename)
         if app_has_diego_enabled?
-          SystemHelper.run_cmd("cf ssh #{app.name} ls #{filename}")
+          SystemHelper.run_cmd("cf ssh #{app.name} -c 'ls #{filename}'")
         else
           SystemHelper.run_cmd("cf files #{app.name} #{filename}")
         end

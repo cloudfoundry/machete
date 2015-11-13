@@ -40,7 +40,7 @@ module Machete
           allow(SystemHelper).to receive(:run_cmd).
             with("cf has-diego-enabled #{app.name}").and_return('true')
           expect(SystemHelper).to receive(:run_cmd).
-            with("cf ssh #{app.name} ls filename")
+            with("cf ssh #{app.name} -c 'ls filename'")
         end
 
         context 'when the file exists in the app' do
