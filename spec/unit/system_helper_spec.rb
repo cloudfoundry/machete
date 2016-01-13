@@ -15,7 +15,7 @@ module Machete
         subject { SystemHelper }
 
         specify do
-          subject.run_cmd('exit 1')
+          expect { subject.run_cmd('exit 1') }.to raise_error(RuntimeError)
           expect(subject.exit_status).to eql 1
 
           subject.run_cmd('exit 0')
@@ -43,6 +43,13 @@ module Machete
 
         it { should have_received('info').with("hello\n") }
 
+      end
+
+      context 'command fails' do
+        subject { SystemHelper }
+        it 'should raise a RuntimeError' do
+          expect { subject.run_cmd('exit 1') }.to raise_error(RuntimeError)
+        end
       end
     end
   end
