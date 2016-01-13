@@ -46,7 +46,7 @@ module Machete::Host
 
       specify do
         host_log.clear
-        expect(host).to have_received(:run).with('sudo rm /var/log/internet_access.log')
+        expect(host).to have_received(:run).with('sudo rm -f /var/log/internet_access.log')
         expect(host).to have_received(:run).with('sudo restart rsyslog')
       end
     end

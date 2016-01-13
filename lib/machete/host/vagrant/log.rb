@@ -30,7 +30,7 @@ module Machete
         end
 
         def remove_access_log_command
-          "sudo rm #{INTERNET_ACCESS_LOG}"
+          "sudo rm -f #{INTERNET_ACCESS_LOG}"
         end
 
         def restart_syslog_command
