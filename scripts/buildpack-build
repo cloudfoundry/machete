@@ -147,8 +147,9 @@ cf_password=${CF_PASSWORD:-"admin"}
 cf login -u admin -p $cf_password
 
 cf create-org pivotal
+cf target -o pivotal
 cf create-space integration
-cf target -o pivotal -s integration
+cf target -s integration
 
 if [ "$should_upload" == "true" ]; then
   detect_language
