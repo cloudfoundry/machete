@@ -4,7 +4,7 @@ module Machete
       Machete.logger.info "$ #{cmd}" unless silent
       result = `#{cmd}`
       Machete.logger.info result unless silent
-      raise RuntimeError if self.exit_status != 0
+      raise RuntimeError.new("Command '#{cmd}' failed.") if self.exit_status != 0
       result
     end
 
