@@ -25,8 +25,8 @@ describe '#has_logged' do
     end
 
     it 'can match regular expressions' do
-      expect(app).to have_logged /something/
-      expect(app).to_not have_logged /something else/
+      expect(app).to have_logged(/something/)
+      expect(app).to_not have_logged(/something else/)
     end
 
     context 'special characters' do

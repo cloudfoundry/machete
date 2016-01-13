@@ -81,7 +81,7 @@ module Machete
         specify do
           expect {
             vendor_dependencies.execute(app)
-          }.to raise_error
+          }.to raise_error(RuntimeError)
 
           expect(Machete.logger).
             to have_received(:action)
