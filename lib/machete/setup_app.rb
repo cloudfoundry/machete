@@ -1,17 +1,12 @@
 module Machete
   class SetupApp
     def execute(app)
-      set_environment_variables(app)
-    end
+      app.env.each do |env_variable, value|
+        SystemHelper.run_cmd("cf set-env #{app.name} #{env_variable} #{value}")
+      end
 
-    private
-
-    def set_environment_variables(app)
-      set_app_env.execute(app)
-    end
-
-    def set_app_env
-      CF::SetAppEnv.new
+      SystemHelper.run_cmd(%Q{cf cups #{app.name}-test-service -p '{"username":"AdM1n","password":"pa55woRD"}'})
+      SystemHelper.run_cmd(%Q{cf bind-service #{app.name} #{app.name}-test-service})
     end
   end
 end

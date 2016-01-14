@@ -3,6 +3,8 @@ module Machete
     VENDOR_SCRIPT = 'package.sh'
 
     def execute(app)
+      return unless Dir.exist?(app.src_directory)
+
       Dir.chdir(app.src_directory) do
         return unless File.exist?(VENDOR_SCRIPT)
 

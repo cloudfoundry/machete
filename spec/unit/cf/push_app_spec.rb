@@ -16,21 +16,13 @@ module Machete
 
       subject(:push_app) { PushApp.new }
 
-      before do
-        allow(Dir).
-          to receive(:chdir).
-               with('path/to/src').
-               and_yield
-      end
-
       context 'default arguments' do
         before do
           allow(SystemHelper).to receive(:run_cmd)
         end
 
         specify do
-          expect(SystemHelper).to receive(:run_cmd).with('cf push app_name')
-          expect(Dir).to receive(:chdir)
+          expect(SystemHelper).to receive(:run_cmd).with('cf push app_name -p path/to/src')
           push_app.execute(app)
         end
       end
@@ -41,8 +33,7 @@ module Machete
         end
 
         specify do
-          expect(SystemHelper).to receive(:run_cmd).with('cf push app_name --no-start')
-          expect(Dir).to receive(:chdir)
+          expect(SystemHelper).to receive(:run_cmd).with('cf push app_name -p path/to/src --no-start')
           push_app.execute(app, start: false)
         end
       end
@@ -55,7 +46,7 @@ module Machete
         end
 
         specify do
-          expect(SystemHelper).to receive(:run_cmd).with('cf push app_name -c \'start_command\'')
+          expect(SystemHelper).to receive(:run_cmd).with('cf push app_name -p path/to/src -c \'start_command\'')
           push_app.execute(app)
         end
       end
@@ -68,7 +59,7 @@ module Machete
         end
 
         specify do
-          expect(SystemHelper).to receive(:run_cmd).with('cf push app_name -s stack')
+          expect(SystemHelper).to receive(:run_cmd).with('cf push app_name -p path/to/src -s stack')
           push_app.execute(app)
         end
       end
@@ -81,7 +72,7 @@ module Machete
         end
 
         specify do
-          expect(SystemHelper).to receive(:run_cmd).with('cf push app_name -b my_buildpack')
+          expect(SystemHelper).to receive(:run_cmd).with('cf push app_name -p path/to/src -b my_buildpack')
           push_app.execute(app)
         end
       end

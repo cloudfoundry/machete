@@ -19,6 +19,7 @@ module Machete
       @env = options.fetch(:env, {})
       @stack = options[:stack] || ENV['CF_STACK']
       @buildpack = options[:buildpack]
+      @service = options[:service]
     end
 
     def src_directory
@@ -26,7 +27,7 @@ module Machete
     end
 
     def needs_setup?
-      !! ( env.any?  )
+      env.any? || !@service.nil?
     end
   end
 end
