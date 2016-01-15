@@ -76,7 +76,7 @@ module Machete
       end
 
       def log_all_packets
-        '-m limit --limit 5/min -j LOG --log-prefix "cf-to-internet-traffic: " --log-level 0'
+        '-j LOG --log-prefix "cf-to-internet-traffic: " --log-level 0'
       end
 
       def accepts_all_packets

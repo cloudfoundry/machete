@@ -48,7 +48,7 @@ module Machete
       context 'command fails' do
         subject { SystemHelper }
         it 'should raise a RuntimeError' do
-          expect { subject.run_cmd('exit 1') }.to raise_error(RuntimeError, "Command 'exit 1' failed.")
+          expect { subject.run_cmd('exit 1') }.to raise_error(RuntimeError, "Command 'exit 1' failed.\n\noutput:\n\n")
         end
       end
     end

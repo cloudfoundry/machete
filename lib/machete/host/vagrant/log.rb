@@ -1,3 +1,5 @@
+require 'shellwords'
+
 module Machete
   module Host
     class Vagrant
@@ -30,7 +32,8 @@ module Machete
         end
 
         def remove_access_log_command
-          "sudo rm -f #{INTERNET_ACCESS_LOG}"
+          command = "rm -f #{INTERNET_ACCESS_LOG} && touch #{INTERNET_ACCESS_LOG} && chown syslog:adm #{INTERNET_ACCESS_LOG} && chmod 666 #{INTERNET_ACCESS_LOG}"
+          "sudo bash -c #{command.shellescape}"
         end
 
         def restart_syslog_command
