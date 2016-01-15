@@ -12,18 +12,5 @@ describe Machete::Host do
         expect(Machete::Host.create).to be_instance_of(Machete::Host::Vagrant)
       end
     end
-
-    context 'BOSH TARGET is set' do
-      specify 'it uses the Aws host' do
-        expect(ENV).to receive(:[]).with('BOSH_TARGET').and_return('/tmp')
-        expect(Machete::Host.create).to be_instance_of(Machete::Host::Aws)
-      end
-    end
-
-    context 'with neither environment variables set' do
-      specify 'it uses the unknown host' do
-        expect(Machete::Host.create).to be_instance_of(Machete::Host::Unknown)
-      end
-    end
   end
 end
