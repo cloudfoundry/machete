@@ -15,9 +15,6 @@ module Machete
         subject { SystemHelper }
 
         specify do
-          expect { subject.run_cmd('exit 1') }.to raise_error(RuntimeError)
-          expect(subject.exit_status).to eql 1
-
           subject.run_cmd('exit 0')
           expect(subject.exit_status).to eql 0
         end
@@ -37,18 +34,17 @@ module Machete
 
         subject { Machete.logger }
 
-        before { SystemHelper.run_cmd('echo hello') }
+        context 'on successful subcommands' do
+          before { SystemHelper.run_cmd('echo hello') }
 
-        it { should have_received('info').with("$ echo hello") }
+          it { should have_received('info').with("$ echo hello") }
+          it { should have_received('info').with("hello\n") }
+        end
 
-        it { should have_received('info').with("hello\n") }
+        context 'when a subcommand fails' do
+          before { SystemHelper.run_cmd('exit 1') }
 
-      end
-
-      context 'command fails' do
-        subject { SystemHelper }
-        it 'should raise a RuntimeError' do
-          expect { subject.run_cmd('exit 1') }.to raise_error(RuntimeError, "Command 'exit 1' failed.\n\noutput:\n\n")
+          it { should have_received('error').with(/Command 'exit 1' failed./) }
         end
       end
     end
