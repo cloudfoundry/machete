@@ -1,5 +1,6 @@
 require 'rspec/matchers'
 require 'erb'
+require 'English'
 
 RSpec::Matchers.define :have_internet_traffic do
   dockerfile = <<-DOCKERFILE
@@ -23,15 +24,16 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
   match do |app|
     begin
       cached_buildpack_path = Dir['*_buildpack-cached-v*.zip'].fetch(0)
-      fixture_path = "./cf_spec/fixtures/#{app_name}"
+      fixture_path = "./#{app.src_directory}"
 
       dockerfile_path = "Dockerfile.#{$$}.#{Time.now.to_i}"
       dockerfile_contents = ERB.new(dockerfile).result binding
       File.write(dockerfile_path, dockerfile_contents)
 
       docker_output = Dir.chdir(File.dirname(dockerfile_path)) do
-        `docker build --rm --no-cache -f #{dockerfile_path} .`
+        `docker build --rm --no-cache -f #{dockerfile_path} . 2>&1`
       end
+      raise "Dockerfile failed to build:\n\n#{docker_output}" unless $CHILD_STATUS.success?
       @traffic_lines = docker_output.split("\n").grep(/^(\e\[\d+m)?internet traffic:/)
       return !@traffic_lines.empty?
     ensure
