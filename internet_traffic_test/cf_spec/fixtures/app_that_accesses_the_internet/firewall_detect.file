@@ -1,0 +1,3 @@
+I am here so the detect script in the firewall test app just works.
+
+See https://github.com/cf-buildpacks/cf-firewall-test-buildpack/blob/master/bin/detect

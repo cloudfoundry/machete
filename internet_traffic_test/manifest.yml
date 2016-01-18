@@ -1,0 +1,9 @@
+---
+language: 'null'
+
+dependencies: []
+
+url_to_dependency_map: []
+
+exclude_files:
+  - .git
