@@ -1,5 +1,4 @@
 require 'bundler'
-require 'machete/host/vagrant/log'
 
 module Machete
   module Host
@@ -19,10 +18,6 @@ module Machete
           result = SystemHelper.run_cmd "vagrant ssh -c '#{command}' 2>&1"
         end
         result
-      end
-
-      def create_log_manager
-        Log.new(self)
       end
 
       private

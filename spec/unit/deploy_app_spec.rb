@@ -65,14 +65,6 @@ module Machete
                  with(app)
         end
 
-        context 'clearing internet access log' do
-          specify do
-            deploy_app.execute(app)
-            expect(log_manager).to have_received(:clear).ordered
-            expect(push_app).to have_received(:execute).ordered
-          end
-        end
-
         context 'vendoring' do
           specify do
             deploy_app.execute(app)

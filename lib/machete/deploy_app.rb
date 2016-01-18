@@ -13,7 +13,6 @@ module Machete
     private
 
     def prepare_push(app)
-      clear_internet_access_log(app)
       delete_app.execute(app)
       vendor_dependencies.execute(app)
       setup_app(app)
@@ -31,10 +30,6 @@ module Machete
       return unless app.needs_setup?
       push_app.execute(app, start: false)
       SetupApp.new.execute(app)
-    end
-
-    def clear_internet_access_log(app)
-      app.host.create_log_manager.clear
     end
 
     def vendor_dependencies
