@@ -1,9 +1,0 @@
-#!/usr/bin/env ruby
-$: << './lib'
-require 'bundler/setup'
-require 'machete'
-
-Machete.logger.info '----> Content of firewall logging'
-
-puts Machete::Firewall.run_on_host('sudo cat /var/log/internet_access.log')
-

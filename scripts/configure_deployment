@@ -46,22 +46,7 @@ __reset_public_security_groups() {
   cf bind-staging-security-group public_networks_with_logging
 }
 
-__ensure_internet_traffic_logging() {
-  __indent "Setting up internet egress logging"
-
-  bundle
-
-  if [ "$VAGRANT_CWD" != "" ]; then
-    __indent " with Vagrant deployment"
-    bundle exec ./scripts/enable_bosh_lite_enterprise_firewall.rb
-  else
-    __indent " with AWS deployment"
-    __reset_public_security_groups
-  fi
-}
-
 __target_bosh
 __target_api
 
-__ensure_internet_traffic_logging
 __reset_public_security_groups
