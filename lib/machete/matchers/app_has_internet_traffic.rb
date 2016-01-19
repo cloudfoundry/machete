@@ -25,7 +25,7 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
   match do |app|
     begin
       cached_buildpack_path = Dir['*_buildpack-cached-v*.zip'].fetch(0)
-      fixture_path = "./cf_spec/fixtures/#{app_name}"
+      fixture_path = "./cf_spec/fixtures/#{app.name}"
 
       dockerfile_path = "Dockerfile.#{$$}.#{Time.now.to_i}"
 
