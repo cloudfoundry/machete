@@ -16,18 +16,19 @@ RUN mkdir -p /buildpack
 RUN mkdir -p /tmp/cache
 
 RUN unzip /tmp/<%= cached_buildpack_path %> -d /buildpack
-RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/internet traffic: /' 2>&1 &) \
- && /buildpack/bin/detect /tmp/staged \
- && /buildpack/bin/compile /tmp/staged /tmp/cache \
- && /buildpack/bin/release /tmp/staged /tmp/cache
+RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/internet traffic: /' 2>&1 &)
+RUN /buildpack/bin/detect /tmp/staged
+RUN /buildpack/bin/compile /tmp/staged /tmp/cache
+RUN /buildpack/bin/release /tmp/staged /tmp/cache
   DOCKERFILE
 
   match do |app|
     begin
       cached_buildpack_path = Dir['*_buildpack-cached-v*.zip'].fetch(0)
-      fixture_path = "./cf_spec/fixtures/#{app.name}"
+      fixture_path = "./#{app.src_directory}"
 
       dockerfile_path = "Dockerfile.#{$$}.#{Time.now.to_i}"
+      docker_image_name = 'internet_traffic_test'
 
       manifest_search = Dir.glob("#{fixture_path}/**/manifest.yml")
       manifest_location = ''
@@ -47,13 +48,17 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
       File.write(dockerfile_path, dockerfile_contents)
 
       docker_output = Dir.chdir(File.dirname(dockerfile_path)) do
-        `docker build --rm --no-cache -f #{dockerfile_path} .`
+        `docker build --rm --no-cache -t #{docker_image_name} -f #{dockerfile_path} .`
       end
+
       @traffic_lines = docker_output.split("\n").grep(/^(\e\[\d+m)?internet traffic:/)
-      return !@traffic_lines.empty?
+
     ensure
+      `docker rmi -f #{docker_image_name}`
       FileUtils.rm(dockerfile_path)
     end
+
+    return !@traffic_lines.empty?
   end
 
   failure_message do
