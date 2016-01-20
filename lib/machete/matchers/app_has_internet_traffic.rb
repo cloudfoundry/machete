@@ -16,10 +16,7 @@ RUN mkdir -p /buildpack
 RUN mkdir -p /tmp/cache
 
 RUN unzip /tmp/<%= cached_buildpack_path %> -d /buildpack
-RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/internet traffic: /' 2>&1 &)
-RUN /buildpack/bin/detect /tmp/staged
-RUN /buildpack/bin/compile /tmp/staged /tmp/cache
-RUN /buildpack/bin/release /tmp/staged /tmp/cache
+RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/internet traffic: /' 2>&1 &) && /buildpack/bin/detect /tmp/staged && /buildpack/bin/compile /tmp/staged /tmp/cache && /buildpack/bin/release /tmp/staged /tmp/cache
   DOCKERFILE
 
   match do |app|
@@ -47,17 +44,30 @@ RUN /buildpack/bin/release /tmp/staged /tmp/cache
       dockerfile_contents = ERB.new(dockerfile).result binding
       File.write(dockerfile_path, dockerfile_contents)
 
+      docker_exitstatus = 0
+
       docker_output = Dir.chdir(File.dirname(dockerfile_path)) do
-        `docker build --rm --no-cache -t #{docker_image_name} -f #{dockerfile_path} .`
+        output = `docker build --rm --no-cache -t #{docker_image_name} -f #{dockerfile_path} .`
+        docker_exitstatus = $?.exitstatus.to_i
+        output
+      end
+
+      unless docker_exitstatus == 0
+        puts '=========================================='
+        puts "docker_output: #{dockerfile_output}"
+        puts '=========================================='
       end
 
       @traffic_lines = docker_output.split("\n").grep(/^(\e\[\d+m)?internet traffic:/)
 
     ensure
-      `docker rmi -f #{docker_image_name}`
+      unless `docker images | grep #{docker_image_name}`.strip.empty?
+        `docker rmi -f #{docker_image_name}`
+      end
       FileUtils.rm(dockerfile_path)
     end
 
+    raise "docker didn't successfully build" unless docker_exitstatus == 0
     return !@traffic_lines.empty?
   end
 
@@ -67,6 +77,6 @@ RUN /buildpack/bin/release /tmp/staged /tmp/cache
 
   failure_message_when_negated do
     "\nInternet traffic detected:\n\n" +
-    @traffic_lines.join("\n")
+      @traffic_lines.join("\n")
   end
 end
