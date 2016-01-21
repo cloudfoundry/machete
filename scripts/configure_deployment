@@ -38,15 +38,5 @@ __target_bosh() {
   __are_you_sure "Are you sure you want to use the above bosh target?"
 }
 
-__reset_public_security_groups() {
-  __indent "Setting up public security groups for egress logging"
-
-  cf unbind-staging-security-group public_networks
-  cf create-security-group public_networks_with_logging "./scripts/assets/public_networks_with_logging.json"
-  cf bind-staging-security-group public_networks_with_logging
-}
-
 __target_bosh
 __target_api
-
-__reset_public_security_groups

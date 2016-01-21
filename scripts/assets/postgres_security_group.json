@@ -1,7 +1,0 @@
-[
-    {
-        "destination": "10.244.0.30",
-        "protocol": "tcp",
-        "ports": "5524"
-    }
-]
