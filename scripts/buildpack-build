@@ -161,4 +161,4 @@ BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=$mode CF_STACK=$stack bundle exec rspec
   --require rspec/instafail \
   --format RSpec::Instafail \
   --color \
-  --pattern "{integration,unit,helpers}/*_spec.rb" $rspec_options
+  $rspec_options
