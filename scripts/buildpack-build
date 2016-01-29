@@ -160,5 +160,6 @@ indent "Running specs"
 BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=$mode CF_STACK=$stack bundle exec rspec \
   --require rspec/instafail \
   --format RSpec::Instafail \
+  --format documentation \
   --color \
   $rspec_options
