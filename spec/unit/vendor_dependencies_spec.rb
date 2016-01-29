@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 
 module Machete
@@ -25,9 +26,9 @@ module Machete
           expect(SystemHelper).to receive(:exit_status).and_return(0)
           expect(SystemHelper).to receive(:run_cmd).with('./package.sh')
 
-          expect {
+          expect do
             vendor_dependencies.execute(app)
-          }.not_to raise_error
+          end.not_to raise_error
         end
       end
 
@@ -36,9 +37,9 @@ module Machete
           expect(SystemHelper).to receive(:exit_status).and_return(-1)
           expect(SystemHelper).to receive(:run_cmd).with('./package.sh')
 
-          expect {
+          expect do
             vendor_dependencies.execute(app)
-          }.to raise_error(RuntimeError)
+          end.to raise_error(RuntimeError)
         end
       end
     end

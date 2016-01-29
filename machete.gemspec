@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Machete::VERSION
   spec.authors       = ['Jordi Noguera and Rasheed Abdul-Aziz and Aaron Triantafyllidis']
   spec.email         = ['pair+jordi+squeedee@pivotallabs.com']
-  spec.summary       = %q{Machete is the offline buildpack library for Cloud Foundry Buildpacks}
-  spec.description   = %q{Machete is the offline buildpack library for Cloud Foundry Buildpacks}
+  spec.summary       = 'Machete is the offline buildpack library for Cloud Foundry Buildpacks'
+  spec.description   = 'Machete is the offline buildpack library for Cloud Foundry Buildpacks'
   spec.homepage      = ''
   spec.license       = 'MIT'
 

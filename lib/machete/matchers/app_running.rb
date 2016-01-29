@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'rspec/matchers'
 
 RSpec::Matchers.define :be_running do |timeout = 60|
@@ -7,7 +8,7 @@ RSpec::Matchers.define :be_running do |timeout = 60|
     start_time = Time.now
     max_end_time = start_time + timeout
 
-    while Time.now <= max_end_time do
+    while Time.now <= max_end_time
       status = app_status.execute(app)
       return false if status == Machete::AppStatus::STAGING_FAILED
       return true if status == Machete::AppStatus::RUNNING

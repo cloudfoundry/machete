@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'rspec/matchers'
 
 RSpec::Matchers.define :have_logged do |expected_entry|
@@ -7,7 +8,7 @@ RSpec::Matchers.define :have_logged do |expected_entry|
     if expected_entry.is_a? String
       app_log.contents.include?(expected_entry)
     elsif expected_entry.is_a? Regexp
-      app_log.contents.match(expected_entry) != nil
+      !app_log.contents.match(expected_entry).nil?
     end
   end
 

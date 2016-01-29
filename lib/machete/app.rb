@@ -1,6 +1,7 @@
+# encoding: utf-8
 module Machete
   class App
-    FIXTURES_DIR = 'cf_spec/fixtures'
+    FIXTURES_DIR = 'cf_spec/fixtures'.freeze
 
     attr_reader :buildpack,
                 :env,
@@ -10,7 +11,7 @@ module Machete
                 :stack,
                 :start_command
 
-    def initialize path, host, options = {}
+    def initialize(path, host, options = {})
       @path = path
       @host = host
 

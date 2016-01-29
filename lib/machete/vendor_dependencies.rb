@@ -1,6 +1,7 @@
+# encoding: utf-8
 module Machete
   class VendorDependencies
-    VENDOR_SCRIPT = 'package.sh'
+    VENDOR_SCRIPT = 'package.sh'.freeze
 
     def execute(app)
       return unless Dir.exist?(app.src_directory)
@@ -25,7 +26,7 @@ module Machete
 
     def handle_error(cmd_output)
       if SystemHelper.exit_status != 0
-        raise "Failed to vendor dependencies:\n#{cmd_output}"
+        fail "Failed to vendor dependencies:\n#{cmd_output}"
       end
     end
   end

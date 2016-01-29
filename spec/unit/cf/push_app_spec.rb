@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 require 'tmpdir'
 
@@ -7,10 +8,10 @@ module Machete
       let(:src_directory) { Dir.mktmpdir }
       let(:app) do
         double(:app, name: 'app_name',
-               src_directory: src_directory,
-               start_command: start_command,
-               stack: stack,
-               buildpack: buildpack)
+                     src_directory: src_directory,
+                     start_command: start_command,
+                     stack: stack,
+                     buildpack: buildpack)
       end
       let(:start_command) { nil }
       let(:stack) { nil }

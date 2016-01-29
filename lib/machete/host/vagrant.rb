@@ -1,8 +1,9 @@
+# encoding: utf-8
 require 'bundler'
 
 module Machete
   module Host
-    class VagrantCWDMissingError < StandardError;
+    class VagrantCWDMissingError < StandardError
     end
 
     class Vagrant
@@ -10,7 +11,7 @@ module Machete
         @vagrant_cwd = vagrant_cwd
       end
 
-      def run command
+      def run(command)
         check_vagrant_cwd
 
         result = ''
@@ -21,8 +22,9 @@ module Machete
       end
 
       private
+
       def check_vagrant_cwd
-        raise VagrantCWDMissingError, 'VAGRANT_CWD environment variable is not set' unless @vagrant_cwd
+        fail VagrantCWDMissingError, 'VAGRANT_CWD environment variable is not set' unless @vagrant_cwd
       end
     end
   end

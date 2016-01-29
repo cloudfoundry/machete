@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 
 module Machete
@@ -9,7 +10,7 @@ module Machete
              host: host,
              name: 'app_name',
              needs_setup?: app_needs_setup?
-      )
+            )
     end
 
     let(:vendor_dependencies) { double(:vendor_dependencies) }
@@ -25,44 +26,43 @@ module Machete
     describe '#execute' do
       let(:log_manager) { double(:log_manager, clear: true) }
 
-
       context 'full deploy of app' do
         before do
-          allow(VendorDependencies).
-            to receive(:new).
-                 and_return(vendor_dependencies)
+          allow(VendorDependencies)
+            .to receive(:new)
+            .and_return(vendor_dependencies)
 
-          allow(vendor_dependencies).
-            to receive(:execute).
-                 with(app)
+          allow(vendor_dependencies)
+            .to receive(:execute)
+            .with(app)
 
-          allow(host).
-            to receive(:create_log_manager).
-                 and_return(log_manager)
+          allow(host)
+            .to receive(:create_log_manager)
+            .and_return(log_manager)
 
-          allow(CF::DeleteApp).
-            to receive(:new).
-                 and_return(delete_app)
+          allow(CF::DeleteApp)
+            .to receive(:new)
+            .and_return(delete_app)
 
-          allow(delete_app).
-            to receive(:execute).
-                 with(app)
+          allow(delete_app)
+            .to receive(:execute)
+            .with(app)
 
-          allow(CF::PushApp).
-            to receive(:new).
-                 and_return(push_app)
+          allow(CF::PushApp)
+            .to receive(:new)
+            .and_return(push_app)
 
-          allow(push_app).
-            to receive(:execute).
-                 with(app)
+          allow(push_app)
+            .to receive(:execute)
+            .with(app)
 
-          allow(SetupApp).
-            to receive(:new).
-                 and_return(setup_app)
+          allow(SetupApp)
+            .to receive(:new)
+            .and_return(setup_app)
 
-          allow(setup_app).
-            to receive(:execute).
-                 with(app)
+          allow(setup_app)
+            .to receive(:execute)
+            .with(app)
         end
 
         context 'vendoring' do
@@ -85,9 +85,9 @@ module Machete
           let(:app_needs_setup?) { true }
 
           before do
-            allow(push_app).
-              to receive(:execute).
-                   with(app, start: false)
+            allow(push_app)
+              .to receive(:execute)
+              .with(app, start: false)
           end
 
           specify do
@@ -112,13 +112,13 @@ module Machete
 
       context 'push only' do
         before do
-          allow(CF::PushApp).
-            to receive(:new).
-                 and_return(push_app)
+          allow(CF::PushApp)
+            .to receive(:new)
+            .and_return(push_app)
 
-          allow(push_app).
-            to receive(:execute).
-                 with(app)
+          allow(push_app)
+            .to receive(:execute)
+            .with(app)
         end
 
         specify do

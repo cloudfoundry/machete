@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 require 'machete/matchers'
 
@@ -8,15 +9,15 @@ module Machete
     let(:filename) { double(:filename) }
 
     before do
-      allow(CF::AppFile).
-        to receive(:new).
-             with(app).
-             and_return(app_file)
+      allow(CF::AppFile)
+        .to receive(:new)
+        .with(app)
+        .and_return(app_file)
 
-      allow(app_file).
-        to receive(:has_file?).
-             with(filename).
-             and_return(has_file)
+      allow(app_file)
+        .to receive(:has_file?)
+        .with(filename)
+        .and_return(has_file)
     end
 
     context 'app has file' do

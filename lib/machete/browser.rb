@@ -1,3 +1,4 @@
+# encoding: utf-8
 module Machete
   HTTPServerError = Class.new(RuntimeError)
 
@@ -11,13 +12,13 @@ module Machete
     def visit_path(path, username: nil, password: nil)
       retries = 1
       begin
-        if username.nil? && password.nil?
-          @response = HTTParty.get("http://#{base_url}#{path}")
-        else
-          @response = HTTParty.get("http://#{username}:#{password}@#{base_url}#{path}")
+        @response = if username.nil? && password.nil?
+                      HTTParty.get("http://#{base_url}#{path}")
+                    else
+                      HTTParty.get("http://#{username}:#{password}@#{base_url}#{path}")
         end
 
-        raise HTTPServerError.new("responded with error code #{@response.code}") if @response.code >= 500
+        fail HTTPServerError.new("responded with error code #{@response.code}") if @response.code >= 500
       rescue SocketError, HTTPServerError
         raise if retries == 10
         retries += 1

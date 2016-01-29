@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'ostruct'
 
 module Machete
@@ -20,16 +21,14 @@ module Machete
 
       private
 
-      def app
-        @app
-      end
+      attr_reader :app
 
       def cf_response
         @cf_response ||= JSON.parse instances_command
       end
 
       def error_occurred?
-        app_guid.nil? || cf_response.has_key?('error_code')
+        app_guid.nil? || cf_response.key?('error_code')
       end
 
       def instances

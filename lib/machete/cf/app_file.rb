@@ -1,9 +1,9 @@
+# encoding: utf-8
 require 'machete/system_helper'
 
 module Machete
   module CF
     class AppFile
-
       attr_reader :app
 
       def initialize(app)

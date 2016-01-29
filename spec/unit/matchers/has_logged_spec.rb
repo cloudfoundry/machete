@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 require 'machete/matchers'
 
@@ -7,14 +8,14 @@ describe '#has_logged' do
   let(:app) { Machete::App.new('app_name', host) }
 
   before do
-    allow(Machete::CF::AppLog).
-      to receive(:new).
-           with(app).
-           and_return(app_log)
+    allow(Machete::CF::AppLog)
+      .to receive(:new)
+      .with(app)
+      .and_return(app_log)
 
-    allow(app_log).
-      to receive(:contents).
-           and_return(log_contents)
+    allow(app_log)
+      .to receive(:contents)
+      .and_return(log_contents)
   end
 
   context 'app has logged' do

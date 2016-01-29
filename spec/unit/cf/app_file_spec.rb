@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 require 'json'
 
@@ -10,13 +11,12 @@ module Machete
 
       describe '#has_file?' do
         context 'with a standard CF deployment' do
-
           before do
-            allow(SystemHelper).to receive(:run_cmd).
-              with("cf has-diego-enabled #{app.name}").and_return('false')
-            allow(SystemHelper).
-              to receive(:run_cmd).
-              with('cf files app_name filename')
+            allow(SystemHelper).to receive(:run_cmd)
+              .with("cf has-diego-enabled #{app.name}").and_return('false')
+            allow(SystemHelper)
+              .to receive(:run_cmd)
+              .with('cf files app_name filename')
           end
 
           context 'when the file exists in the app' do
@@ -37,10 +37,10 @@ module Machete
 
       context 'with a Diego CF deployment' do
         before do
-          allow(SystemHelper).to receive(:run_cmd).
-            with("cf has-diego-enabled #{app.name}").and_return('true')
-          expect(SystemHelper).to receive(:run_cmd).
-            with("cf ssh #{app.name} -c 'ls filename'")
+          allow(SystemHelper).to receive(:run_cmd)
+            .with("cf has-diego-enabled #{app.name}").and_return('true')
+          expect(SystemHelper).to receive(:run_cmd)
+            .with("cf ssh #{app.name} -c 'ls filename'")
         end
 
         context 'when the file exists in the app' do

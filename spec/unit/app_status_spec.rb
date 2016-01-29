@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 
 module Machete
@@ -11,18 +12,18 @@ module Machete
       subject(:app_status) { AppStatus.new }
 
       before do
-        allow(CF::Instances).
-          to receive(:new).
-               with(app).
-               and_return(instances_command)
+        allow(CF::Instances)
+          .to receive(:new)
+          .with(app)
+          .and_return(instances_command)
 
-        allow(instances_command).
-          to receive(:execute).
-               and_return([instance])
+        allow(instances_command)
+          .to receive(:execute)
+          .and_return([instance])
 
-        allow(instances_command).
-          to receive(:error).
-               and_return(error)
+        allow(instances_command)
+          .to receive(:error)
+          .and_return(error)
       end
 
       context 'app has starting instances' do

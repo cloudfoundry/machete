@@ -1,8 +1,8 @@
+# encoding: utf-8
 require 'spec_helper'
 
 module Machete
   describe Browser do
-
     subject(:browser) { Browser.new(app) }
     let(:app) { double(:app, name: 'app') }
     let(:response) { double(:response, content_type: content_type, code: 200) }
@@ -34,9 +34,9 @@ module Machete
         it 'retries the request ten times' do
           expect(HTTParty).to receive(:get).once.and_raise(HTTPServerError)
           expect(HTTParty).to receive(:get).exactly(9).times.and_raise(SocketError)
-          expect {
+          expect do
             browser.visit_path('/flub')
-          }.to raise_error(SocketError)
+          end.to raise_error(SocketError)
         end
 
         it 'returns on a successful request' do
@@ -50,9 +50,9 @@ module Machete
           it 'raises an exception' do
             expect(HTTParty).to receive(:get).exactly(10).times.and_return(double(:bad_response, code: 500))
 
-            expect {
+            expect do
               browser.visit_path('/flub')
-            }.to raise_error(HTTPServerError)
+            end.to raise_error(HTTPServerError)
           end
         end
 
@@ -60,9 +60,9 @@ module Machete
           it 'does not raise an exception' do
             expect(HTTParty).to receive(:get).once.and_return(double(:response, code: 400))
 
-            expect {
+            expect do
               browser.visit_path('/flub')
-            }.to_not raise_error
+            end.to_not raise_error
           end
         end
       end
@@ -84,9 +84,9 @@ module Machete
 
       describe '#headers' do
         it 'returns the headers of the request' do
-          expect(response).to receive(:headers).and_return({ 'X-This-Is-A-Header' => 'true' })
+          expect(response).to receive(:headers).and_return('X-This-Is-A-Header' => 'true')
           browser.visit_path('/test')
-          expect(browser.headers).to eql({ 'X-This-Is-A-Header' => 'true' })
+          expect(browser.headers).to eql('X-This-Is-A-Header' => 'true')
         end
       end
     end
@@ -98,7 +98,6 @@ module Machete
         it 'returns Content-Type value' do
           allow(CF::CLI).to receive(:url_for_app)
           allow(HTTParty).to receive(:get).and_return(response)
-
 
           browser.visit_path('/')
 

@@ -1,3 +1,4 @@
+# encoding: utf-8
 module Machete
   module CF
     class PushApp
@@ -12,27 +13,17 @@ module Machete
         base_command += " -p #{app.src_directory}"
 
         manifest = File.join(app.src_directory, 'manifest.yml')
-        if File.exist?(manifest)
-          base_command += " -f #{manifest}"
-        end
+        base_command += " -f #{manifest}" if File.exist?(manifest)
 
-        if app.stack
-          base_command += " -s #{app.stack}"
-        end
+        base_command += " -s #{app.stack}" if app.stack
 
-        unless start
-          base_command += ' --no-start'
-        end
+        base_command += ' --no-start' unless start
 
-        if app.start_command
-          base_command += " -c '#{app.start_command}'"
-        end
+        base_command += " -c '#{app.start_command}'" if app.start_command
 
-        if app.buildpack
-          base_command += " -b #{app.buildpack}"
-        end
+        base_command += " -b #{app.buildpack}" if app.buildpack
 
-        return base_command
+        base_command
       end
 
       def base_command(app)

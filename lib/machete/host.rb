@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'machete/host/vagrant'
 
 module Machete
@@ -5,9 +6,7 @@ module Machete
     def self.create
       vagrant_cwd = ENV['VAGRANT_CWD']
 
-      if vagrant_cwd
-        self::Vagrant.new(vagrant_cwd)
-      end
+      self::Vagrant.new(vagrant_cwd) if vagrant_cwd
     end
   end
 end

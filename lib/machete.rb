@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'machete/logger'
 require 'machete/deploy_app'
 require 'machete/app'
@@ -11,7 +12,7 @@ require 'machete/browser'
 
 module Machete
   class << self
-    def deploy_app(path, options={})
+    def deploy_app(path, options = {})
       app = App.new(path, host, options)
       deployer.execute(app)
       app
@@ -22,14 +23,11 @@ module Machete
       deployer.execute(app, push_only: true)
     end
 
-
     def logger
       @logger ||= Machete::Logger.new(STDOUT)
     end
 
-    def logger=(new_logger)
-      @logger = new_logger
-    end
+    attr_writer :logger
 
     private
 

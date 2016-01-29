@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'rspec/matchers'
 require 'erb'
 require 'yaml'
@@ -24,7 +25,7 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
       cached_buildpack_path = Dir['*_buildpack-cached-v*.zip'].fetch(0)
       fixture_path = "./#{app.src_directory}"
 
-      dockerfile_path = "Dockerfile.#{$$}.#{Time.now.to_i}"
+      dockerfile_path = "Dockerfile.{$PROCESS_ID}.#{Time.now.to_i}"
       docker_image_name = 'internet_traffic_test'
 
       manifest_search = Dir.glob("#{fixture_path}/**/manifest.yml")
@@ -35,9 +36,9 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
         manifest_hash = YAML.load_file(manifest_location)
       end
       docker_env_vars = ''
-      if manifest_hash.has_key?('env')
+      if manifest_hash.key?('env')
         manifest_hash['env'].each do |key, value|
-          docker_env_vars << "ENV #{key.to_s} #{value.to_s}\n"
+          docker_env_vars << "ENV #{key} #{value}\n"
         end
       end
 
@@ -48,7 +49,7 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
 
       docker_output = Dir.chdir(File.dirname(dockerfile_path)) do
         output = `docker build --rm --no-cache -t #{docker_image_name} -f #{dockerfile_path} .`
-        docker_exitstatus = $?.exitstatus.to_i
+        docker_exitstatus = $CHILD_STATUS.exitstatus.to_i
         output
       end
 
@@ -67,12 +68,12 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
       FileUtils.rm(dockerfile_path)
     end
 
-    raise "docker didn't successfully build" unless docker_exitstatus == 0
+    fail "docker didn't successfully build" unless docker_exitstatus == 0
     return !@traffic_lines.empty?
   end
 
   failure_message do
-    "No Internet traffic was detected"
+    'No Internet traffic was detected'
   end
 
   failure_message_when_negated do

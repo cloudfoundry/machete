@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'rspec/matchers'
 
 RSpec::Matchers.define :have_file do |expected_filename|

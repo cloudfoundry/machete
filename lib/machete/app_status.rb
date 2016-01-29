@@ -1,3 +1,4 @@
+# encoding: utf-8
 module Machete
   class AppStatus
     UNKNOWN = 0
@@ -12,7 +13,7 @@ module Machete
 
       return RUNNING if has_one_running_instance(instances)
 
-      return UNKNOWN
+      UNKNOWN
     end
 
     private

@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 
 describe Machete do
@@ -5,10 +6,10 @@ describe Machete do
   let(:deploy_app) { double(:deploy_app) }
 
   before do
-    allow(Machete::DeployApp).
-      to receive(:new).
-           with(no_args).
-           and_return deploy_app
+    allow(Machete::DeployApp)
+      .to receive(:new)
+      .with(no_args)
+      .and_return deploy_app
   end
 
   describe '.deploy_app' do
@@ -16,26 +17,26 @@ describe Machete do
     let(:host) { double(:host) }
 
     before do
-      allow(Machete::Host::Vagrant).
-        to receive(:new).
-             and_return(host)
+      allow(Machete::Host::Vagrant)
+        .to receive(:new)
+        .and_return(host)
 
-      allow(deploy_app).
-        to receive(:execute).
-             with(app)
+      allow(deploy_app)
+        .to receive(:execute)
+        .with(app)
     end
 
     context 'no additional options' do
       before do
-        allow(Machete::App).
-          to receive(:new).
-               with(path, host, {}).
-               and_return(app)
-        allow(Machete).to receive(:host).and_return(host)
+        allow(Machete::App)
+          .to receive(:new)
+          .with(path, host, {})
+          .and_return(app)
+        allow(described_class).to receive(:host).and_return(host)
       end
 
       specify do
-        result = Machete.deploy_app('path/to/app_name')
+        result = described_class.deploy_app('path/to/app_name')
         expect(result).to eql app
         expect(deploy_app).to have_received(:execute)
       end
@@ -45,15 +46,15 @@ describe Machete do
       let(:options) { double(:options) }
 
       before do
-        allow(Machete::App).
-          to receive(:new).
-               with(path, host, options).
-               and_return(app)
-        allow(Machete).to receive(:host).and_return(host)
+        allow(Machete::App)
+          .to receive(:new)
+          .with(path, host, options)
+          .and_return(app)
+        allow(described_class).to receive(:host).and_return(host)
       end
 
       specify do
-        result = Machete.deploy_app('path/to/app_name', options)
+        result = described_class.deploy_app('path/to/app_name', options)
         expect(result).to eql app
         expect(deploy_app).to have_received(:execute)
       end
@@ -62,13 +63,13 @@ describe Machete do
 
   describe '.push' do
     before do
-      allow(deploy_app).
-        to receive(:execute).
-             with(app, push_only: true)
+      allow(deploy_app)
+        .to receive(:execute)
+        .with(app, push_only: true)
     end
 
     specify do
-      Machete.push(app)
+      described_class.push(app)
       expect(deploy_app).to have_received(:execute).with(app, push_only: true)
     end
   end

@@ -1,17 +1,20 @@
+# encoding: utf-8
 require 'spec_helper'
 
 module Machete
   module CF
     describe CLI do
-        let(:app) { double(
+      let(:app) do
+        double(
           :app,
           name: 'myApp'
-        )}
+        )
+      end
       context 'an app has a URL' do
         specify do
-          expect(SystemHelper).to receive(:run_cmd).
-            with('cf app myApp').
-            and_return(<<-RESPONSE)
+          expect(SystemHelper).to receive(:run_cmd)
+            .with('cf app myApp')
+            .and_return(<<-RESPONSE)
               other stuff
               urls: the_apps_url
               other stuff
@@ -23,13 +26,13 @@ module Machete
 
       context 'when the app does not have a URL' do
         specify do
-          expect(SystemHelper).to receive(:run_cmd).
-            with('cf app myApp').
-            and_return('this is not the response you are looking for')
+          expect(SystemHelper).to receive(:run_cmd)
+            .with('cf app myApp')
+            .and_return('this is not the response you are looking for')
 
-          expect {
+          expect do
             CLI.url_for_app(app)
-          }.to raise_error("Failed finding app URL\nresponse:\n\nthis is not the response you are looking for")
+          end.to raise_error("Failed finding app URL\nresponse:\n\nthis is not the response you are looking for")
         end
       end
     end

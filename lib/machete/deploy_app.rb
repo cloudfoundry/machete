@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'httparty'
 require 'machete/system_helper'
 require 'machete/cf/delete_app'

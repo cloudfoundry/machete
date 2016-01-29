@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 
 module Machete
@@ -11,30 +12,30 @@ module Machete
       subject(:instances_command) { Instances.new(app) }
 
       before do
-        allow(AppGuidFinder).
-          to receive(:new).
-               and_return(app_guid_finder)
+        allow(AppGuidFinder)
+          .to receive(:new)
+          .and_return(app_guid_finder)
 
-        allow(app_guid_finder).
-          to receive(:execute).
-               with(app).
-               and_return(app_guid)
+        allow(app_guid_finder)
+          .to receive(:execute)
+          .with(app)
+          .and_return(app_guid)
 
-        allow(SystemHelper).
-          to receive(:run_cmd).
-               with("cf curl /v2/apps/#{app_guid}/instances").
-               and_return(instances_json)
+        allow(SystemHelper)
+          .to receive(:run_cmd)
+          .with("cf curl /v2/apps/#{app_guid}/instances")
+          .and_return(instances_json)
 
-        allow(JSON).
-          to receive(:parse).
-               with(instances_json).
-               and_return(cf_response)
+        allow(JSON)
+          .to receive(:parse)
+          .with(instances_json)
+          .and_return(cf_response)
       end
 
       context 'had an error' do
         let(:cf_response) do
           {
-            'code' => 170004,
+            'code' => 170_004,
             'description' => 'App staging failed in the buildpack compile phase',
             'error_code' => 'CF-ErrorCode'
           }

@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'machete/cf/app_log'
 require 'machete/cf/app_file'
 require 'machete/cf/delete_app'

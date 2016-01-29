@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 
 describe '#be_running' do
@@ -23,21 +24,21 @@ describe '#be_running' do
           .with("cf curl /v2/apps?q='name:fake_app'", true)
           .at_least(:twice)
           .and_return('{"resources":[]}', {
-          resources: [
-            metadata: {
-              guid: 'awesome-guid'
-            }
-          ]
-        }.to_json)
+            resources: [
+              metadata: {
+                guid: 'awesome-guid'
+              }
+            ]
+          }.to_json)
 
         expect(Machete::SystemHelper).to receive(:run_cmd)
-          .with("cf curl /v2/apps/awesome-guid/instances")
+          .with('cf curl /v2/apps/awesome-guid/instances')
           .at_least(:once)
           .and_return({
-          "0" => {
-            state: "RUNNING"
-          }
-        }.to_json)
+            '0' => {
+              state: 'RUNNING'
+            }
+          }.to_json)
 
         expect(Kernel).to receive(:sleep)
 

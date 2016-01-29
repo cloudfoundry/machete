@@ -1,8 +1,8 @@
+# encoding: utf-8
 require 'spec_helper'
 
 module Machete
   describe Host::Vagrant do
-
     subject(:host) { Host::Vagrant.new(vagrant_cwd) }
 
     let(:vagrant_cwd) { nil }
@@ -12,14 +12,14 @@ module Machete
         let(:vagrant_cwd) { '/tmp' }
 
         before do
-          allow(Bundler).
-            to receive(:with_clean_env).
-            and_yield
+          allow(Bundler)
+            .to receive(:with_clean_env)
+            .and_yield
 
-          allow(SystemHelper).
-            to receive(:run_cmd).
-            with('vagrant ssh -c \'command\' 2>&1').
-            and_return 'hello there'
+          allow(SystemHelper)
+            .to receive(:run_cmd)
+            .with('vagrant ssh -c \'command\' 2>&1')
+            .and_return 'hello there'
         end
 
         specify do

@@ -1,3 +1,4 @@
+# encoding: utf-8
 module Machete
   module CF
     class AppGuidFinder
@@ -8,7 +9,9 @@ module Machete
       private
 
       def extract_first_guid(response)
-        response['resources'].first['metadata']['guid'] rescue nil
+        response['resources'].first['metadata']['guid']
+      rescue
+        nil
       end
 
       def search(app_name)

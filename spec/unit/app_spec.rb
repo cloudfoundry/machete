@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'spec_helper'
 
 module Machete
@@ -13,7 +14,7 @@ module Machete
       end
 
       context 'when the name argument is passed' do
-        let(:options) { {name: 'my_new_app' } }
+        let(:options) { { name: 'my_new_app' } }
 
         it 'sets the name' do
           expect(app.name).to eql 'my_new_app'
@@ -78,7 +79,7 @@ module Machete
 
     describe '#buildpack' do
       context 'when the buildpack is passed as an argument' do
-        let(:options) { {buildpack: 'my_buildpack'} }
+        let(:options) { { buildpack: 'my_buildpack' } }
 
         it 'return the value' do
           expect(app.buildpack).to eq 'my_buildpack'

@@ -1,3 +1,4 @@
+# encoding: utf-8
 require 'rspec/matchers'
 
 RSpec::Matchers.define :have_header do |expected_header|
@@ -11,11 +12,11 @@ RSpec::Matchers.define :have_header do |expected_header|
     end
   end
 
-  failure_message do |browser|
+  failure_message do |_browser|
     "'#{expected_header}' not found in: \n\n#{@page_headers}"
   end
 
-  failure_message_when_negated do |browser|
+  failure_message_when_negated do |_browser|
     "'#{expected_header}' was found in: \n\n#{@page_headers}"
   end
 end
