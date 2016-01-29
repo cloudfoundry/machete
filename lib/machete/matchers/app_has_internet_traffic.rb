@@ -54,7 +54,7 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
 
       unless docker_exitstatus == 0
         puts '=========================================='
-        puts "docker_output: #{dockerfile_output}"
+        puts "docker_output: #{docker_output}"
         puts '=========================================='
       end
 
