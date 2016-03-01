@@ -47,6 +47,15 @@ Errors in the Machete library log to STDOUT by default. You can change Machete's
   Machete.logger = Machete::Logger.new("log/integration.log")
 ```
 
+# Running Test Suite
+
+To run the unit test suite, run the following from the base `machete` directory:
+
+    $ rspec
+
+To run the integration test, run the following from the `internet_traffic_test` directory:
+
+    $ cf_exec buildpack-build
 
 ## Notes
 
