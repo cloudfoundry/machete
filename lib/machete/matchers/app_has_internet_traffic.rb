@@ -25,7 +25,7 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
       cached_buildpack_path = Dir['*_buildpack-cached-v*.zip'].fetch(0)
       fixture_path = "./#{app.src_directory}"
 
-      dockerfile_path = "Dockerfile.{$PROCESS_ID}.#{Time.now.to_i}"
+      dockerfile_path = "Dockerfile.#{$PROCESS_ID}.#{Time.now.to_i}"
       docker_image_name = 'internet_traffic_test'
 
       manifest_search = Dir.glob("#{fixture_path}/**/manifest.yml")
