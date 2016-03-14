@@ -13,7 +13,7 @@ describe '#be_running' do
           .at_least(:twice)
           .and_return('{"resources":[]}')
 
-        app = Machete::App.new('fake_app', nil)
+        app = Machete::App.new('fake_app')
         expect(app).to_not be_running
       end
     end
@@ -42,7 +42,7 @@ describe '#be_running' do
 
         expect(Kernel).to receive(:sleep)
 
-        app = Machete::App.new('fake_app', nil)
+        app = Machete::App.new('fake_app')
         expect(app).to be_running
       end
     end

@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'machete/matchers'
 
 describe '#be_running' do
-  let(:app) { Machete::App.new('app_name', nil) }
+  let(:app) { Machete::App.new('app_name') }
   let(:app_status) { double(:app_status) }
 
   before do

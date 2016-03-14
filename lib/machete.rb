@@ -4,7 +4,6 @@ require 'machete/deploy_app'
 require 'machete/app'
 require 'machete/buildpack_mode'
 require 'machete/cf'
-require 'machete/host'
 require 'machete/vendor_dependencies'
 require 'machete/setup_app'
 require 'machete/app_status'
@@ -13,7 +12,7 @@ require 'machete/browser'
 module Machete
   class << self
     def deploy_app(path, options = {})
-      app = App.new(path, host, options)
+      app = App.new(path, options)
       deployer.execute(app)
       app
     end
@@ -33,10 +32,6 @@ module Machete
 
     def deployer
       Machete::DeployApp.new
-    end
-
-    def host
-      Host.create
     end
   end
 end

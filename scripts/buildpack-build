@@ -54,9 +54,7 @@ validate_stack_option() {
 
 configure_stack() {
   if [ "$host" == "" ]; then
-    host=bosh-lite.com
-    export VAGRANT_CWD="$HOME/workspace/bosh-lite"
-    $VAGRANT_CWD/bin/add-route
+    host=local.pcfdev.io
   fi
 
   indent "Using the stack '$stack' against the host '$host'"
@@ -144,12 +142,14 @@ fi
 indent "Connecting to CF"
 cf api api.$host --skip-ssl-validation
 cf_password=${CF_PASSWORD:-"admin"}
-cf login -u admin -p $cf_password
+cf login -u admin -p $cf_password -o pivotal -s integration || true
 
 cf create-org pivotal
 cf target -o pivotal
 cf create-space integration
 cf target -s integration
+
+cf login -u admin -p $cf_password -o pivotal -s integration
 
 if [ "$should_upload" == "true" ]; then
   detect_language

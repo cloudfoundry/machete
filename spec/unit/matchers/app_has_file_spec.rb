@@ -4,7 +4,7 @@ require 'machete/matchers'
 
 module Machete
   describe '#have_file' do
-    let(:app) { App.new('app_name', nil) }
+    let(:app) { App.new('app_name') }
     let(:app_file) { double(:app_file) }
     let(:filename) { double(:filename) }
 

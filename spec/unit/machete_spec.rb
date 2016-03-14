@@ -14,13 +14,8 @@ describe Machete do
 
   describe '.deploy_app' do
     let(:path) { 'path/to/app_name' }
-    let(:host) { double(:host) }
 
     before do
-      allow(Machete::Host::Vagrant)
-        .to receive(:new)
-        .and_return(host)
-
       allow(deploy_app)
         .to receive(:execute)
         .with(app)
@@ -30,9 +25,8 @@ describe Machete do
       before do
         allow(Machete::App)
           .to receive(:new)
-          .with(path, host, {})
+          .with(path, {})
           .and_return(app)
-        allow(described_class).to receive(:host).and_return(host)
       end
 
       specify do
@@ -48,9 +42,8 @@ describe Machete do
       before do
         allow(Machete::App)
           .to receive(:new)
-          .with(path, host, options)
+          .with(path, options)
           .and_return(app)
-        allow(described_class).to receive(:host).and_return(host)
       end
 
       specify do

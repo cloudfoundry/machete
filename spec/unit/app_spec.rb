@@ -3,10 +3,9 @@ require 'spec_helper'
 
 module Machete
   describe App do
-    let(:host) { double(:host) }
     let(:options) { Hash.new }
 
-    let(:app) { App.new('path/to/example_app', host, options) }
+    let(:app) { App.new('path/to/example_app',  options) }
 
     describe '#name' do
       it 'defaults to the last path' do
@@ -53,7 +52,7 @@ module Machete
     end
 
     describe '#stack' do
-      let(:app) { App.new('path/to/example_app', host, options) }
+      let(:app) { App.new('path/to/example_app', options) }
       context 'when CF_STACK is lucid64' do
         specify do
           allow(ENV).to receive(:[]).with('CF_STACK').and_return('lucid64')

@@ -7,14 +7,12 @@ module Machete
     let(:app) do
       double(:app,
              path: path,
-             host: host,
              name: 'app_name',
              needs_setup?: app_needs_setup?
             )
     end
 
     let(:vendor_dependencies) { double(:vendor_dependencies) }
-    let(:host) { double(:host, run: '') }
     let(:logger) { double(:logger) }
     let(:delete_app) { double(:delete_app) }
     let(:push_app) { double(:push_app) }
@@ -35,10 +33,6 @@ module Machete
           allow(vendor_dependencies)
             .to receive(:execute)
             .with(app)
-
-          allow(host)
-            .to receive(:create_log_manager)
-            .and_return(log_manager)
 
           allow(CF::DeleteApp)
             .to receive(:new)
