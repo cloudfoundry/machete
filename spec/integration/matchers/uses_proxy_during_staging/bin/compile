@@ -1,0 +1,20 @@
+#!/bin/bash
+# usage: bin/compile <build-dir> <cache-dir>
+
+mkdir -p "$1" "$2"
+
+echo "-----> Compiling simple proxy staging test app"
+echo "-----> Compiled simple proxy staging test app"
+
+if [ -f "$1/exec.sh" ]; then
+  echo "-----> found exec.sh, running:"
+
+  $1/exec.sh
+
+  if [ $? -ne 0 ]; then
+    echo "************************************" 1>&2
+    echo "*** exec.sh failed" 1>&2
+
+    exit 1
+  fi
+fi

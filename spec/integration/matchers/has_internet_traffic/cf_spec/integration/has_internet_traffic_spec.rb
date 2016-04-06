@@ -6,6 +6,7 @@ module Machete
   describe '#has_internet_traffic' do
     let(:fixture_dir) { File.join(Dir.pwd, 'spec', 'integration', 'matchers',
                                   'has_internet_traffic') }
+
     subject(:app) do
       Machete::App.new(app_name, { name: app_name, buildpack: 'null-test-buildpack'} )
     end

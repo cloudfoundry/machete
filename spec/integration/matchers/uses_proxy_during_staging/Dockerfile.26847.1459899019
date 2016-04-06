@@ -1,0 +1,15 @@
+FROM cloudfoundry/cflinuxfs2
+
+ENV CF_STACK cflinuxfs2
+ENV http_proxy http://192.168.50.1:8080
+ENV https_proxy https://192.168.50.1:8080
+
+
+ADD ./cf_spec/fixtures/app_that_causes_correct_staging_proxy_use /tmp/staged/
+ADD ./null_buildpack-v0.0.1.zip /tmp/
+
+RUN mkdir -p /buildpack
+RUN mkdir -p /tmp/cache
+
+RUN unzip /tmp/null_buildpack-v0.0.1.zip -d /buildpack
+RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/internet traffic: /' 2>&1 &) && /buildpack/bin/detect /tmp/staged && /buildpack/bin/compile /tmp/staged /tmp/cache && /buildpack/bin/release /tmp/staged /tmp/cache
