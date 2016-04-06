@@ -70,11 +70,13 @@ EOF
 
       tmpdir = Dir.mktmpdir
       proxy_dir = File.join(tmpdir, 'go/src/proxy')
+      gopath_dir = File.join(tmpdir, 'go')
       FileUtils.mkdir_p(proxy_dir)
       File.write(File.join(proxy_dir, 'main.go'), go_code)
+
       Dir.chdir(proxy_dir) do
-        `GOPATH=#{tmpdir} go get ./...`
-        `GOPATH=#{tmpdir} go build`
+        `GOPATH=#{gopath_dir} go get ./...`
+        `GOPATH=#{gopath_dir} go build`
         proxy_process = fork { exec("#{proxy_dir}/proxy") }
       end
 
