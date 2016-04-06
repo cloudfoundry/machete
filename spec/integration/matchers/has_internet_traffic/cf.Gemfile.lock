@@ -9,9 +9,9 @@ GIT
       terminal-table (~> 1.4.5)
 
 PATH
-  remote: ../
+  remote: ../../../..
   specs:
-    machete (0.0.33)
+    machete (0.0.36)
       httparty
 
 GEM
