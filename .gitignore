@@ -4,3 +4,4 @@
 Gemfile.lock
 null_buildpack-*.zip
 log
+Dockerfile*
