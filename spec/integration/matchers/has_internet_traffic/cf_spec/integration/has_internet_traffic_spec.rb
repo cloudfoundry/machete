@@ -13,7 +13,9 @@ module Machete
 
     before do
       Dir.chdir(fixture_dir) do
-        system('BUNDLE_GEMFILE=cf.Gemfile bundle && BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --cached')
+        Bundler.with_clean_env do
+          system('BUNDLE_GEMFILE=cf.Gemfile bundle && BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --cached')
+        end
       end
     end
 
