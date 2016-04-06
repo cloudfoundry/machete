@@ -44,7 +44,7 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
       end
 
       # setting proxy env vars
-      proxy_ip = Socket.ip_address_list.last.ip_address
+      proxy_ip = Socket.ip_address_list.select{ |ip| ip.ip_address =~ /^[\d\.]+$/ }.last.ip_address
       proxy_port = '8080'
       docker_env_vars << "ENV http_proxy http://#{proxy_ip}:#{proxy_port}\n"
       docker_env_vars << "ENV https_proxy https://#{proxy_ip}:#{proxy_port}\n"
