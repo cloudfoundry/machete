@@ -3,6 +3,7 @@ require 'rspec/matchers'
 require 'erb'
 require 'yaml'
 require 'socket'
+require 'tmpdir'
 
 RSpec::Matchers.define :use_proxy_during_staging do
   dockerfile = <<-DOCKERFILE
@@ -18,7 +19,7 @@ RUN mkdir -p /buildpack
 RUN mkdir -p /tmp/cache
 
 RUN unzip /tmp/<%= cached_buildpack_path %> -d /buildpack
-RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/internet traffic: /' 2>&1 &) && /buildpack/bin/detect /tmp/staged && /buildpack/bin/compile /tmp/staged /tmp/cache && /buildpack/bin/release /tmp/staged /tmp/cache
+RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -t -w /tmp/dumplog &) && /buildpack/bin/detect /tmp/staged && /buildpack/bin/compile /tmp/staged /tmp/cache && /buildpack/bin/release /tmp/staged /tmp/cache && pkill tcpdump; tcpdump -nr /tmp/dumplog || true
   DOCKERFILE
 
   match do |app|
@@ -50,11 +51,31 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
       docker_env_vars << "ENV https_proxy https://#{proxy_ip}:#{proxy_port}\n"
 
       # boot up proxy in background
-      web_proxy_thread = Thread.new do
-        require 'webrick'
-        require 'webrick/httpproxy'
-        proxy = WEBrick::HTTPProxyServer.new Port: proxy_port.to_i
-        proxy.start
+      proxy_process = nil
+      go_code = <<EOF
+package main
+
+import (
+    "github.com/elazarl/goproxy"
+    "log"
+    "net/http"
+)
+
+func main() {
+    proxy := goproxy.NewProxyHttpServer()
+    proxy.Verbose = true
+    log.Fatal(http.ListenAndServe(":8080", proxy))
+}
+EOF
+
+      tmpdir = Dir.mktmpdir
+      proxy_dir = File.join(tmpdir, 'go/src/proxy')
+      FileUtils.mkdir_p(proxy_dir)
+      File.write(File.join(proxy_dir, 'main.go'), go_code)
+      Dir.chdir(proxy_dir) do
+        `GOPATH=#{tmpdir} go get ./...`
+        `GOPATH=#{tmpdir} go build`
+        proxy_process = fork { exec("#{proxy_dir}/proxy") }
       end
 
       dockerfile_contents = ERB.new(dockerfile).result binding
@@ -74,20 +95,21 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
         puts '=========================================='
       end
 
-      @traffic_lines = docker_output.split("\n").grep(/^(\e\[\d+m)?internet traffic:/)
+      @traffic_lines = docker_output.split("\n").grep(/IP ([\d+\.]+) > ([\d+\.]+)\.(\d+)/)
     ensure
       unless `docker images | grep #{docker_image_name}`.strip.empty?
         `docker rmi -f #{docker_image_name}`
       end
+      FileUtils.rm_f(tmpdir) if defined? tmpdir
       FileUtils.rm(dockerfile_path) if defined? dockerfile_path && !dockerfile_path.nil?
-      Thread.kill(web_proxy_thread) if defined? web_proxy_thread && !web_proxy_thread.nil?
+      Process.kill('KILL', proxy_process) if defined? proxy_process && !proxy_process.nil?
     end
 
     fail "docker didn't successfully build" unless docker_exitstatus == 0
 
     #check all traffic lines hit proxy
     return @traffic_lines.all? do |traffic_line|
-      /internet traffic: P ([\d+\.]+) > ([\d+\.]+)\.(\d+)/.match(traffic_line)
+      /IP ([\d+\.]+) > ([\d+\.]+)\.(\d+)/.match(traffic_line)
       source_ip_port = $1
       destination_ip = $2
       destination_port = $3
