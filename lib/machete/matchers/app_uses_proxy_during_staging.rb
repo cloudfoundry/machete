@@ -50,7 +50,7 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
       docker_env_vars << "ENV https_proxy https://#{proxy_ip}:#{proxy_port}\n"
 
       # boot up proxy in background
-      web_proxy_io = IO.popen("ruby -rwebrick -rwebrick/httpproxy -e \"proxy = WEBrick::HTTPProxyServer.new Port: #{proxy_port};trap 'TERM' do proxy.shutdown end;proxy.start\"")
+      web_proxy_io = IO.popen("ruby -rwebrick -rwebrick/httpproxy -e \"proxy = WEBrick::HTTPProxyServer.new Port: #{proxy_port};proxy.start\"")
 
       dockerfile_contents = ERB.new(dockerfile).result binding
       File.write(dockerfile_path, dockerfile_contents)
@@ -75,7 +75,7 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
         `docker rmi -f #{docker_image_name}`
       end
       FileUtils.rm(dockerfile_path)
-      Process.kill("TERM", web_proxy_io.pid)
+      Process.kill("KILL", web_proxy_io.pid)
     end
 
     fail "docker didn't successfully build" unless docker_exitstatus == 0
