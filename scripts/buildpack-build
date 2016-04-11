@@ -44,6 +44,14 @@ detect_language() {
   fi
 }
 
+disable_original_buildpack() {
+    cf update-buildpack ${language}_buildpack --disable
+}
+
+enable_original_buildpack() {
+    cf update-buildpack ${language}_buildpack --enable
+}
+
 validate_stack_option() {
   if ([ "$stack" != "cflinuxfs2" ]); then
     echo -e 'ERROR: Invalid argument passed in for --stack option. \n' \
@@ -68,13 +76,13 @@ configure_based_on_mode() {
   fi
 }
 
-build_buildpack() {
+build_new_buildpack() {
   indent "Building $mode buildpack"
   rm -f ${buildpack_file_pattern}
   BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --"$mode"
 }
 
-upload_buildpack() {
+upload_new_buildpack() {
   indent "Uploading buildpack to CF"
   cf delete-buildpack ${language}-test-buildpack -f
   cf create-buildpack ${language}-test-buildpack ${buildpack_file_pattern} 1 --enable
@@ -135,7 +143,7 @@ which cf
 cf --version
 
 if [ "$should_build" == "true" ]; then
-  build_buildpack
+  build_new_buildpack
   detect_language
 fi
 
@@ -153,7 +161,8 @@ cf login -u admin -p $cf_password -o pivotal -s integration
 
 if [ "$should_upload" == "true" ]; then
   detect_language
-  upload_buildpack
+  disable_original_buildpack
+  upload_new_buildpack
 fi
 
 indent "Running specs"
@@ -163,3 +172,8 @@ BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=$mode CF_STACK=$stack bundle exec rspec
   --format documentation \
   --color \
   $rspec_options
+
+
+if [ "$should_upload" == "true" ]; then
+    enable_original_buildpack
+fi
