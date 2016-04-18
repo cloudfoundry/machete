@@ -44,12 +44,26 @@ detect_language() {
   fi
 }
 
-disable_original_buildpack() {
-    cf update-buildpack ${language}_buildpack --disable
+disable_buildpacks() {
+  cf buildpacks | while read line
+  do
+    buildpack_attributes=($line)
+    buildpack_name=${buildpack_attributes[0]}
+    buildpack_enabled=${buildpack_attributes[2]}
+
+    if [ "$buildpack_enabled" == "true" ]; then
+      cf update-buildpack $buildpack_name --disable 1>&2
+      echo $buildpack_name
+    fi
+  done
 }
 
-enable_original_buildpack() {
-    cf update-buildpack ${language}_buildpack --enable
+enable_buildpacks() {
+  for buildpack_name in ${machete_disabled_buildpacks[@]}
+  do
+    echo "Enabling $buildpack_name"
+    cf update-buildpack $buildpack_name --enable
+  done
 }
 
 validate_stack_option() {
@@ -161,7 +175,10 @@ cf login -u admin -p $cf_password -o pivotal -s integration
 
 if [ "$should_upload" == "true" ]; then
   detect_language
-  disable_original_buildpack
+  echo "Disabling all buildpacks"
+  machete_disabled_buildpacks=($(disable_buildpacks))
+  disable_buildpacks
+  trap enable_buildpacks SIGHUP SIGINT SIGQUIT SIGABRT SIGTERM
   upload_new_buildpack
 fi
 
@@ -175,5 +192,6 @@ BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=$mode CF_STACK=$stack bundle exec rspec
 
 
 if [ "$should_upload" == "true" ]; then
-    enable_original_buildpack
+  enable_buildpacks
+  echo "Restored original buildpacks enabled/disabled configuration"
 fi

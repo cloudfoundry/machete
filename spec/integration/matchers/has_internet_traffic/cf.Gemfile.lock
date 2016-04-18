@@ -11,7 +11,7 @@ GIT
 PATH
   remote: ../../../..
   specs:
-    machete (0.0.40)
+    machete (0.0.41)
       httparty
 
 GEM
