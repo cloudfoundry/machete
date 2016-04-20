@@ -8,15 +8,15 @@ RSpec::Matchers.define :have_internet_traffic do
 FROM cloudfoundry/cflinuxfs2
 
 ENV CF_STACK cflinuxfs2
-<%= docker_env_vars %>
-
-ADD <%= fixture_path %> /tmp/staged/
-ADD ./<%= cached_buildpack_path %> /tmp/
-
 RUN mkdir -p /buildpack
 RUN mkdir -p /tmp/cache
 
+ADD ./<%= cached_buildpack_path %> /tmp/
 RUN unzip /tmp/<%= cached_buildpack_path %> -d /buildpack
+
+<%= docker_env_vars %>
+ADD <%= fixture_path %> /tmp/staged/
+
 RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/internet traffic: /' 2>&1 &) && /buildpack/bin/detect /tmp/staged && /buildpack/bin/compile /tmp/staged /tmp/cache && /buildpack/bin/release /tmp/staged /tmp/cache
   DOCKERFILE
 
@@ -48,7 +48,7 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
       docker_exitstatus = 0
 
       docker_output = Dir.chdir(File.dirname(dockerfile_path)) do
-        output = `docker build --rm --no-cache -t #{docker_image_name} -f #{dockerfile_path} .`
+        output = `docker build -t #{docker_image_name} -f #{dockerfile_path} .`
         docker_exitstatus = $CHILD_STATUS.exitstatus.to_i
         output
       end
@@ -62,9 +62,6 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
       @traffic_lines = docker_output.split("\n").grep(/^(\e\[\d+m)?internet traffic:/)
 
     ensure
-      unless `docker images | grep #{docker_image_name}`.strip.empty?
-        `docker rmi -f #{docker_image_name}`
-      end
       FileUtils.rm(dockerfile_path)
     end
 
