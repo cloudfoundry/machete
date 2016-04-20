@@ -10,15 +10,15 @@ RSpec::Matchers.define :use_proxy_during_staging do
 FROM cloudfoundry/cflinuxfs2
 
 ENV CF_STACK cflinuxfs2
+<%= docker_env_vars %>
+
+ADD <%= fixture_path %> /tmp/staged/
+ADD ./<%= cached_buildpack_path %> /tmp/
+
 RUN mkdir -p /buildpack
 RUN mkdir -p /tmp/cache
 
-ADD ./<%= cached_buildpack_path %> /tmp/
 RUN unzip /tmp/<%= cached_buildpack_path %> -d /buildpack
-
-<%= docker_env_vars %>
-ADD <%= fixture_path %> /tmp/staged/
-
 RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -t -Uw /tmp/dumplog &) && /buildpack/bin/detect /tmp/staged && /buildpack/bin/compile /tmp/staged /tmp/cache && /buildpack/bin/release /tmp/staged /tmp/cache && pkill tcpdump; tcpdump -nr /tmp/dumplog || true
   DOCKERFILE
 
@@ -86,7 +86,7 @@ EOF
       docker_exitstatus = 0
 
       docker_output = Dir.chdir(File.dirname(dockerfile_path)) do
-        output = `docker build -t #{docker_image_name} -f #{dockerfile_path} .`
+        output = `docker build --rm --no-cache -t #{docker_image_name} -f #{dockerfile_path} .`
         docker_exitstatus = $CHILD_STATUS.exitstatus.to_i
         output
       end
@@ -99,6 +99,9 @@ EOF
 
       @traffic_lines = docker_output.split("\n").grep(/IP ([\d+\.]+) > ([\d+\.]+)\.(\d+)/)
     ensure
+      unless `docker images | grep #{docker_image_name}`.strip.empty?
+        `docker rmi -f #{docker_image_name}`
+      end
       FileUtils.rm_f(tmpdir) if defined? tmpdir
       FileUtils.rm(dockerfile_path) if defined? dockerfile_path && !dockerfile_path.nil?
       Process.kill('KILL', proxy_process) if defined? proxy_process && !proxy_process.nil?
