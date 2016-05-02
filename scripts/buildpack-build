@@ -64,6 +64,7 @@ enable_buildpacks() {
     echo "Enabling $buildpack_name"
     cf update-buildpack $buildpack_name --enable
   done
+  echo "Restored original buildpacks enabled/disabled configuration"
 }
 
 validate_stack_option() {
@@ -178,7 +179,7 @@ if [ "$should_upload" == "true" ]; then
   echo "Disabling all buildpacks"
   machete_disabled_buildpacks=($(disable_buildpacks))
   disable_buildpacks
-  trap enable_buildpacks SIGHUP SIGINT SIGQUIT SIGABRT SIGTERM
+  trap enable_buildpacks SIGHUP SIGINT SIGQUIT SIGABRT SIGTERM EXIT
   upload_new_buildpack
 fi
 
@@ -190,8 +191,6 @@ BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=$mode CF_STACK=$stack bundle exec rspec
   --color \
   $rspec_options
 
-
 if [ "$should_upload" == "true" ]; then
   enable_buildpacks
-  echo "Restored original buildpacks enabled/disabled configuration"
 fi
