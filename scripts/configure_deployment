@@ -31,12 +31,4 @@ __target_api() {
   __ensure_space
 }
 
-__target_bosh() {
-  __indent "Targetting bosh"
-
-  echo $(bosh target)
-  __are_you_sure "Are you sure you want to use the above bosh target?"
-}
-
-__target_bosh
 __target_api
