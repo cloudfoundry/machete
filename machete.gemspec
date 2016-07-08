@@ -6,12 +6,12 @@ require 'machete/version'
 Gem::Specification.new do |spec|
   spec.name          = 'machete'
   spec.version       = Machete::VERSION
-  spec.authors       = ['Jordi Noguera and Rasheed Abdul-Aziz and Aaron Triantafyllidis']
-  spec.email         = ['pair+jordi+squeedee@pivotallabs.com']
-  spec.summary       = 'Machete is the offline buildpack library for Cloud Foundry Buildpacks'
-  spec.description   = 'Machete is the offline buildpack library for Cloud Foundry Buildpacks'
+  spec.authors       = ['Cloud Foundry Buildpacks Team']
+  spec.email         = ['cf-buildpacks-eng@pivotal.io']
+  spec.summary       = 'Machete is the buildpack testing library for Cloud Foundry Buildpacks'
+  spec.description   = 'Machete is the buildpack testing library for Cloud Foundry Buildpacks'
   spec.homepage      = ''
-  spec.license       = 'MIT'
+  spec.license       = 'Apache 2.0'
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
