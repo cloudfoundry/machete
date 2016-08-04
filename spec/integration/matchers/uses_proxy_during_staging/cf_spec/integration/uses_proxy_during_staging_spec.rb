@@ -8,7 +8,15 @@ module Machete
                                   'uses_proxy_during_staging') }
 
     subject(:app) do
-      Machete::App.new(app_name, { name: app_name } )
+      Machete::App.new(app_name, { name: app_name, buildpack: 'null-test-buildpack'} )
+    end
+
+    before do
+      Dir.chdir(fixture_dir) do
+        Bundler.with_clean_env do
+          system('BUNDLE_GEMFILE=cf.Gemfile bundle && BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --uncached')
+        end
+      end
     end
 
     context 'a buildpack that utilizes proxies correctly' do
