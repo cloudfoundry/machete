@@ -21,7 +21,7 @@ module Machete
     end
 
     after do
-      #Machete::CF::DeleteApp.new.execute(app)
+      Machete::CF::DeleteApp.new.execute(app)
       system('cf delete-buildpack -f null-test-buildpack')
     end
 
