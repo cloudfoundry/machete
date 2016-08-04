@@ -163,16 +163,8 @@ if [ "$should_build" == "true" ]; then
 fi
 
 indent "Connecting to CF"
-cf api api.$host --skip-ssl-validation
-cf_password=${CF_PASSWORD:-"admin"}
-cf login -u admin -p $cf_password -o pivotal -s integration || true
-
-cf create-org pivotal
-cf target -o pivotal
-cf create-space integration
-cf target -s integration
-
-cf login -u admin -p $cf_password -o pivotal -s integration
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+$SCRIPT_DIR/cf_login_and_setup $host
 
 if [ "$should_upload" == "true" ]; then
   detect_language

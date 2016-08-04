@@ -1,0 +1,15 @@
+#!/bin/bash
+set -eo pipefail
+
+HOST=$1
+
+cf api api.$HOST --skip-ssl-validation
+cf_password=${CF_PASSWORD:-"admin"}
+cf login -u admin -p $cf_password -o pivotal -s integration || true
+
+cf create-org pivotal
+cf target -o pivotal
+cf create-space integration
+cf target -s integration
+
+cf login -u admin -p $cf_password -o pivotal -s integration
