@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe '#be_running' do
   before { Timecop.scale(3600) }
-  after { Timecop.return }
+  after  { Timecop.return }
 
   context 'When the app has not deployed immediately' do
     context 'And it never starts' do

@@ -1,26 +1,30 @@
 # encoding: utf-8
 require 'rspec/matchers'
 
-RSpec::Matchers.define :have_logged do |expected_entry|
+RSpec::Matchers.define :have_logged do |expected_entry, timeout = 10|
   match do |app|
-    app_log = Machete::CF::AppLog.new(app)
+    max_end_time = Time.now + timeout
 
-    if expected_entry.is_a? String
-      app_log.contents.include?(expected_entry)
-    elsif expected_entry.is_a? Regexp
-      !app_log.contents.match(expected_entry).nil?
+    while Time.now <= max_end_time
+      app_logs = app.get_logs
+      if expected_entry.is_a?(String) && app_logs.include?(expected_entry)
+        return true
+      elsif expected_entry.is_a?(Regexp) && !app_logs.match(expected_entry).nil?
+        return true
+      end
+      Kernel.sleep(1)
     end
+
+    return false
   end
 
   failure_message do |app|
-    app_log = Machete::CF::AppLog.new(app)
     "\nApp log did not include '#{expected_entry}'\n\n" +
-      app_log.contents
+      app.get_logs
   end
 
   failure_message_when_negated do |app|
-    app_log = Machete::CF::AppLog.new(app)
     "\nApp log did include '#{expected_entry}'\n\n" +
-      app_log.contents
+      app.get_logs
   end
 end

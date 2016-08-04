@@ -1,26 +1,34 @@
 # encoding: utf-8
 require 'machete/system_helper'
+require 'childprocess'
 
 module Machete
   module CF
-    class AppLog
-      attr_reader :app
+    class AppLogs
+      attr_reader :app_name
+      attr_reader :push_logs
 
-      def initialize(app)
-        @app = app
+      def initialize(app_name)
+        @app_name = app_name
       end
 
-      def contents
-        Machete.logger.info "$ #{recent_logs}"
-        result = SystemHelper.run_cmd(recent_logs)
-        Machete.logger.info result
-        result
+      def start_logs
+        @log_output_file = Tempfile.new("log-output-for-#{app_name}")
+        @log_process = ChildProcess.build("cf", "logs", app_name)
+        @log_process.io.stdout = @log_output_file
+        @log_process.start
       end
 
-      private
+      def record_push_logs(logs)
+        @push_logs = logs
+      end
 
-      def recent_logs
-        "cf logs #{app.name} --recent"
+      def end_logs
+        @log_process.stop if defined? @log_process
+      end
+
+      def get_logs
+        push_logs + File.read(@log_output_file)
       end
     end
   end

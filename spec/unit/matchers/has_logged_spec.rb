@@ -3,17 +3,11 @@ require 'spec_helper'
 require 'machete/matchers'
 
 describe '#has_logged' do
-  let(:app_log) { double(:app_log) }
   let(:app) { Machete::App.new('app_name' ) }
 
   before do
-    allow(Machete::CF::AppLog)
-      .to receive(:new)
-      .with(app)
-      .and_return(app_log)
-
-    allow(app_log)
-      .to receive(:contents)
+    allow(app)
+      .to receive(:get_logs)
       .and_return(log_contents)
   end
 

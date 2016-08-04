@@ -3,7 +3,9 @@ module Machete
   module CF
     class PushApp
       def execute(app, start: true)
-        SystemHelper.run_cmd push_command(app, start)
+        logs = SystemHelper.run_cmd push_command(app, start)
+        app.record_push_logs(logs)
+        app.start_logs
       end
 
       private

@@ -1,0 +1,10 @@
+#!/bin/bash
+# usage: bin/compile <build-dir> <cache-dir>
+
+mkdir -p "$1" "$2"
+
+echo "Start of logs"
+
+for i in {1..150}; do
+  echo "Log line $i"
+done

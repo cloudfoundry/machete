@@ -26,4 +26,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rubocop-rspec'
 
   spec.add_runtime_dependency 'httparty'
+  spec.add_runtime_dependency 'childprocess'
 end

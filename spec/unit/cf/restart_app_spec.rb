@@ -8,15 +8,13 @@ module Machete
       subject(:delete_app) { DeleteApp.new }
 
       before do
-        allow(SystemHelper)
-          .to receive(:run_cmd)
-          .with('cf delete -f -r app_name')
+        allow(SystemHelper).to receive(:run_cmd).with('cf delete -f -r app_name')
       end
 
       specify do
+        expect(app).to receive(:end_logs)
         delete_app.execute(app)
-        expect(SystemHelper)
-          .to have_received(:run_cmd)
+        expect(SystemHelper).to have_received(:run_cmd)
       end
     end
   end

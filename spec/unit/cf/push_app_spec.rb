@@ -21,6 +21,9 @@ module Machete
 
       before do
         allow(SystemHelper).to receive(:run_cmd)
+        allow(app).to receive(:record_push_logs)
+        allow(app).to receive(:start_logs)
+        allow(app).to receive(:end_logs)
       end
 
       context 'default arguments' do

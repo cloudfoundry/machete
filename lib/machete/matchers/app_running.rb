@@ -5,8 +5,7 @@ RSpec::Matchers.define :be_running do |timeout = 60|
   match do |app|
     app_status = Machete::AppStatus.new
 
-    start_time = Time.now
-    max_end_time = start_time + timeout
+    max_end_time = Time.now + timeout
 
     while Time.now <= max_end_time
       status = app_status.execute(app)

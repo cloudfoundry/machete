@@ -14,9 +14,9 @@ module Machete
       end
 
       specify do
+        expect(app).to receive(:end_logs)
         delete_app.execute(app)
-        expect(SystemHelper)
-          .to have_received(:run_cmd)
+        expect(SystemHelper).to have_received(:run_cmd)
       end
     end
   end
