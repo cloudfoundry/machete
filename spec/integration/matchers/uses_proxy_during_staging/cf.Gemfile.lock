@@ -11,7 +11,7 @@ GIT
 PATH
   remote: ../../../..
   specs:
-    machete (0.0.41)
+    machete (0.0.43)
       httparty
 
 GEM
@@ -25,8 +25,7 @@ GEM
       tzinfo (~> 1.1)
     coderay (1.1.0)
     diff-lcs (1.2.5)
-    httparty (0.13.7)
-      json (~> 1.8)
+    httparty (0.14.0)
       multi_xml (>= 0.5.2)
     i18n (0.7.0)
     json (1.8.3)
@@ -70,4 +69,4 @@ DEPENDENCIES
   rspec-instafail
 
 BUNDLED WITH
-   1.11.2
+   1.12.5
