@@ -19,6 +19,9 @@ RUN mkdir -p /buildpack
 RUN mkdir -p /tmp/cache
 
 RUN unzip /tmp/<%= cached_buildpack_path %> -d /buildpack
+
+# HACK around https://github.com/dotcloud/docker/issues/5490
+RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
 RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -t -Uw /tmp/dumplog &) && /buildpack/bin/detect /tmp/staged && /buildpack/bin/compile /tmp/staged /tmp/cache && /buildpack/bin/release /tmp/staged /tmp/cache && pkill tcpdump; tcpdump -nr /tmp/dumplog || true
   DOCKERFILE
 
