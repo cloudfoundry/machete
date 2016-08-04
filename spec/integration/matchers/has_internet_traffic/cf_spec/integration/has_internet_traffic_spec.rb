@@ -8,15 +8,7 @@ module Machete
                                   'has_internet_traffic') }
 
     subject(:app) do
-      Machete::App.new(app_name, { name: app_name, buildpack: 'null-test-buildpack'} )
-    end
-
-    before do
-      Dir.chdir(fixture_dir) do
-        Bundler.with_clean_env do
-          system('BUNDLE_GEMFILE=cf.Gemfile bundle && BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --cached')
-        end
-      end
+      Machete::App.new(app_name, { name: app_name } )
     end
 
     context 'an app that does not access the internet' do
