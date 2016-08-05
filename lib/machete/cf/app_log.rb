@@ -4,11 +4,11 @@ require 'childprocess'
 
 module Machete
   module CF
-    class AppLogs
+    module AppLogs
       attr_reader :app_name
       attr_reader :push_logs
 
-      def initialize(app_name)
+      def setup_logs(app_name)
         @app_name = app_name
       end
 

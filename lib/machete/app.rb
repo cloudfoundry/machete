@@ -1,6 +1,8 @@
 # encoding: utf-8
 module Machete
   class App
+    include CF::AppLogs
+
     FIXTURES_DIR = 'cf_spec/fixtures'.freeze
 
     attr_reader :buildpack,
@@ -19,7 +21,7 @@ module Machete
       @stack = options[:stack] || ENV['CF_STACK']
       @buildpack = options[:buildpack]
       @service = options[:service]
-      @logger = CF::AppLogs.new(name)
+      setup_logs(name)
     end
 
     def src_directory
@@ -28,22 +30,6 @@ module Machete
 
     def needs_setup?
       env.any? || !@service.nil?
-    end
-
-    def record_push_logs(logs)
-      @logger.record_push_logs(logs)
-    end
-
-    def get_logs
-      @logger.get_logs
-    end
-
-    def start_logs
-      @logger.start_logs
-    end
-
-    def end_logs
-      @logger.end_logs
     end
   end
 end

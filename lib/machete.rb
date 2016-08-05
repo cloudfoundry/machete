@@ -1,9 +1,9 @@
 # encoding: utf-8
 require 'machete/logger'
 require 'machete/deploy_app'
+require 'machete/cf'
 require 'machete/app'
 require 'machete/buildpack_mode'
-require 'machete/cf'
 require 'machete/vendor_dependencies'
 require 'machete/setup_app'
 require 'machete/app_status'
