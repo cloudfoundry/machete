@@ -4,8 +4,8 @@ module Machete
     class PushApp
       def execute(app, start: true)
         logs = SystemHelper.run_cmd push_command(app, start)
-        app.record_push_logs(logs)
         app.start_logs
+        app.record_push_logs(logs)
       end
 
       private

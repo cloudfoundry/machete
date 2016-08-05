@@ -57,5 +57,17 @@ module Machete
         end
       end
     end
+
+    context 'app that immediately outputs logs after starting' do
+      let(:app_name) { 'app_that_logs_immediately_after_start' }
+      let(:browser) { Machete::Browser.new(app) }
+
+      it 'logs lines immediately after app push' do
+        Dir.chdir(fixture_dir) do
+          expect(app).to be_running
+          expect(app).to have_logged("Immediate")
+        end
+      end
+    end
   end
 end

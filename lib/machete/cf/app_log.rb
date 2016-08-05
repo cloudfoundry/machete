@@ -30,6 +30,10 @@ module Machete
       def get_logs
         push_logs + File.read(@log_output_file)
       end
+
+      def get_recent_logs
+        SystemHelper.run_cmd("cf logs --recent #{app_name}")
+      end
     end
   end
 end
