@@ -2,6 +2,7 @@
 require 'machete/logger'
 require 'machete/deploy_app'
 require 'machete/cf'
+require 'machete/rspec_helpers'
 require 'machete/app'
 require 'machete/buildpack_mode'
 require 'machete/vendor_dependencies'
