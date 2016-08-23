@@ -49,5 +49,47 @@ module Machete
         end
       end
     end
+
+    describe '#skip_if_proprietary_dependencies_are_not_available' do
+      subject { described_class.skip_if_proprietary_dependencies_are_not_available }
+
+      describe 'Oracle Instant Client Lite and OCI SDK' do
+        context 'downloaded dependencies are available' do
+          before do
+            allow(File).to receive(:exist?).and_return(true)
+          end
+
+          it 'checks the file system for the files' do
+            expect(File).to receive(:exist?).with('/oracle/libclntsh.so').and_return(true)
+            expect(File).to receive(:exist?).with('/oracle/libclntsh.so.12.1').and_return(true)
+            expect(File).to receive(:exist?).with('/oracle/libipc1.so').and_return(true)
+            expect(File).to receive(:exist?).with('/oracle/libmql1.so').and_return(true)
+            expect(File).to receive(:exist?).with('/oracle/libnnz12.so').and_return(true)
+            expect(File).to receive(:exist?).with('/oracle/libociicus.so').and_return(true)
+            expect(File).to receive(:exist?).with('/oracle/libons.so').and_return(true)
+
+            subject
+          end
+
+          it 'does not skip a test' do
+            expect_any_instance_of(described_class).to_not receive(:skip)
+
+            subject
+          end
+        end
+
+        context 'the dependencies are missing' do
+          before do
+            allow(File).to receive(:exist?).and_return(false)
+          end
+
+          it 'skips a test' do
+            expect_any_instance_of(described_class).to receive(:skip)
+
+            subject
+          end
+        end
+      end
+    end
   end
 end

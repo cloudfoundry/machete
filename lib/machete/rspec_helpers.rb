@@ -18,6 +18,23 @@ module Machete
         self.new.skip(reason) # skip method is an instance method as defined by RSpec, so we have to new
       end
     end
+
+    def self.skip_if_proprietary_dependencies_are_not_available
+      oracle_proprietary_files = %w(
+        /oracle/libclntshcore.so.12.1
+        /oracle/libclntsh.so
+        /oracle/libclntsh.so.12.1
+        /oracle/libipc1.so
+        /oracle/libmql1.so
+        /oracle/libnnz12.so
+        /oracle/libociicus.so
+        /oracle/libons.so
+      )
+
+      all_files_were_found = oracle_proprietary_files.reduce { |all_found_so_far, file_to_check| all_found_so_far && File.exist?(file_to_check) }
+
+      self.new.skip('Skipping Oracle module tests as proprietary files are missing') unless all_files_were_found
+    end
   end
 end
 
