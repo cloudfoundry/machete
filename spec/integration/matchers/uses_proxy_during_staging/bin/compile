@@ -1,10 +1,14 @@
 #!/bin/bash
 # usage: bin/compile <build-dir> <cache-dir>
 
+set -eu
+
 mkdir -p "$1" "$2"
 
 echo "-----> Compiling simple proxy staging test app"
 echo "-----> Compiled simple proxy staging test app"
+
+echo $VCAP_APPLICATION
 
 if [ -f "$1/exec.sh" ]; then
   echo "-----> found exec.sh, running:"

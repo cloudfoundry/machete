@@ -11,7 +11,7 @@ GIT
 PATH
   remote: ../../../..
   specs:
-    machete (0.0.45)
+    machete (0.0.47)
       childprocess
       httparty
 

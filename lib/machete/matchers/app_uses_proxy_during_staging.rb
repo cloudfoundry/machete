@@ -10,6 +10,7 @@ RSpec::Matchers.define :use_proxy_during_staging do
 FROM cloudfoundry/cflinuxfs2
 
 ENV CF_STACK cflinuxfs2
+ENV VCAP_APPLICATION {}
 <%= docker_env_vars %>
 
 ADD <%= fixture_path %> /tmp/staged/
