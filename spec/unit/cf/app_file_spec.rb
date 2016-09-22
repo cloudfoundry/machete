@@ -40,14 +40,14 @@ module Machete
           allow(SystemHelper).to receive(:run_cmd)
             .with("cf has-diego-enabled #{app.name}").and_return('true')
           allow(SystemHelper).to receive(:run_cmd)
-            .with("cf ssh #{app.name}")
+            .with("cf ssh #{app.name} -c 'ls /app'")
           allow(SystemHelper).to receive(:run_cmd)
             .with("cf ssh #{app.name} -c 'ls filename'")
         end
 
         it 'calls cf ssh twice to avoid race condition' do
           expect(SystemHelper).to receive(:run_cmd)
-            .with("cf ssh #{app.name}").ordered
+            .with("cf ssh #{app.name} -c 'ls /app'").ordered
           expect(SystemHelper).to receive(:run_cmd)
             .with("cf ssh #{app.name} -c 'ls filename'").ordered
 
