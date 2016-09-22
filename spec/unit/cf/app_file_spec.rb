@@ -39,8 +39,19 @@ module Machete
         before do
           allow(SystemHelper).to receive(:run_cmd)
             .with("cf has-diego-enabled #{app.name}").and_return('true')
-          expect(SystemHelper).to receive(:run_cmd)
+          allow(SystemHelper).to receive(:run_cmd)
+            .with("cf ssh #{app.name}")
+          allow(SystemHelper).to receive(:run_cmd)
             .with("cf ssh #{app.name} -c 'ls filename'")
+        end
+
+        it 'calls cf ssh twice to avoid race condition' do
+          expect(SystemHelper).to receive(:run_cmd)
+            .with("cf ssh #{app.name}").ordered
+          expect(SystemHelper).to receive(:run_cmd)
+            .with("cf ssh #{app.name} -c 'ls filename'").ordered
+
+          subject.has_file? 'filename'
         end
 
         context 'when the file exists in the app' do
