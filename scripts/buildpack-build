@@ -103,6 +103,20 @@ upload_new_buildpack() {
   cf create-buildpack ${language}-test-buildpack ${buildpack_file_pattern} 1 --enable
 }
 
+check_compile_extensions() {
+  indent "Checking compile extensions is up to date"
+  if [ ! -d "compile-extensions" ]; then
+    echo "No compile-extensions directory in this buildpack."
+  elif [ ! "$(ls -A compile-extensions)" ]; then
+    echo "WARNING: compile-extensions is empty, update the submodule!"
+    exit 1
+  elif [[ $(git submodule | head -c 1) = "+" ]]; then
+    echo "WARNING: compile-extensions is not aligned with master"
+  else
+    echo "compile-extensions up to date!"
+  fi
+}
+
 while [ "$#" -gt 0 ]; do
   case $1 in
     -h|-\?|--help|help)
@@ -158,6 +172,7 @@ which cf
 cf --version
 
 if [ "$should_build" == "true" ]; then
+  check_compile_extensions
   build_new_buildpack
   detect_language
 fi
