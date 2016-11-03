@@ -14,10 +14,10 @@ module Machete
 
     context 'when the matcher is given a regex' do
       it 'uses it to make the match' do
-        expect(browser).to have_body /this.*included/
+        expect(browser).to have_body(/this.*included/)
       end
       it "fails if the regex doesn't match" do
-        expect(browser).not_to have_body /this.*zzz/
+        expect(browser).not_to have_body(/this.*zzz/)
       end
     end
 
