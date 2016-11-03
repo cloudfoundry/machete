@@ -166,7 +166,9 @@ USAGE
       %w(HUP INT QUIT ABRT TERM EXIT).each do |sig|
         Signal.trap(sig) do
           enable_buildpacks(disabled_buildpacks)
-          exit 1
+          if sig != 'EXIT'
+            exit 1
+          end
         end
       end
     end

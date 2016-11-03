@@ -3,4 +3,10 @@
 
 require_relative '../lib/machete/buildpack_test_runner'
 
-Machete::BuildpackTestRunner.new(ARGV).run!
+tests_pass = Machete::BuildpackTestRunner.new(ARGV).run!
+
+if tests_pass
+  exit 0
+else
+  exit 1
+end
