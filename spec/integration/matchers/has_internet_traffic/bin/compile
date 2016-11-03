@@ -8,6 +8,9 @@ mkdir -p "$1" "$2"
 echo "-----> Compiling simple firewall test app"
 echo "-----> Compiled simple firewall test app. Oh Yeah."
 
+echo $ENV_VAR1
+echo $ENV_VAR2
+
 echo $VCAP_APPLICATION
 
 if [ -f "$1/exec.sh" ]; then

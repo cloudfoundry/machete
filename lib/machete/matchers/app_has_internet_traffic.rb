@@ -1,28 +1,8 @@
 # encoding: utf-8
 require 'rspec/matchers'
-require 'erb'
 require 'yaml'
 
 RSpec::Matchers.define :have_internet_traffic do
-  dockerfile = <<-DOCKERFILE
-FROM cloudfoundry/cflinuxfs2
-
-ENV CF_STACK cflinuxfs2
-ENV VCAP_APPLICATION {}
-<%= docker_env_vars %>
-
-ADD <%= fixture_path %> /tmp/staged/
-ADD ./<%= cached_buildpack_path %> /tmp/
-
-RUN mkdir -p /buildpack
-RUN mkdir -p /tmp/cache
-
-RUN unzip /tmp/<%= cached_buildpack_path %> -d /buildpack
-
-# HACK around https://github.com/dotcloud/docker/issues/5490
-RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
-RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/internet traffic: /' 2>&1 &) && /buildpack/bin/detect /tmp/staged && /buildpack/bin/compile /tmp/staged /tmp/cache && /buildpack/bin/release /tmp/staged /tmp/cache
-  DOCKERFILE
 
   match do |app|
     begin
@@ -40,13 +20,35 @@ RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/in
         manifest_hash = YAML.load_file(manifest_location)
       end
       docker_env_vars = ''
-      if manifest_hash.key?('env')
-        manifest_hash['env'].each do |key, value|
-          docker_env_vars << "ENV #{key} #{value}\n"
+      if manifest_hash.key?('applications')
+        app_hash = manifest_hash['applications'].first
+        if !app_hash.nil? && app_hash.key?('env')
+          app_hash['env'].each do |key, value|
+            docker_env_vars += "ENV #{key} #{value}\n"
+          end
         end
       end
 
-      dockerfile_contents = ERB.new(dockerfile).result binding
+      dockerfile_contents = <<-DOCKERFILE
+FROM cloudfoundry/cflinuxfs2
+
+ENV CF_STACK cflinuxfs2
+ENV VCAP_APPLICATION {}
+#{docker_env_vars}
+
+ADD #{fixture_path} /tmp/staged/
+ADD ./#{cached_buildpack_path} /tmp/
+
+RUN mkdir -p /buildpack
+RUN mkdir -p /tmp/cache
+
+RUN unzip /tmp/#{cached_buildpack_path} -d /buildpack
+
+# HACK around https://github.com/dotcloud/docker/issues/5490
+RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
+RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/internet traffic: /' 2>&1 &) && /buildpack/bin/detect /tmp/staged && /buildpack/bin/compile /tmp/staged /tmp/cache && /buildpack/bin/release /tmp/staged /tmp/cache
+DOCKERFILE
+
       File.write(dockerfile_path, dockerfile_contents)
 
       docker_exitstatus = 0
