@@ -9,6 +9,7 @@ require 'machete/vendor_dependencies'
 require 'machete/setup_app'
 require 'machete/app_status'
 require 'machete/browser'
+require 'machete/buildpack_test_runner'
 
 module Machete
   class << self

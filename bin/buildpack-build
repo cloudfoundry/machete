@@ -3,4 +3,4 @@
 
 require_relative '../lib/machete/buildpack_test_runner'
 
-BuildpackTestRunner.new(ARGV).run!
+Machete::BuildpackTestRunner.new(ARGV).run!
