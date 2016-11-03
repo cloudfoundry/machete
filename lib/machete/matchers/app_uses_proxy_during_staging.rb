@@ -3,34 +3,16 @@ require 'rspec/matchers'
 require 'yaml'
 require 'socket'
 require 'tmpdir'
+require 'machete/matchers/matcher_helpers'
 
 RSpec::Matchers.define :use_proxy_during_staging do
+  include Machete::MatcherHelpers
+
   match do |app|
     begin
-      cached_buildpack_path = Dir['*_buildpack-v*.zip'].fetch(0)
-      fixture_path = "./#{app.src_directory}"
-
-      dockerfile_path = "Dockerfile.#{$PROCESS_ID}.#{Time.now.to_i}"
       docker_image_name = 'proxy_staging_test'
 
-      manifest_search = Dir.glob("#{fixture_path}/**/manifest.yml")
-      manifest_location = ''
-      manifest_hash = {}
-      unless manifest_search.empty?
-        manifest_location = File.expand_path(manifest_search[0])
-        manifest_hash = YAML.load_file(manifest_location)
-      end
       docker_env_vars = ''
-      if manifest_hash.key?('applications')
-        app_hash = manifest_hash['applications'].first
-        if !app_hash.nil? && app_hash.key?('env')
-          app_hash['env'].each do |key, value|
-            docker_env_vars += "ENV #{key} #{value}\n"
-          end
-        end
-      end
-
-
       # setting proxy env vars
       proxy_ip = Socket.ip_address_list.select{ |ip| ip.ip_address =~ /^[\d\.]+$/ }.last.ip_address
       proxy_port = '8080'
@@ -54,7 +36,6 @@ func main() {
     log.Fatal(http.ListenAndServe(":#{proxy_port}", proxy))
 }
 EOF
-
       tmpdir = Dir.mktmpdir
       proxy_dir = File.join(tmpdir, 'go/src/proxy')
       gopath_dir = File.join(tmpdir, 'go')
@@ -67,41 +48,9 @@ EOF
         proxy_process = fork { exec("#{proxy_dir}/proxy") }
       end
 
-      dockerfile_contents = <<-DOCKERFILE
-FROM cloudfoundry/cflinuxfs2
+      network_command = '(sudo tcpdump -n -i eth0 not udp port 53 and ip -t -Uw /tmp/dumplog &) && /buildpack/bin/detect /tmp/staged && /buildpack/bin/compile /tmp/staged /tmp/cache && /buildpack/bin/release /tmp/staged /tmp/cache && pkill tcpdump; tcpdump -nr /tmp/dumplog || true'
 
-ENV CF_STACK cflinuxfs2
-ENV VCAP_APPLICATION {}
-#{docker_env_vars}
-
-ADD #{fixture_path} /tmp/staged/
-ADD ./#{cached_buildpack_path} /tmp/
-
-RUN mkdir -p /buildpack
-RUN mkdir -p /tmp/cache
-
-RUN unzip /tmp/#{cached_buildpack_path} -d /buildpack
-
-# HACK around https://github.com/dotcloud/docker/issues/5490
-RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
-RUN (sudo tcpdump -n -i eth0 not udp port 53 and ip -t -Uw /tmp/dumplog &) && /buildpack/bin/detect /tmp/staged && /buildpack/bin/compile /tmp/staged /tmp/cache && /buildpack/bin/release /tmp/staged /tmp/cache && pkill tcpdump; tcpdump -nr /tmp/dumplog || true
-DOCKERFILE
-
-      File.write(dockerfile_path, dockerfile_contents)
-
-      docker_exitstatus = 0
-
-      docker_output = Dir.chdir(File.dirname(dockerfile_path)) do
-        output = `docker build --rm --no-cache -t #{docker_image_name} -f #{dockerfile_path} .`
-        docker_exitstatus = $CHILD_STATUS.exitstatus.to_i
-        output
-      end
-
-      unless docker_exitstatus == 0
-        puts '=========================================='
-        puts "docker_output: #{docker_output}"
-        puts '=========================================='
-      end
+      docker_exitstatus, docker_output, dockerfile_path = execute_docker_file(app, :uncached, docker_image_name, docker_env_vars, network_command)
 
       @traffic_lines = docker_output.split("\n").grep(/IP ([\d+\.]+) > ([\d+\.]+)\.(\d+)/)
     ensure
