@@ -19,7 +19,7 @@ module Machete
     end
 
     def run!
-      indent "Using the stack 'stack' against the host '$host'"
+      indent "Using the stack '#{@stack}' against the host '#{@host}'"
 
       indent "Fetching CF CLI details"
       system "which cf"
