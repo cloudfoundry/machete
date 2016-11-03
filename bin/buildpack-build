@@ -1,3 +1,3 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
-exec(File.expand_path('../../scripts/buildpack-build', __FILE__), *ARGV)
+exec(File.expand_path('../../scripts/buildpack-build.rb', __FILE__), *ARGV)
