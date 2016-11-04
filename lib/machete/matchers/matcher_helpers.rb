@@ -41,7 +41,7 @@ module Machete
     # HACK around https://github.com/dotcloud/docker/issues/5490
     RUN mv /usr/sbin/tcpdump /usr/bin/tcpdump
 
-    RUN (#{network_command})
+    RUN #{network_command}
     DOCKERFILE
     end
 
