@@ -57,12 +57,9 @@ module Machete
         manifest_hash = YAML.load_file(manifest_location)
       end
 
-      if manifest_hash.key?('applications')
-        app_hash = manifest_hash['applications'].first
-        if !app_hash.nil? && app_hash.key?('env')
-          app_hash['env'].each do |key, value|
-            app_env_vars += "ENV #{key} #{value}\n"
-          end
+      if manifest_hash.key?('env')
+        manifest_hash['env'].each do |key, value|
+          app_env_vars += "ENV #{key} #{value}\n"
         end
       end
 

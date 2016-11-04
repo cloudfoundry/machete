@@ -1,5 +1,4 @@
 ---
-applications:
-  - env:
-      ENV_VAR1: 'env var 1'
-      ENV_VAR2: 'env var 2'
+env:
+  ENV_VAR1: 'env var 1'
+  ENV_VAR2: 'env var 2'
