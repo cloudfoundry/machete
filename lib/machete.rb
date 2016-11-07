@@ -15,7 +15,7 @@ module Machete
   class << self
     def deploy_app(path, options = {})
       app = App.new(path, options)
-      raise "Unable to locate app directory: #{app.src_directory}" unless Dir.exist? app.src_directory
+      raise "Unable to locate app directory: #{app.src_directory}" unless directory_exists? app.src_directory
       deployer.execute(app)
       app
     end
@@ -32,6 +32,10 @@ module Machete
     attr_writer :logger
 
     private
+
+    def directory_exists?(directory)
+      `file #{directory}`.strip.split(' ').last == 'directory'
+    end
 
     def deployer
       Machete::DeployApp.new

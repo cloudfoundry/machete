@@ -4,7 +4,7 @@ require 'tmpdir'
 
 describe Machete do
   let(:app_deployer) { double(:app_deployer) }
-  let(:path) { 'path/to/app_name' }
+  let(:path) { 'path/to\~\>/app_name' }
   let(:app) { Machete::App.new(path, options) }
   let(:options) { {} }
 
@@ -13,7 +13,7 @@ describe Machete do
     @temp_dir = Dir.mktmpdir
 
     Dir.chdir(@temp_dir)
-    FileUtils.mkdir_p(File.join('cf_spec', 'fixtures', 'path/to/app_name'))
+    FileUtils.mkdir_p(File.join('cf_spec', 'fixtures', 'path/to~>/app_name'))
 
     allow(Machete::DeployApp)
       .to receive(:new)
@@ -40,16 +40,26 @@ describe Machete do
     end
 
     context 'the app path is incorrect' do
-      let(:path) { 'path/does/not/exist' }
+      context 'the app path is not escaped' do
+        let(:path) { 'path/does/not/exist' }
 
-      it 'throws an exception' do
-        expect { described_class.deploy_app(path) }.to raise_error(RuntimeError)
+        it 'throws an exception' do
+          expect { described_class.deploy_app(path) }.to raise_error(RuntimeError)
+        end
+      end
+
+      context 'the app path is escaped' do
+        let(:path) { 'path/contains/\~\>/operator' }
+
+        it 'throws an exception' do
+          expect { described_class.deploy_app(path) }.to raise_error(RuntimeError)
+        end
       end
     end
 
     context 'no additional options' do
       specify do
-        result = described_class.deploy_app('path/to/app_name')
+        result = described_class.deploy_app(path)
         expect(result).to eql app
         expect(app_deployer).to have_received(:execute)
       end
@@ -59,7 +69,7 @@ describe Machete do
       let(:options) { {buildpack: 'fake-buildpack', stack: 'cflinux99'} }
 
       specify do
-        result = described_class.deploy_app('path/to/app_name', options)
+        result = described_class.deploy_app(path, options)
         expect(result).to eql app
         expect(result.stack).to eql 'cflinux99'
         expect(result.buildpack).to eql 'fake-buildpack'
