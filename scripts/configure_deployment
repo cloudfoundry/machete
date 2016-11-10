@@ -14,20 +14,10 @@ __ensure_space() {
   cf target -o pivotal -s integration
 }
 
-__are_you_sure() {
-  echo -n $1
-  read -r -p " [y/N] " response
-  response=$(echo $response | tr '[:upper:]' '[:lower:]')
-  if [[ $response =~ ^(no|n)$ ]]; then
-    exit 1
-  fi
-}
-
 __target_api() {
-  __indent "Targetting CF API"
+  __indent "Targeting CF API"
 
   echo $(cf api)
-  __are_you_sure "Are you sure you want to use the above cf api?"
   __ensure_space
 }
 
