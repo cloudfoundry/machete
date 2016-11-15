@@ -1,4 +1,6 @@
 # encoding: utf-8
+require 'bundler'
+
 module Machete
   class VendorDependencies
     VENDOR_SCRIPT = 'package.sh'.freeze

@@ -15,6 +15,10 @@ describe Machete do
     Dir.chdir(@temp_dir)
     FileUtils.mkdir_p(File.join('cf_spec', 'fixtures', 'path/to~>/app_name'))
 
+    directory_with_file = File.join('cf_spec', 'fixtures', 'path/exists')
+    FileUtils.mkdir_p(directory_with_file)
+    File.write(File.join(directory_with_file, 'java.jar'), '')
+
     allow(Machete::DeployApp)
       .to receive(:new)
       .with(no_args)
@@ -27,7 +31,6 @@ describe Machete do
   end
 
   describe '#deploy_app' do
-
     before do
       allow(app_deployer)
         .to receive(:execute)
@@ -54,6 +57,16 @@ describe Machete do
         it 'throws an exception' do
           expect { described_class.deploy_app(path) }.to raise_error(RuntimeError)
         end
+      end
+    end
+
+    context 'the app path is a single file like a .jar for java' do
+      let(:path) { 'path/exists/java.jar' }
+
+      specify do
+        result = described_class.deploy_app(path)
+        expect(result).to eql app
+        expect(app_deployer).to have_received(:execute)
       end
     end
 

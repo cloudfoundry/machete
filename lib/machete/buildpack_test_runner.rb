@@ -107,8 +107,8 @@ USAGE
           buildpack_name = $1.strip
           buildpack_enabled = $2.strip
           if buildpack_enabled == 'true'
-            puts `cf update-buildpack #{buildpack_name} --disable 1>&2`
-            disabled_buildpacks << buildpack_name if $?.success?
+            update_successful = system("cf update-buildpack #{buildpack_name} --disable 1>&2")
+            disabled_buildpacks << buildpack_name if update_successful
           end
         end
       end

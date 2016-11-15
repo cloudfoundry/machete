@@ -139,15 +139,15 @@ go-buildpack                 4          true      false    go_buildpack-cached-v
 
       before do
         allow(subject).to receive(:puts)
-        allow(subject).to receive(:`)
+        allow(subject).to receive(:system).and_return(true)
         allow(subject).to receive(:`).with('cf buildpacks').and_return(cf_buildpacks_output)
       end
 
       it 'tries to disable all enabled buildpacks' do
-        expect(subject).to receive(:`).with('cf update-buildpack staticfile-buildpack --disable 1>&2')
-        expect(subject).to receive(:`).with('cf update-buildpack go-buildpack --disable 1>&2')
-        expect(subject).to_not receive(:`).with('cf update-buildpack binary-buildpack --disable 1>&2')
-        expect(subject).to_not receive(:`).with('cf update-buildpack dotnet-core-buildpack --disable 1>&2')
+        expect(subject).to receive(:system).with('cf update-buildpack staticfile-buildpack --disable 1>&2').and_return(true)
+        expect(subject).to receive(:system).with('cf update-buildpack go-buildpack --disable 1>&2').and_return(true)
+        expect(subject).to_not receive(:system).with('cf update-buildpack binary-buildpack --disable 1>&2')
+        expect(subject).to_not receive(:system).with('cf update-buildpack dotnet-core-buildpack --disable 1>&2')
         subject.disable_buildpacks
       end
 

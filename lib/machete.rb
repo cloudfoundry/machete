@@ -34,7 +34,7 @@ module Machete
     private
 
     def directory_exists?(directory)
-      `file #{directory}`.strip.split(' ').last == 'directory'
+      !(`file #{directory}`.include? 'No such file or directory')
     end
 
     def deployer
