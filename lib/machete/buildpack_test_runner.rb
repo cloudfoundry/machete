@@ -74,7 +74,7 @@ Options:
                           # Default: cflinuxfs2
                           # Possible values: cflinuxfs2
     [--host=HOST]         # Specifies the host to target for running tests.
-                          # Example: edge-1.buildpacks-ci.cf-app.com
+                          # Example: edge-1.buildpacks-gcp.ci.cf-app.com
                           # Default: local.pcfdev.io
     [--cached]            # Specifies the test run of a buildpack with vendored dependencies
                           # Default: true
