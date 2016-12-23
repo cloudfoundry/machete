@@ -143,7 +143,7 @@ USAGE
     def build_new_buildpack
       indent "Building #{@mode} buildpack"
       FileUtils.rm_rf(buildpack_zip_files)
-      system("BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --#{@mode}")
+      raise "Buildpack packaging failed!" unless system("BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --#{@mode}")
     end
 
     def upload_new_buildpack
