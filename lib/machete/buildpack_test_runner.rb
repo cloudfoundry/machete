@@ -124,10 +124,10 @@ USAGE
 
     def validate_stack_option
       if @stack != "cflinuxfs2"
-        arg_error = <<~ERROR
-          ERROR: Invalid argument passed in for --stack option.
-          The valid --stack options are [ 'cflinuxfs2' ]
-        ERROR
+        arg_error = <<-ERROR
+  ERROR: Invalid argument passed in for --stack option.
+  The valid --stack options are [ 'cflinuxfs2' ]
+ERROR
         raise ArgumentError.new(arg_error)
       end
     end
