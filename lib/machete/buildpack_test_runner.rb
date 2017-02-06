@@ -13,6 +13,7 @@ module Machete
       @mode = 'cached'
       @should_build = true
       @should_upload = true
+      @shared_host = false
       @rspec_options = 'cf_spec'
 
       set_values_from_args(process_args(args))
@@ -30,7 +31,7 @@ module Machete
       indent "Running specs"
 
       rspec_command = <<-COMMAND
-BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=#{@mode} CF_STACK=#{@stack} bundle exec rspec \
+BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=#{@mode} CF_STACK=#{@stack} SHARED_HOST=#{@shared_host} bundle exec rspec \
   --require rspec/instafail \
   --format RSpec::Instafail \
   --format documentation \
@@ -57,11 +58,15 @@ BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=#{@mode} CF_STACK=#{@stack} bundle exec
       system "#{script_dir}/cf_login_and_setup #{@host}"
 
       if @should_upload
-        puts "Disabling all buildpacks"
-        disabled_buildpacks = disable_buildpacks
+        if @shared_host
+          upload_new_buildpack("#{detect_language}_buildpack")
+        else
+          puts "Disabling all buildpacks"
+          disabled_buildpacks = disable_buildpacks
 
-        setup_signal_handling_enable_buildpacks(disabled_buildpacks)
-        upload_new_buildpack
+          setup_signal_handling_enable_buildpacks(disabled_buildpacks)
+          upload_new_buildpack
+        end
       end
     end
 
@@ -84,6 +89,9 @@ Options:
                           # Default: true
     [--no-upload]         # Specifies whether to upload local buildpack to cf. Overrides '--no-build' flag to true.
                           # Default: true
+    [--shared-host]       # Specifies whether to replace the standard buildpack when uploading to cf. (only works if upload and build)
+                          # Default: false
+
 
 Builds, uploads, and runs tests against a specified BUILDPACK.
 Any other supplied arguments will be passed as rspec arguments!
@@ -146,20 +154,22 @@ ERROR
       raise "Buildpack packaging failed!" unless system("BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --#{@mode}")
     end
 
-    def upload_new_buildpack
+    def upload_new_buildpack(buildpack_name = nil)
       language = detect_language
+      buildpack_name ||= "#{language}-test-buildpack"
 
       indent "Uploading buildpack to CF"
-      system "cf delete-buildpack #{language}-test-buildpack -f"
-      system "cf create-buildpack #{language}-test-buildpack #{buildpack_zip_files.first} 1 --enable"
+      system "cf delete-buildpack #{buildpack_name} -f"
+      system "cf create-buildpack #{buildpack_name} #{buildpack_zip_files.first} 1 --enable"
     end
 
     def detect_language
+      return @detected_language if @detected_language
       indent "Detecting language"
       buildpack_zip_file = buildpack_zip_files.first
-      detected_language = buildpack_zip_file.split('_').first
-      indent "Language detected: #{detected_language}"
-      detected_language
+      @detected_language = buildpack_zip_file.split('_').first
+      indent "Language detected: #{@detected_language}"
+      @detected_language
     end
 
     def setup_signal_handling_enable_buildpacks(disabled_buildpacks)
@@ -185,6 +195,9 @@ ERROR
       if options[:no_upload]
         @should_build = false
         @should_upload = false
+      end
+      if options[:shared_host]
+        @shared_host = true
       end
       if options[:host]
         @host = options[:host]
@@ -223,6 +236,8 @@ ERROR
         when '--no-upload'
           options[:no_build] = true
           options[:no_upload] = true
+        when '--shared-host'
+          options[:shared_host] = true
         else
           rspec_options.push arg
         end
