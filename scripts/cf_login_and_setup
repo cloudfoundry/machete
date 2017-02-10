@@ -2,14 +2,16 @@
 set -eo pipefail
 
 HOST=$1
+SPACE="integration_`date '+%s'`"
 
 cf api api.$HOST --skip-ssl-validation
 cf_password=${CF_PASSWORD:-"admin"}
-cf login -u admin -p $cf_password -o pivotal -s integration || true
+cf login -u admin -p $cf_password -o pivotal -s $SPACE || true
 
 cf create-org pivotal
 cf target -o pivotal
-cf create-space integration
-cf target -s integration
 
-cf login -u admin -p $cf_password -o pivotal -s integration
+cf create-space $SPACE -o pivotal
+cf target -s $SPACE -o pivotal
+
+cf login -u admin -p $cf_password -o pivotal -s $SPACE
