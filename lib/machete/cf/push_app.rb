@@ -29,7 +29,7 @@ module Machete
       end
 
       def base_command(app)
-        "cf push #{app.name}"
+        "cf push --random-route #{app.name}"
       end
     end
   end

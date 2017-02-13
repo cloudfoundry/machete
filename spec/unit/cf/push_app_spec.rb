@@ -28,14 +28,14 @@ module Machete
 
       context 'default arguments' do
         specify do
-          expect(SystemHelper).to receive(:run_cmd).with("cf push app_name -p #{src_directory}")
+          expect(SystemHelper).to receive(:run_cmd).with("cf push --random-route app_name -p #{src_directory}")
           push_app.execute(app)
         end
       end
 
       context 'start argument is false' do
         specify do
-          expect(SystemHelper).to receive(:run_cmd).with("cf push app_name -p #{src_directory} --no-start")
+          expect(SystemHelper).to receive(:run_cmd).with("cf push --random-route app_name -p #{src_directory} --no-start")
           push_app.execute(app, start: false)
         end
       end
@@ -44,7 +44,7 @@ module Machete
         let(:start_command) { 'start_command' }
 
         specify do
-          expect(SystemHelper).to receive(:run_cmd).with("cf push app_name -p #{src_directory} -c 'start_command'")
+          expect(SystemHelper).to receive(:run_cmd).with("cf push --random-route app_name -p #{src_directory} -c 'start_command'")
           push_app.execute(app)
         end
       end
@@ -53,7 +53,7 @@ module Machete
         let(:stack) { 'stack' }
 
         specify do
-          expect(SystemHelper).to receive(:run_cmd).with("cf push app_name -p #{src_directory} -s stack")
+          expect(SystemHelper).to receive(:run_cmd).with("cf push --random-route app_name -p #{src_directory} -s stack")
           push_app.execute(app)
         end
       end
@@ -62,7 +62,7 @@ module Machete
         let(:buildpack) { 'my_buildpack' }
 
         specify do
-          expect(SystemHelper).to receive(:run_cmd).with("cf push app_name -p #{src_directory} -b my_buildpack")
+          expect(SystemHelper).to receive(:run_cmd).with("cf push --random-route app_name -p #{src_directory} -b my_buildpack")
           push_app.execute(app)
         end
       end
@@ -70,7 +70,7 @@ module Machete
       context 'app has a manifest.yml' do
         specify do
           FileUtils.touch(File.join(src_directory, 'manifest.yml'))
-          expect(SystemHelper).to receive(:run_cmd).with("cf push app_name -p #{src_directory} -f #{src_directory}/manifest.yml")
+          expect(SystemHelper).to receive(:run_cmd).with("cf push --random-route app_name -p #{src_directory} -f #{src_directory}/manifest.yml")
           push_app.execute(app)
         end
       end
