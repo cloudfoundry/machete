@@ -103,7 +103,7 @@ module Machete
       let(:test_dir) { Dir.mktmpdir }
       let(:rspec_command) do
         <<-COMMAND
-BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=cached CF_STACK=cflinuxfs2 SHARED_HOST=false bundle exec rspec \
+BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=cached CF_STACK=cflinuxfs2 SHARED_HOST=false BUILDPACK_VERSION=99-12345 bundle exec rspec \
   --require rspec/instafail \
   --format RSpec::Instafail \
   --format documentation \
@@ -115,6 +115,7 @@ BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=cached CF_STACK=cflinuxfs2 SHARED_HOST=
       before do
         allow(subject).to receive(:system)
         allow(subject).to receive(:puts)
+        allow(subject).to receive(:test_version).and_return('99-12345')
         @current_dir = Dir.pwd
         Dir.chdir test_dir
         File.write("test_buildpack-v3.3.3.zip", "xxx")
@@ -246,6 +247,39 @@ go-buildpack                 4          true      false    go_buildpack-cached-v
           expect(subject).to receive(:upload_new_buildpack).with("test_buildpack").ordered
           subject.setup_buildpacks
         end
+      end
+    end
+
+    describe '#build_new_buildpack' do
+      let(:args) { ['--uncached'] }
+      let(:test_dir) { Dir.mktmpdir }
+
+      before do
+        allow(subject).to receive(:puts)
+        allow(subject).to receive(:system).and_return(true)
+        @current_dir = Dir.pwd
+        Dir.chdir test_dir
+        File.write("VERSION", "3.3.3")
+      end
+
+      after do
+        FileUtils.rm_rf(test_dir)
+        Dir.chdir @current_dir
+      end
+
+      it 'set @test_version' do
+        subject.build_new_buildpack
+        expect(subject.test_version).to match(/3\.3\.3\-\d*/)
+      end
+
+      it 'creates a buildpack with buildpack-packager' do
+        expect(subject).to receive(:system).with(/bundle exec buildpack-packager/)
+        subject.build_new_buildpack
+      end
+
+      it 'restores VERSION to the correct value' do
+        subject.build_new_buildpack
+        expect(File.read('VERSION')).to eq('3.3.3')
       end
     end
 

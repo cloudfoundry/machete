@@ -5,7 +5,7 @@ require 'fileutils'
 
 module Machete
   class BuildpackTestRunner
-    attr_reader :stack, :mode, :host, :should_build, :should_upload, :rspec_options
+    attr_reader :stack, :mode, :host, :should_build, :should_upload, :rspec_options, :test_version
 
     def initialize(args)
       @stack = 'cflinuxfs2'
@@ -31,7 +31,7 @@ module Machete
       indent "Running specs"
 
       rspec_command = <<-COMMAND
-BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=#{@mode} CF_STACK=#{@stack} SHARED_HOST=#{@shared_host} bundle exec rspec \
+BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=#{@mode} CF_STACK=#{@stack} SHARED_HOST=#{@shared_host} BUILDPACK_VERSION=#{test_version} bundle exec rspec \
   --require rspec/instafail \
   --format RSpec::Instafail \
   --format documentation \
@@ -155,7 +155,12 @@ ERROR
     def build_new_buildpack
       indent "Building #{@mode} buildpack"
       FileUtils.rm_rf(buildpack_zip_files)
+
+      current_version = File.read('VERSION').strip
+      @test_version = "#{current_version}-#{Time.now.to_i}"
+      File.write('VERSION', @test_version)
       raise "Buildpack packaging failed!" unless system("BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --#{@mode}")
+      File.write('VERSION', current_version)
     end
 
     def upload_new_buildpack(buildpack_name = nil)

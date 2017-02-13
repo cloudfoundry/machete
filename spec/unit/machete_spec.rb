@@ -11,6 +11,8 @@ describe Machete do
   before do
     @current_dir = Dir.pwd
     @temp_dir = Dir.mktmpdir
+    @old_buildpack_version = ENV['BUILDPACK_VERSION']
+    ENV['BUILDPACK_VERSION'] = '99-12345'
 
     Dir.chdir(@temp_dir)
     FileUtils.mkdir_p(File.join('cf_spec', 'fixtures', 'path/to~>/app_name'))
@@ -28,6 +30,7 @@ describe Machete do
   after do
     Dir.chdir(@current_dir)
     FileUtils.rm_rf(@temp_dir)
+    ENV['BUILDPACK_VERSION'] = @old_buildpack_version
   end
 
   describe '#deploy_app' do
@@ -64,6 +67,7 @@ describe Machete do
       let(:path) { 'path/exists/java.jar' }
 
       specify do
+        expect(described_class).to receive(:verify_buildpack_version).with(app)
         result = described_class.deploy_app(path)
         expect(result).to eql app
         expect(app_deployer).to have_received(:execute)
@@ -72,6 +76,7 @@ describe Machete do
 
     context 'no additional options' do
       specify do
+        expect(described_class).to receive(:verify_buildpack_version).with(app)
         result = described_class.deploy_app(path)
         expect(result).to eql app
         expect(app_deployer).to have_received(:execute)
@@ -79,9 +84,10 @@ describe Machete do
     end
 
     context 'with additional options' do
-      let(:options) { {buildpack: 'fake-buildpack', stack: 'cflinux99'} }
+      let(:options) { {buildpack: 'fake-buildpack', stack: 'cflinux99', skip_verify_version: true} }
 
       specify do
+        expect(described_class).not_to receive(:verify_buildpack_version)
         result = described_class.deploy_app(path, options)
         expect(result).to eql app
         expect(result.stack).to eql 'cflinux99'

@@ -10,13 +10,18 @@ require 'machete/setup_app'
 require 'machete/app_status'
 require 'machete/browser'
 require 'machete/buildpack_test_runner'
+require 'rspec/expectations'
 
 module Machete
   class << self
+    include RSpec::Matchers
+
     def deploy_app(path, options = {})
       app = App.new(path, options)
       raise "Unable to locate app directory: #{app.src_directory}" unless directory_exists? app.src_directory
+      raise "BUILDPACK_VERSION not set" unless ENV['BUILDPACK_VERSION']
       deployer.execute(app)
+      verify_buildpack_version(app) unless options[:skip_verify_version] == true
       app
     end
 
@@ -32,6 +37,10 @@ module Machete
     attr_writer :logger
 
     private
+
+    def verify_buildpack_version(app)
+      expect(app).to have_logged("Buildpack version #{ENV['BUILDPACK_VERSION']}")
+    end
 
     def directory_exists?(directory)
       !(`file #{directory}`.include? 'No such file or directory')

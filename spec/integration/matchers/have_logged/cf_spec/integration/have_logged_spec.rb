@@ -8,10 +8,13 @@ module Machete
                                   'have_logged') }
 
     subject(:app) do
-      Machete.deploy_app(app_name, { name: app_name, buildpack: 'null-test-buildpack'})
+      Machete.deploy_app(app_name, { name: app_name, buildpack: 'null-test-buildpack', skip_verify_version: true})
     end
 
     before do
+      @old_buildpack_version = ENV['BUILDPACK_VERSION']
+      ENV['BUILDPACK_VERSION'] = '55-12345'
+
       Dir.chdir(fixture_dir) do
         Bundler.with_clean_env do
           system('BUNDLE_GEMFILE=cf.Gemfile bundle && BUNDLE_GEMFILE=cf.Gemfile bundle exec buildpack-packager --cached')
@@ -23,6 +26,7 @@ module Machete
     after do
       Machete::CF::DeleteApp.new.execute(app)
       system('cf delete-buildpack -f null-test-buildpack')
+      ENV['BUILDPACK_VERSION'] = '55-12345'
     end
 
     context 'an app that outputs logs' do
