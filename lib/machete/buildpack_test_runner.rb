@@ -5,7 +5,7 @@ require 'fileutils'
 
 module Machete
   class BuildpackTestRunner
-    attr_reader :stack, :mode, :host, :should_build, :should_upload, :rspec_options, :test_version
+    attr_reader :stack, :mode, :host, :should_build, :should_upload, :rspec_options, :test_version, :integration_space
 
     def initialize(args)
       @stack = 'cflinuxfs2'
@@ -52,7 +52,9 @@ BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=#{@mode} CF_STACK=#{@stack} SHARED_HOST
       end
 
       language = detect_language
-      @integration_space = "integration-#{language}-#{Time.now.to_i}"
+      unless @integration_space
+        @integration_space = "integration-#{language}-#{Time.now.to_i}"
+      end
 
       indent "Connecting to CF"
 
@@ -223,6 +225,9 @@ ERROR
       if options[:rspec]
         @rspec_options = options[:rspec].join(' ')
       end
+      if options[:integration_space]
+        @integration_space = options[:integration_space]
+      end
     end
 
     def process_args(args)
@@ -252,6 +257,8 @@ ERROR
           options[:no_upload] = true
         when '--shared-host'
           options[:shared_host] = true
+        when /\-\-integration\-space=(.*)/
+          options[:integration_space] = $1
         else
           rspec_options.push arg
         end

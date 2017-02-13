@@ -80,6 +80,14 @@ module Machete
         end
       end
 
+      context 'while setting the integration test space' do
+        let(:args) { ['--integration-space=integration'] }
+
+        it 'sets integration_space' do
+          expect(subject.integration_space).to eq('integration')
+        end
+      end
+
       context 'while indicating rspec options' do
         let(:args) { %w(cf_spec --stack=cflinuxfs2 --host=pcfdev --tag language:ruby) }
 
@@ -200,6 +208,20 @@ go-buildpack                 4          true      false    go_buildpack-cached-v
           expect(subject).to receive(:build_new_buildpack).ordered
           script_dir = File.expand_path(File.join(__dir__, '..', '..', 'scripts'))
           expect(subject).to receive(:system).with(/#{script_dir}\/cf_login_and_setup local.pcfdev.io integration-test/).ordered
+          expect(subject).to receive(:disable_buildpacks).and_return(disabled_buildpacks).ordered
+          expect(subject).to receive(:setup_signal_handling).with(disabled_buildpacks).ordered
+          expect(subject).to receive(:upload_new_buildpack).with(no_args).ordered
+          subject.setup_buildpacks
+        end
+      end
+
+      context 'an integration space is passed as an option' do
+        let(:args) { ['--uncached', '--integration-space=some-other-space'] }
+
+        it 'builds a new buildpack  and uploads it cf, logging in to the specified space' do
+          expect(subject).to receive(:build_new_buildpack).ordered
+          script_dir = File.expand_path(File.join(__dir__, '..', '..', 'scripts'))
+          expect(subject).to receive(:system).with(/#{script_dir}\/cf_login_and_setup local.pcfdev.io some-other-space/).ordered
           expect(subject).to receive(:disable_buildpacks).and_return(disabled_buildpacks).ordered
           expect(subject).to receive(:setup_signal_handling).with(disabled_buildpacks).ordered
           expect(subject).to receive(:upload_new_buildpack).with(no_args).ordered
