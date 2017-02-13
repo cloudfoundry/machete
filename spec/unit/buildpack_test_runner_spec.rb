@@ -100,9 +100,10 @@ module Machete
     end
 
     describe '#run!' do
+      let(:test_dir) { Dir.mktmpdir }
       let(:rspec_command) do
         <<-COMMAND
-BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=cached CF_STACK=cflinuxfs2 bundle exec rspec \
+BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=cached CF_STACK=cflinuxfs2 SHARED_HOST=false bundle exec rspec \
   --require rspec/instafail \
   --format RSpec::Instafail \
   --format documentation \
@@ -114,6 +115,14 @@ BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=cached CF_STACK=cflinuxfs2 bundle exec 
       before do
         allow(subject).to receive(:system)
         allow(subject).to receive(:puts)
+        @current_dir = Dir.pwd
+        Dir.chdir test_dir
+        File.write("test_buildpack-v3.3.3.zip", "xxx")
+      end
+
+      after do
+        FileUtils.rm_rf(test_dir)
+        Dir.chdir @current_dir
       end
 
       it 'setups the buildpacks and runs rspec' do
@@ -169,46 +178,72 @@ go-buildpack                 4          true      false    go_buildpack-cached-v
     end
 
     describe '#setup_buildpacks' do
+      let(:args) { ['--uncached'] }
       let(:disabled_buildpacks) { double(:disabled_buildpacks) }
+      let(:test_dir) { Dir.mktmpdir }
 
-      before { allow(subject).to receive(:puts) }
+      before do
+        allow(subject).to receive(:puts)
+        @current_dir = Dir.pwd
+        Dir.chdir test_dir
+        File.write("test_buildpack-v3.3.3.zip", "xxx")
+      end
+
+      after do
+        FileUtils.rm_rf(test_dir)
+        Dir.chdir @current_dir
+      end
 
       context 'should upload and build' do
         it 'builds a new buildpack  and uploads it cf' do
           expect(subject).to receive(:build_new_buildpack).ordered
           script_dir = File.expand_path(File.join(__dir__, '..', '..', 'scripts'))
-          expect(subject).to receive(:system).with("#{script_dir}/cf_login_and_setup local.pcfdev.io").ordered
+          expect(subject).to receive(:system).with(/#{script_dir}\/cf_login_and_setup local.pcfdev.io integration-test/).ordered
           expect(subject).to receive(:disable_buildpacks).and_return(disabled_buildpacks).ordered
-          expect(subject).to receive(:setup_signal_handling_enable_buildpacks).with(disabled_buildpacks).ordered
-          expect(subject).to receive(:upload_new_buildpack).ordered
+          expect(subject).to receive(:setup_signal_handling).with(disabled_buildpacks).ordered
+          expect(subject).to receive(:upload_new_buildpack).with(no_args).ordered
           subject.setup_buildpacks
         end
       end
 
       context 'should not build' do
-        let(:args) { ['--no-build'] }
+        let(:args) { ['--uncached', '--no-build'] }
 
         it 'uploads an existing buildpack to cf' do
           expect(subject).to_not receive(:build_new_buildpack)
           script_dir = File.expand_path(File.join(__dir__, '..', '..', 'scripts'))
-          expect(subject).to receive(:system).with("#{script_dir}/cf_login_and_setup local.pcfdev.io").ordered
+          expect(subject).to receive(:system).with(/#{script_dir}\/cf_login_and_setup local.pcfdev.io integration-test/).ordered
           expect(subject).to receive(:disable_buildpacks).and_return(disabled_buildpacks).ordered
-          expect(subject).to receive(:setup_signal_handling_enable_buildpacks).with(disabled_buildpacks).ordered
-          expect(subject).to receive(:upload_new_buildpack).ordered
+          expect(subject).to receive(:setup_signal_handling).with(disabled_buildpacks).ordered
+          expect(subject).to receive(:upload_new_buildpack).with(no_args).ordered
           subject.setup_buildpacks
         end
       end
 
       context 'should not upload' do
-        let(:args) { ['--no-upload'] }
+        let(:args) { ['--uncached', '--no-upload'] }
 
         it 'neither builds nor uploads any buildpacks' do
           expect(subject).to_not receive(:build_new_buildpack)
           script_dir = File.expand_path(File.join(__dir__, '..', '..', 'scripts'))
-          expect(subject).to receive(:system).with("#{script_dir}/cf_login_and_setup local.pcfdev.io").ordered
+          expect(subject).to receive(:system).with(/#{script_dir}\/cf_login_and_setup local.pcfdev.io integration-test/).ordered
           expect(subject).to_not receive(:disable_buildpacks)
-          expect(subject).to_not receive(:setup_signal_handling_enable_buildpacks)
+          expect(subject).to_not receive(:setup_signal_handling)
           expect(subject).to_not receive(:upload_new_buildpack)
+          subject.setup_buildpacks
+        end
+      end
+
+      context 'shared host' do
+        let(:args) { ['--uncached', '--shared-host'] }
+
+        it 'does not disable any buildpacks and uploads the specified language buildpack' do
+          expect(subject).to receive(:build_new_buildpack).ordered
+          script_dir = File.expand_path(File.join(__dir__, '..', '..', 'scripts'))
+          expect(subject).to receive(:system).with(/#{script_dir}\/cf_login_and_setup local.pcfdev.io integration-test/).ordered
+          expect(subject).to_not receive(:disable_buildpacks)
+          expect(subject).to receive(:setup_signal_handling).with([])
+          expect(subject).to receive(:upload_new_buildpack).with("test_buildpack").ordered
           subject.setup_buildpacks
         end
       end

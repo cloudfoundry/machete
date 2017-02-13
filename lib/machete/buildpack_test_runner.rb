@@ -51,20 +51,24 @@ BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=#{@mode} CF_STACK=#{@stack} SHARED_HOST
         build_new_buildpack
       end
 
+      language = detect_language
+      @integration_space = "integration-#{language}-#{Time.now.to_i}"
+
       indent "Connecting to CF"
 
       script_dir = File.expand_path(File.join(__dir__, '..', '..', 'scripts'))
 
-      system "#{script_dir}/cf_login_and_setup #{@host}"
+      system "#{script_dir}/cf_login_and_setup #{@host} #{@integration_space}"
 
       if @should_upload
         if @shared_host
-          upload_new_buildpack("#{detect_language}_buildpack")
+          upload_new_buildpack("#{language}_buildpack")
+          setup_signal_handling([])
         else
           puts "Disabling all buildpacks"
           disabled_buildpacks = disable_buildpacks
 
-          setup_signal_handling_enable_buildpacks(disabled_buildpacks)
+          setup_signal_handling(disabled_buildpacks)
           upload_new_buildpack
         end
       end
@@ -172,10 +176,11 @@ ERROR
       @detected_language
     end
 
-    def setup_signal_handling_enable_buildpacks(disabled_buildpacks)
+    def setup_signal_handling(disabled_buildpacks)
       %w(HUP INT QUIT ABRT TERM EXIT).each do |sig|
         Signal.trap(sig) do
           enable_buildpacks(disabled_buildpacks)
+          delete_integration_space
           if sig != 'EXIT'
             exit 1
           end
@@ -184,6 +189,10 @@ ERROR
     end
 
     private
+
+    def delete_integration_space
+      system "cf delete-space -f #{@integration_space}"
+    end
 
     def set_values_from_args(options)
       if options[:mode]
