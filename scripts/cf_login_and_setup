@@ -2,7 +2,7 @@
 set -eo pipefail
 
 HOST=$1
-SPACE=$2
+SPACE=${2:-"integration"}
 
 cf api api.$HOST --skip-ssl-validation
 cf_password=${CF_PASSWORD:-"admin"}
