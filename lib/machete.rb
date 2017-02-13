@@ -10,9 +10,12 @@ require 'machete/setup_app'
 require 'machete/app_status'
 require 'machete/browser'
 require 'machete/buildpack_test_runner'
+require 'rspec/expectations'
 
 module Machete
   class << self
+    include RSpec::Matchers
+
     def deploy_app(path, options = {})
       app = App.new(path, options)
       raise "Unable to locate app directory: #{app.src_directory}" unless directory_exists? app.src_directory
