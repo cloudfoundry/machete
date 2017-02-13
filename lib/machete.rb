@@ -18,7 +18,7 @@ module Machete
       raise "Unable to locate app directory: #{app.src_directory}" unless directory_exists? app.src_directory
       raise "BUILDPACK_VERSION not set" unless ENV['BUILDPACK_VERSION']
       deployer.execute(app)
-      verify_buildpack_version
+      verify_buildpack_version(app)
       app
     end
 
@@ -35,7 +35,7 @@ module Machete
 
     private
 
-    def verify_buildpack_version
+    def verify_buildpack_version(app)
       expect(app).to have_logged("Buildpack version #{ENV['BUILDPACK_VERSION']}")
     end
 
