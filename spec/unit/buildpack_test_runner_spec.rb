@@ -208,12 +208,13 @@ go-buildpack                 4          true      false    go_buildpack-cached-v
       let(:args) { ['--uncached'] }
       let(:disabled_buildpacks) { double(:disabled_buildpacks) }
       let(:test_dir) { Dir.mktmpdir }
+      let(:buildpack_file) {"test_buildpack-v3.3.3.zip"}
 
       before do
         allow(subject).to receive(:puts)
         @current_dir = Dir.pwd
         Dir.chdir test_dir
-        File.write("test_buildpack-v3.3.3.zip", "xxx")
+        File.write(buildpack_file, "xxx")
       end
 
       after do
@@ -285,6 +286,21 @@ go-buildpack                 4          true      false    go_buildpack-cached-v
           expect(subject).to_not receive(:disable_buildpacks)
           expect(subject).to receive(:setup_signal_handling).with([])
           expect(subject).to receive(:upload_new_buildpack).with("test_buildpack").ordered
+          subject.setup_buildpacks
+        end
+      end
+
+      context 'shared host with dotnet-core buildpack' do
+        let(:args) { ['--uncached', '--shared-host'] }
+        let(:buildpack_file) {"dotnet-core_buildpack-v9.9.9.zip"}
+
+        it 'does not disable any buildpacks and uploads the specified language buildpack' do
+          expect(subject).to receive(:build_new_buildpack).ordered
+          script_dir = File.expand_path(File.join(__dir__, '..', '..', 'scripts'))
+          expect(subject).to receive(:system).with(/#{script_dir}\/cf_login_and_setup local.pcfdev.io integration-dotnet-core/).ordered
+          expect(subject).to_not receive(:disable_buildpacks)
+          expect(subject).to receive(:setup_signal_handling).with([])
+          expect(subject).to receive(:upload_new_buildpack).with("dotnet_core_buildpack").ordered
           subject.setup_buildpacks
         end
       end

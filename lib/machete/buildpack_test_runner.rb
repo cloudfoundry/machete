@@ -65,7 +65,7 @@ BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=#{@mode} CF_STACK=#{@stack} SHARED_HOST
 
       if @should_upload
         if @shared_host
-          upload_new_buildpack("#{language}_buildpack")
+          upload_new_buildpack("#{language.gsub('-', '_')}_buildpack")
           setup_signal_handling([])
         else
           puts "Disabling all buildpacks"
