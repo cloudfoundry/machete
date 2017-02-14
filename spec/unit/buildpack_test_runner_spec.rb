@@ -18,6 +18,8 @@ module Machete
           expect(subject.should_upload).to eq(true)
           expect(subject.should_build).to eq(true)
           expect(subject.rspec_options).to eq('cf_spec')
+          expect(subject.shared_host).to eq(false)
+          expect(subject.delete_space_on_exit).to eq(false)
         end
       end
 
@@ -85,6 +87,22 @@ module Machete
 
         it 'sets integration_space' do
           expect(subject.integration_space).to eq('integration')
+        end
+      end
+
+      context 'while indicating to delete the test space when done' do
+        let(:args) { ['--delete-space-on-exit'] }
+
+        it 'sets delete_space_on_exit' do
+          expect(subject.delete_space_on_exit).to eq(true)
+        end
+      end
+
+      context 'while indicating tests to run on a shared cf' do
+        let(:args) { ['--shared-host'] }
+
+        it 'sets shared_host to true' do
+          expect(subject.shared_host).to eq(true)
         end
       end
 
@@ -302,6 +320,32 @@ go-buildpack                 4          true      false    go_buildpack-cached-v
       it 'restores VERSION to the correct value' do
         subject.build_new_buildpack
         expect(File.read('VERSION')).to eq('3.3.3')
+      end
+    end
+
+    describe '#delete_integration_space' do
+      before do
+        allow(subject).to receive(:system)
+      end
+
+      context 'delete space on exit' do
+        let(:args) {['--delete-space-on-exit', '--integration-space=testspace']}
+
+        it 'runs cf delete-space on integration space' do
+          expect(subject).to receive(:system).with('cf delete-space -f testspace')
+
+          subject.delete_integration_space
+        end
+      end
+
+      context 'do not delete space on exit' do
+        let(:args) {['--integration-space=testspace']}
+
+        it 'does not run cf delete-space on integration space' do
+          expect(subject).not_to receive(:system).with('cf delete-space -f testspace')
+
+          subject.delete_integration_space
+        end
       end
     end
 

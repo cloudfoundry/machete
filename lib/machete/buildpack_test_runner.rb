@@ -5,7 +5,7 @@ require 'fileutils'
 
 module Machete
   class BuildpackTestRunner
-    attr_reader :stack, :mode, :host, :should_build, :should_upload, :rspec_options, :test_version, :integration_space
+    attr_reader :stack, :mode, :host, :should_build, :should_upload, :rspec_options, :test_version, :integration_space, :delete_space_on_exit, :shared_host
 
     def initialize(args)
       @stack = 'cflinuxfs2'
@@ -15,6 +15,7 @@ module Machete
       @should_upload = true
       @shared_host = false
       @rspec_options = 'cf_spec'
+      @delete_space_on_exit = false
 
       set_values_from_args(process_args(args))
     end
@@ -81,22 +82,26 @@ BUNDLE_GEMFILE=cf.Gemfile BUILDPACK_MODE=#{@mode} CF_STACK=#{@stack} SHARED_HOST
 Usage: buildpack-build [options]
 
 Options:
-    [--stack=STACK]       # Specifies the stack that the test will run against.
-                          # Default: cflinuxfs2
-                          # Possible values: cflinuxfs2
-    [--host=HOST]         # Specifies the host to target for running tests.
-                          # Example: edge-1.buildpacks-gcp.ci.cf-app.com
-                          # Default: local.pcfdev.io
-    [--cached]            # Specifies the test run of a buildpack with vendored dependencies
-                          # Default: true
-    [--uncached]          # Specifies the test run of a buildpack without vendored dependencies
-                          # Default: false
-    [--no-build]          # Specifies whether to build the targeted buildpack.
-                          # Default: true
-    [--no-upload]         # Specifies whether to upload local buildpack to cf. Overrides '--no-build' flag to true.
-                          # Default: true
-    [--shared-host]       # Specifies whether to replace the standard buildpack when uploading to cf. (only works if upload and build)
-                          # Default: false
+    [--stack=STACK]               # Specifies the stack that the test will run against.
+                                  # Default: cflinuxfs2
+                                  # Possible values: cflinuxfs2
+    [--host=HOST]                 # Specifies the host to target for running tests.
+                                  # Example: edge-1.buildpacks-gcp.ci.cf-app.com
+                                  # Default: local.pcfdev.io
+    [--cached]                    # Specifies the test run of a buildpack with vendored dependencies
+                                  # Default: true
+    [--uncached]                  # Specifies the test run of a buildpack without vendored dependencies
+                                  # Default: false
+    [--no-build]                  # Specifies whether to build the targeted buildpack.
+                                  # Default: true
+    [--no-upload]                 # Specifies whether to upload local buildpack to cf. Overrides '--no-build' flag to true.
+                                  # Default: true
+    [--shared-host]               # Specifies whether to replace the standard buildpack when uploading to cf. (only works if upload and build)
+                                  # Default: false
+    [--integration-space=SPACE]   # Space to use for integration specs
+                                  # Default: generated from the name of the buildpack + a timestamp
+    [--delete-space-on-exit]      # Specifes whether to delete the integration space after specs have finished
+                                  # Default: false
 
 
 Builds, uploads, and runs tests against a specified BUILDPACK.
@@ -195,11 +200,11 @@ ERROR
       end
     end
 
-    private
-
     def delete_integration_space
-      system "cf delete-space -f #{@integration_space}"
+      system "cf delete-space -f #{@integration_space}" if @delete_space_on_exit
     end
+
+    private
 
     def set_values_from_args(options)
       if options[:mode]
@@ -227,6 +232,9 @@ ERROR
       end
       if options[:integration_space]
         @integration_space = options[:integration_space]
+      end
+      if options[:delete_space_on_exit]
+        @delete_space_on_exit = true
       end
     end
 
@@ -259,6 +267,8 @@ ERROR
           options[:shared_host] = true
         when /\-\-integration\-space=(.*)/
           options[:integration_space] = $1
+        when '--delete-space-on-exit'
+          options[:delete_space_on_exit] = true
         else
           rspec_options.push arg
         end
