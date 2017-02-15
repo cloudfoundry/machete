@@ -11,7 +11,7 @@ module Machete
 
       cf_api_output = Machete::CF::API.new.execute
 
-      cf_api_version = cf_api_output.match( /API version: (?<version_number>\d+\.\d+\.\d+)/ )['version_number']
+      cf_api_version = cf_api_output.match( /API version:\s*(?<version_number>\d+\.\d+\.\d+)/ )['version_number']
       minimum_acceptable_cf_api_version = Gem::Version.new(version)
 
       if Gem::Version.new(cf_api_version) < minimum_acceptable_cf_api_version
