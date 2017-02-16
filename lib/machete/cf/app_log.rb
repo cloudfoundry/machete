@@ -10,6 +10,7 @@ module Machete
 
       def setup_logs(app_name)
         @app_name = app_name
+        @push_logs = ""
       end
 
       def start_logs
@@ -20,7 +21,7 @@ module Machete
       end
 
       def record_push_logs(logs)
-        @push_logs = logs
+        @push_logs = logs unless logs.nil?
       end
 
       def end_logs
