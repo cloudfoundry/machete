@@ -143,10 +143,10 @@ USAGE
     end
 
     def validate_stack_option
-      if @stack != "cflinuxfs2"
+      if !["cflinuxfs2", "windows2012R2"].include?(@stack)
         arg_error = <<-ERROR
   ERROR: Invalid argument passed in for --stack option.
-  The valid --stack options are [ 'cflinuxfs2' ]
+  The valid --stack options are [ 'cflinuxfs2', 'windows2012R2' ]
 ERROR
         raise ArgumentError.new(arg_error)
       end
