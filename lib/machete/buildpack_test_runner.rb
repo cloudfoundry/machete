@@ -16,6 +16,7 @@ module Machete
       @shared_host = false
       @rspec_options = 'cf_spec'
       @delete_space_on_exit = false
+      @detected_language = nil
 
       set_values_from_args(process_args(args))
     end
