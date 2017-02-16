@@ -38,6 +38,15 @@ module Machete
           expect_any_instance_of(described_class).to_not receive(:skip)
           subject
         end
+
+        context 'new output format' do
+          let(:cf_api_output)         { "API endpoint:   https://api.buildpacks-shared.cf-app.com\nAPI version:    #{actual_cf_api_version}" }
+
+          it 'does not skip' do
+            expect_any_instance_of(described_class).to_not receive(:skip)
+            subject
+          end
+        end
       end
 
       context 'cf api version is lower than minimum version' do
@@ -46,6 +55,13 @@ module Machete
         it 'does skip' do
           expect_any_instance_of(described_class).to receive(:skip).with('skip reason here')
           subject
+        end
+      end
+
+      context 'unknown output format' do
+        let(:cf_api_output)         { "some exciting text" }
+        it 'raises an exception with the output' do
+          expect { subject }.to raise_error(Machete::RSpecHelpers::CfApiMatchError, "Output was: some exciting text")
         end
       end
     end
