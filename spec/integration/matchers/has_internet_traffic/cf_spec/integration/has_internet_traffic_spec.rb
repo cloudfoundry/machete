@@ -20,7 +20,7 @@ module Machete
     end
 
     context 'an app that does not access the internet' do
-      let(:app_name) { 'app_that_does_not_access_the_internet' }
+      let(:app_name) { 'does_not_access_the_internet' }
 
       it 'logs no internet traffic' do
         Dir.chdir(fixture_dir) do
@@ -30,7 +30,7 @@ module Machete
     end
 
     context 'an app that accesses the internet' do
-      let(:app_name)    { 'app_that_accesses_the_internet' }
+      let(:app_name)    { 'accesses_the_internet' }
 
       it 'logs internet traffic' do
         Dir.chdir(fixture_dir) do

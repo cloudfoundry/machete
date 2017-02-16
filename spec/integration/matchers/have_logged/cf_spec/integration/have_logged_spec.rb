@@ -30,7 +30,7 @@ module Machete
     end
 
     context 'an app that outputs logs' do
-      let(:app_name) { 'app_that_logs_noise' }
+      let(:app_name) { 'logs_noise' }
       let(:browser) { Machete::Browser.new(app) }
 
       it 'logs one of the first lines of staging output' do
@@ -63,7 +63,7 @@ module Machete
     end
 
     context 'app that immediately outputs logs after starting' do
-      let(:app_name) { 'app_that_logs_immediately_after_start' }
+      let(:app_name) { 'logs_immediately_after_start' }
       let(:browser) { Machete::Browser.new(app) }
 
       it 'logs lines immediately after app push' do

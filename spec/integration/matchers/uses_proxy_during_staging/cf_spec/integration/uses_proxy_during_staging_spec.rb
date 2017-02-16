@@ -20,7 +20,7 @@ module Machete
     end
 
     context 'a buildpack that utilizes proxies correctly' do
-      let(:app_name) { 'app_that_causes_correct_staging_proxy_use' }
+      let(:app_name) { 'causes_correct_staging_proxy_use' }
 
       it 'uses the proxy correctly during staging' do
         Dir.chdir(fixture_dir) do
@@ -30,7 +30,7 @@ module Machete
     end
 
     context 'a buildpack that utilizes proxies incorrectly' do
-      let(:app_name) { 'app_that_causes_incorrect_staging_proxy_use' }
+      let(:app_name) { 'causes_incorrect_staging_proxy_use' }
 
       it 'does not use the proxy during staging' do
         Dir.chdir(fixture_dir) do
