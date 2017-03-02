@@ -9,6 +9,7 @@ RSpec::Matchers.define :be_running do |timeout = 60|
 
     while Time.now <= max_end_time
       status = app_status.execute(app)
+      puts "------------------------------------#{status}--------------------------\n"
       return false if status == Machete::AppStatus::STAGING_FAILED
       return true if status == Machete::AppStatus::RUNNING
       Kernel.sleep(1)
