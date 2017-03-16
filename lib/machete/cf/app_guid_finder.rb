@@ -1,4 +1,6 @@
 # encoding: utf-8
+require 'json'
+
 module Machete
   module CF
     class AppGuidFinder
@@ -23,7 +25,17 @@ module Machete
       end
 
       def find_app_command(app_name)
-        "cf curl /v2/apps?q='name:#{app_name}'"
+        space = space_guid
+        if space
+          "cf curl '/v2/apps?q=space_guid:#{space}&q=name:#{app_name}'"
+        else
+          "cf curl '/v2/apps?q=name:#{app_name}'"
+        end
+      end
+
+      def space_guid
+        data = JSON.parse(File.read("#{ENV['HOME']}/.cf/config.json")) rescue {}
+        data.dig('SpaceFields', 'GUID')
       end
     end
   end

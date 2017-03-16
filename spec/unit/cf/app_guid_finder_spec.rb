@@ -13,7 +13,7 @@ module Machete
         before do
           allow(SystemHelper)
             .to receive(:run_cmd)
-            .with('cf curl /v2/apps?q=\'name:' + app.name + '\'', true)
+            .with(curl_cmd, true)
             .and_return('{
                     "total_results": 1,
                     "resources": [
@@ -26,8 +26,35 @@ module Machete
                 }')
         end
 
-        specify do
-          expect(app_guid_finder.execute(app)).to eql app_guid
+        context 'and a space guid in cf/config.json' do
+          let(:space_guid) { '123abc' }
+          before do
+            allow(File)
+              .to receive(:read)
+              .with("#{ENV['HOME']}/.cf/config.json")
+              .and_return(%Q{{"SpaceFields": {"GUID": "#{space_guid}"}}})
+          end
+
+          let(:curl_cmd) { "cf curl '/v2/apps?q=space_guid:#{space_guid}&q=name:#{app.name}'" }
+
+          specify do
+            expect(app_guid_finder.execute(app)).to eql app_guid
+          end
+        end
+
+        context 'and WITHOUT a space guid in cf/config.json' do
+          before do
+            allow(File)
+              .to receive(:read)
+              .with("#{ENV['HOME']}/.cf/config.json")
+              .and_raise(Errno::ENOENT.new("No such file or directory"))
+          end
+
+          let(:curl_cmd) { "cf curl '/v2/apps?q=name:#{app.name}'" }
+
+          specify do
+            expect(app_guid_finder.execute(app)).to eql app_guid
+          end
         end
       end
 

@@ -6,10 +6,12 @@ describe '#be_running' do
   after  { Timecop.return }
 
   context 'When the app has not deployed immediately' do
+    before { allow(File).to receive(:read).with("#{ENV['HOME']}/.cf/config.json").and_raise(Errno::ENOENT.new("No such file or directory")) }
+
     context 'And it never starts' do
       it 'is not running' do
         expect(Machete::SystemHelper).to receive(:run_cmd)
-          .with("cf curl /v2/apps?q='name:fake_app'", true)
+          .with("cf curl '/v2/apps?q=name:fake_app'", true)
           .at_least(:twice)
           .and_return('{"resources":[]}')
 
@@ -21,7 +23,7 @@ describe '#be_running' do
     context 'And it starts after awhile' do
       it 'starts running' do
         expect(Machete::SystemHelper).to receive(:run_cmd)
-          .with("cf curl /v2/apps?q='name:fake_app'", true)
+          .with("cf curl '/v2/apps?q=name:fake_app'", true)
           .at_least(:twice)
           .and_return('{"resources":[]}', {
             resources: [
