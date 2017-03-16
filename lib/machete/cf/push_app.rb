@@ -14,8 +14,17 @@ module Machete
         base_command = base_command(app)
         base_command += " -p #{app.src_directory}"
 
-        manifest = File.join(app.src_directory, 'manifest.yml')
-        base_command += " -f #{manifest}" if File.exist?(manifest)
+        manifest_file = File.join(app.src_directory, 'manifest.yml')
+
+        if app.manifest
+          manifest = app.manifest
+        elsif File.exist?(manifest_file)
+          manifest = manifest_file
+        else
+          manifest = nil
+        end
+
+        base_command += " -f #{manifest}" if manifest
 
         base_command += " -s #{app.stack}" if app.stack
 

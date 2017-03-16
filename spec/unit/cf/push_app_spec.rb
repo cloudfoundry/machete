@@ -11,11 +11,13 @@ module Machete
                      src_directory: src_directory,
                      start_command: start_command,
                      stack: stack,
+                     manifest: manifest,
                      buildpack: buildpack)
       end
       let(:start_command) { nil }
-      let(:stack) { nil }
-      let(:buildpack) { nil }
+      let(:stack)         { nil }
+      let(:buildpack)     { nil }
+      let(:manifest)      { nil }
 
       subject(:push_app) { PushApp.new }
 
@@ -67,11 +69,46 @@ module Machete
         end
       end
 
-      context 'app has a manifest.yml' do
-        specify do
-          FileUtils.touch(File.join(src_directory, 'manifest.yml'))
-          expect(SystemHelper).to receive(:run_cmd).with("cf push --random-route app_name -p #{src_directory} -f #{src_directory}/manifest.yml")
-          push_app.execute(app)
+      describe 'manifest.yml' do
+        context 'app directory has a manifest.yml' do
+          before do
+            FileUtils.touch(File.join(src_directory, 'manifest.yml'))
+          end
+
+          after do
+            FileUtils.rm_f(File.join(src_directory, 'manifest.yml'))
+          end
+
+          it 'uses that manifest' do
+            expect(SystemHelper).to receive(:run_cmd).with("cf push --random-route app_name -p #{src_directory} -f #{src_directory}/manifest.yml")
+            push_app.execute(app)
+          end
+        end
+
+        context 'app is given a path to a manifest.yml' do
+          let(:manifest) { 'path/to/manifest.yml' }
+
+          it 'uses the passed manifest.yml' do
+            expect(SystemHelper).to receive(:run_cmd).with("cf push --random-route app_name -p #{src_directory} -f path/to/manifest.yml")
+            push_app.execute(app)
+          end
+        end
+
+        context 'app is given a path to a manifest.yml and one exists in the app directory' do
+          let(:manifest) { 'path/to/manifest.yml' }
+
+          before do
+            FileUtils.touch(File.join(src_directory, 'manifest.yml'))
+          end
+
+          after do
+            FileUtils.rm_f(File.join(src_directory, 'manifest.yml'))
+          end
+
+          it 'uses the passed manifest.yml' do
+            expect(SystemHelper).to receive(:run_cmd).with("cf push --random-route app_name -p #{src_directory} -f path/to/manifest.yml")
+            push_app.execute(app)
+          end
         end
       end
     end

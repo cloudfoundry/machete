@@ -7,6 +7,7 @@ module Machete
 
     attr_reader :buildpack,
                 :env,
+                :manifest,
                 :name,
                 :path,
                 :stack,
@@ -21,6 +22,7 @@ module Machete
       @stack = options[:stack] || ENV['CF_STACK']
       @buildpack = options[:buildpack]
       @service = options[:service]
+      @manifest = options[:manifest]
       setup_logs(name)
     end
 

@@ -91,5 +91,21 @@ module Machete
         end
       end
     end
+
+    describe '#manifest' do
+      context 'when the manifest is passed as an argument' do
+        let(:options) { { manifest: 'path/to/manifest.yml' } }
+
+        it 'return the value' do
+          expect(app.manifest).to eq 'path/to/manifest.yml'
+        end
+      end
+
+      context 'when the buildpack is not passed as an argument' do
+        it 'returns nil' do
+          expect(app.manifest).to eq nil
+        end
+      end
+    end
   end
 end
