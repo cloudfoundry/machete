@@ -7,7 +7,7 @@ module Machete
     class CfApiMatchError < StandardError
     end
 
-    def self.skip_if_cf_api_below(version: nil, reason: nil)
+    def self.skip_if_cf_api_below(version:, reason:)
       raise ArgumentError.new('you must supply a version') if version.nil?
       raise ArgumentError.new('you must supply a reason')  if reason.nil?
 
