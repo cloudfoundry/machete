@@ -57,8 +57,18 @@ module Machete
         end
 
         context 'when the HTTP response is 40x status code' do
+          it 'raises an exception' do
+            expect(HTTParty).to receive(:get).exactly(10).times.and_return(double(:not_found, code: 400))
+
+            expect do
+              browser.visit_path('/flub')
+            end.to raise_error(HTTPServerError)
+          end
+        end
+
+        context 'when the HTTP response is 30x status code' do
           it 'does not raise an exception' do
-            expect(HTTParty).to receive(:get).once.and_return(double(:response, code: 400))
+            expect(HTTParty).to receive(:get).once.and_return(double(:response, code: 300))
 
             expect do
               browser.visit_path('/flub')

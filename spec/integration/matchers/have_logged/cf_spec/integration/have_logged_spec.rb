@@ -50,7 +50,7 @@ module Machete
           expect(app).to have_logged("Start of logs")
           expect(app).to be_running
 
-          browser.visit_path('/non-existent-path')
+          browser.visit_path('/non-existent-path') rescue nil
           expect(app).to have_logged("/non-existent-path' not found")
         end
       end

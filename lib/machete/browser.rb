@@ -9,7 +9,7 @@ module Machete
       @app = app
     end
 
-    def visit_path(path, username: nil, password: nil)
+    def visit_path(path, username: nil, password: nil, allow_404: false)
       retries = 1
       begin
         @response = if username.nil? && password.nil?
@@ -18,7 +18,7 @@ module Machete
                       HTTParty.get("http://#{username}:#{password}@#{base_url}#{path}")
         end
 
-        fail HTTPServerError.new("responded with error code #{@response.code}") if @response.code >= 500
+        fail HTTPServerError.new("responded with error code #{@response.code}") if (@response.code >= 400 && !allow_404) || @response.code >= 500
       rescue SocketError, HTTPServerError
         raise if retries == 10
         retries += 1
