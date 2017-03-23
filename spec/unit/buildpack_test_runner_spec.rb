@@ -384,11 +384,26 @@ go-buildpack                 4          true      false    go_buildpack-cached-v
       context 'with an uncached ruby buildpack' do
         let(:args)               { ['--uncached' ] }
         let(:buildpack_filename) { 'ruby_buildpack-v1.0.5.zip' }
+        let(:buildpacks_json)    { '{}' }
+        before { allow(subject).to receive(:`).with('cf curl /v2/buildpacks').and_return(buildpacks_json) }
 
-        it 'tries to delete an existing test buildpack and upload a new uncached one' do
-          expect(subject).to receive(:system).with("cf delete-buildpack ruby-test-buildpack -f")
-          expect(subject).to receive(:system).with("cf create-buildpack ruby-test-buildpack ruby_buildpack-v1.0.5.zip 1 --enable")
+        it 'creates the buildpack' do
+          expect(subject).to receive(:system).with("cf create-buildpack ruby-test-buildpack ruby_buildpack-v1.0.5.zip 100 --enable")
           subject.upload_new_buildpack
+        end
+
+        it 'creates the named buildpack' do
+          expect(subject).to receive(:system).with("cf create-buildpack ruby_buildpack ruby_buildpack-v1.0.5.zip 3 --enable")
+          subject.upload_new_buildpack('ruby_buildpack')
+        end
+
+        context 'buildpack already exists' do
+          let(:buildpacks_json)    { { resources: [ { entity: { name: 'java_buildpack' }}, { entity: { name: 'ruby_buildpack' }}]}.to_json }
+
+          it 'updates the named buildpack' do
+            expect(subject).to receive(:system).with("cf update-buildpack ruby_buildpack -p ruby_buildpack-v1.0.5.zip -i 3 --enable")
+            subject.upload_new_buildpack('ruby_buildpack')
+          end
         end
       end
       context 'with a cached ruby buildpack' do
@@ -396,8 +411,7 @@ go-buildpack                 4          true      false    go_buildpack-cached-v
         let(:buildpack_filename) { 'ruby_buildpack-cached-v1.0.5.zip' }
 
         it 'tries to delete an existing test buildpack and upload a new cached one' do
-          expect(subject).to receive(:system).with("cf delete-buildpack ruby-test-buildpack -f")
-          expect(subject).to receive(:system).with("cf create-buildpack ruby-test-buildpack ruby_buildpack-cached-v1.0.5.zip 1 --enable")
+          expect(subject).to receive(:system).with("cf create-buildpack ruby-test-buildpack ruby_buildpack-cached-v1.0.5.zip 100 --enable")
           subject.upload_new_buildpack
         end
       end

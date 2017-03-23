@@ -180,10 +180,8 @@ ERROR
       indent "Uploading buildpack to CF"
       pos = BUILDPACK_ORDER.index(buildpack_name) || 100
       if all_buildpacks.include?(buildpack_name)
-        puts "cf update-buildpack #{buildpack_name} -p #{buildpack_zip_files.first} -i #{pos} --enable"
         system "cf update-buildpack #{buildpack_name} -p #{buildpack_zip_files.first} -i #{pos} --enable"
       else
-        puts "cf create-buildpack #{buildpack_name} #{buildpack_zip_files.first} #{pos} --enable"
         system "cf create-buildpack #{buildpack_name} #{buildpack_zip_files.first} #{pos} --enable"
       end
     end
