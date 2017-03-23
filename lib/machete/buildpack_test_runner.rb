@@ -2,10 +2,12 @@
 # encoding: utf-8
 
 require 'fileutils'
+require 'json'
 
 module Machete
   class BuildpackTestRunner
     attr_reader :stack, :mode, :host, :should_build, :should_upload, :rspec_options, :test_version, :integration_space, :delete_space_on_exit, :shared_host
+    BUILDPACK_ORDER = %w(staticfile_buildpack java_buildpack ruby_buildpack nodejs_buildpack go_buildpack python_buildpack php_buildpack dotnet_core_buildpack dotnet_core_buildpack_beta binary_buildpack).unshift(nil)
 
     def initialize(args)
       @stack = 'cflinuxfs2'
@@ -176,8 +178,14 @@ ERROR
       buildpack_name ||= "#{language}-test-buildpack"
 
       indent "Uploading buildpack to CF"
-      system "cf delete-buildpack #{buildpack_name} -f"
-      system "cf create-buildpack #{buildpack_name} #{buildpack_zip_files.first} 1 --enable"
+      pos = BUILDPACK_ORDER.index(buildpack_name) || 100
+      if all_buildpacks.include?(buildpack_name)
+        puts "cf update-buildpack #{buildpack_name} -p #{buildpack_zip_files.first} -i #{pos} --enable"
+        system "cf update-buildpack #{buildpack_name} -p #{buildpack_zip_files.first} -i #{pos} --enable"
+      else
+        puts "cf create-buildpack #{buildpack_name} #{buildpack_zip_files.first} #{pos} --enable"
+        system "cf create-buildpack #{buildpack_name} #{buildpack_zip_files.first} #{pos} --enable"
+      end
     end
 
     def detect_language
@@ -206,6 +214,10 @@ ERROR
     end
 
     private
+
+    def all_buildpacks
+      JSON.parse(`cf curl /v2/buildpacks`).fetch('resources',[]).map{|r|r.dig('entity','name')}
+    end
 
     def set_values_from_args(options)
       if options[:mode]
