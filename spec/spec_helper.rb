@@ -22,4 +22,13 @@ RSpec.configure do |config|
   config.before do
     allow(Kernel).to receive(:sleep)
   end
+
+  config.before do
+    $stdout = StringIO.new
+    $stderr = StringIO.new
+  end
+  config.after(:all) do
+    $stdout = STDOUT
+    $stderr = STDERR
+  end
 end

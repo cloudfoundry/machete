@@ -12,9 +12,9 @@ module Machete
       context 'with immediate result' do
         before do
           allow(SystemHelper)
-            .to receive(:run_cmd)
-            .with(curl_cmd, true)
-            .and_return('{
+            .to receive(:cf_curl)
+            .with(curl_url)
+            .and_return(JSON.parse('{
                     "total_results": 1,
                     "resources": [
                         {
@@ -23,7 +23,7 @@ module Machete
                             }
                         }
                     ]
-                }')
+                }'))
         end
 
         context 'and a space guid in cf/config.json' do
@@ -35,7 +35,7 @@ module Machete
               .and_return(%Q{{"SpaceFields": {"GUID": "#{space_guid}"}}})
           end
 
-          let(:curl_cmd) { "cf curl '/v2/apps?q=space_guid:#{space_guid}&q=name:#{app.name}'" }
+          let(:curl_url) { "/v2/apps?q=space_guid:#{space_guid}&q=name:#{app.name}" }
 
           specify do
             expect(app_guid_finder.execute(app)).to eql app_guid
@@ -50,7 +50,7 @@ module Machete
               .and_raise(Errno::ENOENT.new("No such file or directory"))
           end
 
-          let(:curl_cmd) { "cf curl '/v2/apps?q=name:#{app.name}'" }
+          let(:curl_url) { "/v2/apps?q=name:#{app.name}" }
 
           specify do
             expect(app_guid_finder.execute(app)).to eql app_guid
@@ -60,7 +60,7 @@ module Machete
 
       context 'when the response is empty' do
         it 'returns nil' do
-          allow(SystemHelper).to receive(:run_cmd).and_return('{}')
+          allow(SystemHelper).to receive(:cf_url).and_return('{}')
           expect(app_guid_finder.execute(app)).to be_nil
         end
       end

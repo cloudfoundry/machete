@@ -1,4 +1,7 @@
 # encoding: utf-8
+require 'json'
+require 'open3'
+
 module Machete
   module SystemHelper
     def self.run_cmd(cmd, silent = false)
@@ -11,6 +14,12 @@ module Machete
 
     def self.exit_status
       $CHILD_STATUS.exitstatus
+    end
+
+    def self.cf_curl(url)
+      o, s = Open3.capture2('cf', 'curl', url)
+      raise "Could not cf curl #{url}" unless s.success?
+      JSON.parse(o)
     end
   end
 end

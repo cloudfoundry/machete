@@ -33,5 +33,20 @@ module Machete
     def needs_setup?
       env.any? || !@service.nil?
     end
+
+    def guid
+      @guid ||= Machete::CF::AppGuidFinder.new.execute(self)
+    end
+
+    def url
+      return @url if @url
+      data = curl("/v2/apps/#{guid}/routes")
+      host = data.dig('resources', 0, 'entity', 'host')
+      raise "Could not find url for #{name}" unless host
+      data = curl(data.dig('resources', 0, 'entity', 'domain_url'))
+      domain = data.dig('entity', 'name')
+      raise "Could not find url for #{name}" unless domain
+      @url = "#{host}.#{domain}"
+    end
   end
 end

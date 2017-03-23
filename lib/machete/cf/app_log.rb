@@ -8,6 +8,11 @@ module Machete
       attr_reader :app_name
       attr_reader :push_logs
 
+      def initialize
+        @app_name = @log_output_file = @log_process = nil
+        @push_logs = ""
+      end
+
       def setup_logs(app_name)
         @app_name = app_name
         @push_logs = ""
