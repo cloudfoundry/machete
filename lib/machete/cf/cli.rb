@@ -2,7 +2,7 @@
 module Machete
   module CF
     module CLI
-      CF_URL_REGEX = /^\s*urls:\s*(.*)/
+      CF_URL_REGEX = /^\s*(?:urls|routes):\s*(.*)/
 
       class << self
         def url_for_app(app)

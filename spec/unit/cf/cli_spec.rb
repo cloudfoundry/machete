@@ -22,6 +22,20 @@ module Machete
 
           expect(CLI.url_for_app(app)).to eql('the_apps_url')
         end
+
+        context 'new cf cli' do
+          specify do
+            expect(SystemHelper).to receive(:run_cmd)
+              .with('cf app myApp')
+              .and_return(<<-RESPONSE)
+              other stuff
+              routes: some.excitement.com
+              other stuff
+            RESPONSE
+
+            expect(CLI.url_for_app(app)).to eql('some.excitement.com')
+          end
+        end
       end
 
       context 'when the app does not have a URL' do
