@@ -47,6 +47,15 @@ module Machete
             subject
           end
         end
+
+        context 'newer output format' do
+          let(:cf_api_output)         { "api endpoint:   https://api.buildpacks-shared.cf-app.com\napi version:    #{actual_cf_api_version}" }
+
+          it 'does not skip' do
+            expect_any_instance_of(described_class).to_not receive(:skip)
+            subject
+          end
+        end
       end
 
       context 'cf api version is lower than minimum version' do

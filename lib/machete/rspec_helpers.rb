@@ -12,7 +12,7 @@ module Machete
       raise ArgumentError.new('you must supply a reason')  if reason.nil?
 
       cf_api_output = Machete::CF::API.new.execute
-      m = cf_api_output.match(/API \s+ version: \s+ (\d+\.\d+\.\d+)/x)
+      m = cf_api_output.match(/API \s+ version: \s+ (\d+\.\d+\.\d+)/ix)
       unless m
         raise CfApiMatchError.new("Output was: #{cf_api_output}")
       end
