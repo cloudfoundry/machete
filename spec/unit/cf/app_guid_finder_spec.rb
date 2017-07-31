@@ -26,36 +26,90 @@ module Machete
                 }')
         end
 
-        context 'and a space guid in cf/config.json' do
-          let(:space_guid) { '123abc' }
+        context 'when CF_HOME is set' do
           before do
-            allow(File)
-              .to receive(:read)
-              .with("#{ENV['HOME']}/.cf/config.json")
-              .and_return(%Q{{"SpaceFields": {"GUID": "#{space_guid}"}}})
+            @original_cf_home = ENV["CF_HOME"]
+            ENV["CF_HOME"] = "/tmp/somwhere/else"
           end
 
-          let(:curl_cmd) { "cf curl '/v2/apps?q=space_guid:#{space_guid}&q=name:#{app.name}'" }
+          after do
+            ENV["CF_HOME"] = @original_cf_home
+          end
 
-          specify do
-            expect(app_guid_finder.execute(app)).to eql app_guid
+          context 'and a space guid in cf/config.json' do
+            let(:space_guid) { '123abc' }
+            before do
+              expect(File)
+                .to receive(:read)
+                .with("#{ENV['CF_HOME']}/.cf/config.json")
+                .and_return(%Q{{"SpaceFields": {"GUID": "#{space_guid}"}}})
+            end
+
+            let(:curl_cmd) { "cf curl '/v2/apps?q=space_guid:#{space_guid}&q=name:#{app.name}'" }
+
+            specify do
+              expect(app_guid_finder.execute(app)).to eql app_guid
+            end
+          end
+
+          context 'and WITHOUT a space guid in cf/config.json' do
+            before do
+              expect(File)
+                .to receive(:read)
+                .with("#{ENV['CF_HOME']}/.cf/config.json")
+                .and_raise(Errno::ENOENT.new("No such file or directory"))
+            end
+
+            let(:curl_cmd) { "cf curl '/v2/apps?q=name:#{app.name}'" }
+
+            specify do
+              expect(app_guid_finder.execute(app)).to eql app_guid
+            end
           end
         end
 
-        context 'and WITHOUT a space guid in cf/config.json' do
+        context 'when CF_HOME is not set' do
           before do
-            allow(File)
-              .to receive(:read)
-              .with("#{ENV['HOME']}/.cf/config.json")
-              .and_raise(Errno::ENOENT.new("No such file or directory"))
+            @original_cf_home = ENV["CF_HOME"]
+            ENV["CF_HOME"] = nil
           end
 
-          let(:curl_cmd) { "cf curl '/v2/apps?q=name:#{app.name}'" }
+          after do
+            ENV["CF_HOME"] = @original_cf_home
+          end
 
-          specify do
-            expect(app_guid_finder.execute(app)).to eql app_guid
+          context 'and a space guid in cf/config.json' do
+            let(:space_guid) { '123abc' }
+            before do
+              expect(File)
+                .to receive(:read)
+                .with("#{ENV['HOME']}/.cf/config.json")
+                .and_return(%Q{{"SpaceFields": {"GUID": "#{space_guid}"}}})
+            end
+
+            let(:curl_cmd) { "cf curl '/v2/apps?q=space_guid:#{space_guid}&q=name:#{app.name}'" }
+
+            specify do
+              expect(app_guid_finder.execute(app)).to eql app_guid
+            end
+          end
+
+          context 'and WITHOUT a space guid in cf/config.json' do
+            before do
+              expect(File)
+                .to receive(:read)
+                .with("#{ENV['HOME']}/.cf/config.json")
+                .and_raise(Errno::ENOENT.new("No such file or directory"))
+            end
+
+            let(:curl_cmd) { "cf curl '/v2/apps?q=name:#{app.name}'" }
+
+            specify do
+              expect(app_guid_finder.execute(app)).to eql app_guid
+            end
           end
         end
+
       end
 
       context 'when the response is empty' do

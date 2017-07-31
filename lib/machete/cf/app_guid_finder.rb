@@ -34,8 +34,12 @@ module Machete
       end
 
       def space_guid
-        data = JSON.parse(File.read("#{ENV['HOME']}/.cf/config.json")) rescue {}
+        data = JSON.parse(File.read("#{cf_home}/.cf/config.json")) rescue {}
         data.dig('SpaceFields', 'GUID')
+      end
+
+      def cf_home
+        ENV.fetch('CF_HOME', ENV.fetch('HOME'))
       end
     end
   end
