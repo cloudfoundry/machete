@@ -10,7 +10,7 @@ RSpec::Matchers.define :have_internet_traffic do
     begin
       docker_image_name = 'internet_traffic_test'
       docker_env_vars = ''
-      network_command = "(sudo tcpdump -n -i eth0 not udp port 53 and ip -c 1 -t | sed -e 's/^[^$]/internet traffic: /' 2>&1 &) && /buildpack/bin/detect /tmp/staged && /buildpack/bin/compile /tmp/staged /tmp/cache && /buildpack/bin/release /tmp/staged /tmp/cache"
+      network_command = "(sudo tcpdump -n -i eth0 not udp port 53 and not udp port 5353 and ip -c 1 -t | sed -e 's/^[^$]/internet traffic: /' 2>&1 &) && /buildpack/bin/detect /tmp/staged && /buildpack/bin/compile /tmp/staged /tmp/cache && /buildpack/bin/release /tmp/staged /tmp/cache"
 
       docker_exitstatus, docker_output, dockerfile_path = execute_docker_file(app, :cached, docker_image_name, docker_env_vars, network_command)
 
