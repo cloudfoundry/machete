@@ -1,6 +1,7 @@
 # encoding: utf-8
 require 'machete/system_helper'
 require 'childprocess'
+require 'tempfile'
 
 module Machete
   module CF
